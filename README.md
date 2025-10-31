@@ -1,4 +1,4 @@
-# Nosana Chat MCP: chat and deploy anything on Nosana using natural language.
+# [Nosana Chat MCP](https://nosanachat.inferia.ai/ask?tool=deployer): chat and deploy anything on Nosana using natural language.
 
 <img width="3454" height="1986" alt="image" src="https://github.com/user-attachments/assets/2946c6e2-db1d-4d70-8e56-5dba5a4e106e" />
 
