@@ -1,6 +1,6 @@
 # [Nosana Chat MCP](https://nosanachat.inferia.ai/ask?tool=deployer): chat and deploy anything on Nosana using natural language.
 
-<img width="3454" height="1986" alt="image" src="https://github.com/user-attachments/assets/2946c6e2-db1d-4d70-8e56-5dba5a4e106e" />
+<img width="3452" height="1996" alt="image" src="https://github.com/user-attachments/assets/293094c0-bbd2-4e16-92b7-91c93fc348fc" />
 
 Nosana Chat is a unified AI platform that combines conversational AI capabilities with GPU deployment management. It enables users to interact with multiple language models and deploy AI workloads to decentralized infrastructure using natural language commands.
 
