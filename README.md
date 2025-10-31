@@ -1,6 +1,6 @@
 # [Nosana Chat MCP](https://nosanachat.inferia.ai/ask?tool=deployer): chat and deploy anything on Nosana using natural language.
 
-[![Watch the video](https://i.vimeocdn.com/video/1132617956_640.jpg)](https://vimeo.com/1132617956)
+### [Watch the video](https://vimeo.com/1132617956)
 
 <br>
 
