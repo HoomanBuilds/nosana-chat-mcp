@@ -1,0 +1,30 @@
+{
+  "name": "@nosana-chat/ai",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "@nosana-chat/typescript-config": "workspace:*",
+    "@types/node": "^22.15.3"
+  },
+  "outputs": [
+    "dist/**"
+  ],
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@ai-sdk/google": "^2.0.14",
+    "@google/genai": "^1.19.0",
+    "ai": "^5.0.44",
+    "dotenv": "^17.2.2",
+    "openai": "^5.21.0",
+    "zod": "^4.1.8"
+  }
+}

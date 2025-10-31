@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "buildCommand": "npm run build",
+  "builds": [
+    { "src": "dist/api/**/*.js", "use": "@vercel/node" }
+  ],
+  "routes": [
+    { "src": "/api/health", "dest": "dist/api/health.js" },
+    { "src": "/api/mcp", "dest": "dist/api/mcp.js" }
+  ]
+}

@@ -1,0 +1,1569 @@
+[
+  {
+    "id": "auto-sd",
+    "name": "AUTOMATIC1111 Stable Diffusion 1.5",
+    "category": [
+      "Web UI",
+      "API",
+      "Image Generation"
+    ],
+    "icon": "https://user-images.githubusercontent.com/36368048/196056941-aace0837-473a-4aa5-9067-505b17797aa1.png",
+    "jobDefinition": {
+      "version": "0.1",
+      "type": "container",
+      "meta": {
+        "trigger": "dashboard"
+      },
+      "ops": [
+        {
+          "type": "container/run",
+          "id": "SD15-auto",
+          "args": {
+            "cmd": [
+              "python",
+              "-u",
+              "launch.py",
+              "--listen",
+              "--port",
+              "7860",
+              "--enable-insecure-extension-access"
+            ],
+            "image": "docker.io/nosana/automatic1111:0.0.1",
+            "gpu": true,
+            "expose": 7860,
+            "resources": [
+              {
+                "type": "S3",
+                "url": "https://models.nosana.io/stable-diffusion/1.5",
+                "target": "/stable-diffusion-webui/models/Stable-diffusion"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "axolotl",
+    "name": "Axolotl finetuning LLM's",
+    "category": [
+      "Web UI",
+      "API",
+      "LLM Fine-tuning"
+    ],
+    "icon": "https://raw.githubusercontent.com/nosana-ci/templates/refs/heads/main/templates/Axolotl/axolotl-nobackground.png",
+    "jobDefinition": {
+      "version": "0.1",
+      "type": "container",
+      "meta": {
+        "trigger": "dashboard",
+        "system_requirements": {
+          "required_vram": 4
+        }
+      },
+      "ops": [
+        {
+          "type": "container/run",
+          "id": "Axo",
+          "args": {
+            "image": "docker.io/winglian/axolotl-cloud:main-20250221",
+            "cmd": [
+              "jupyter",
+              "notebook",
+              "--ip=0.0.0.0",
+              "--port=8888",
+              "--no-browser",
+              "--allow-root",
+              "--ServerApp.token=''",
+              "--ServerApp.password=''"
+            ],
+            "expose": 8888,
+            "gpu": true
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "comfyui",
+    "name": "ComfyUI Image Generation",
+    "category": [
+      "Official",
+      "Web UI",
+      "API",
+      "Image Generation"
+    ],
+    "icon": "https://framerusercontent.com/images/3cNQMWKzIhIrQ5KErBm7dSmbd2w.png",
+    "variants": [
+      {
+        "id": "sd15",
+        "name": "Stable Diffusion 1.5",
+        "description": "Classic SD 1.5 model - fast and reliable",
+        "jobDefinition": {
+          "version": "0.1",
+          "type": "container",
+          "ops": [
+            {
+              "type": "container/run",
+              "id": "SD15-comfy",
+              "args": {
+                "cmd": [],
+                "image": "docker.io/nosana/comfyui:2.0.5",
+                "gpu": true,
+                "expose": 8188,
+                "resources": [
+                  {
+                    "type": "S3",
+                    "url": "https://models.nosana.io/stable-diffusion/1.5",
+                    "target": "/comfyui/models/checkpoints"
+                  }
+                ]
+              }
+            }
+          ],
+          "meta": {
+            "trigger": "dashboard",
+            "system_requirements": {
+              "required_vram": 4
+            }
+          }
+        }
+      },
+      {
+        "id": "sdxl",
+        "name": "Stable Diffusion XL",
+        "description": "High-resolution SDXL model - better quality",
+        "jobDefinition": {
+          "version": "0.1",
+          "type": "container",
+          "ops": [
+            {
+              "type": "container/run",
+              "id": "SDXL-comfy",
+              "args": {
+                "cmd": [],
+                "image": "docker.io/nosana/comfyui:2.0.5",
+                "gpu": true,
+                "expose": 8188,
+                "resources": [
+                  {
+                    "type": "S3",
+                    "url": "https://models.nosana.io/stable-diffusion/sd-xl",
+                    "target": "/comfyui/models/checkpoints"
+                  }
+                ]
+              }
+            }
+          ],
+          "meta": {
+            "trigger": "dashboard",
+            "system_requirements": {
+              "required_vram": 8
+            }
+          }
+        }
+      },
+      {
+        "id": "flux",
+        "name": "Flux Schnell FP8",
+        "description": "Latest Flux model - fastest generation",
+        "jobDefinition": {
+          "version": "0.1",
+          "type": "container",
+          "ops": [
+            {
+              "type": "container/run",
+              "id": "Flux-comfy",
+              "args": {
+                "cmd": [],
+                "image": "docker.io/nosana/comfyui:2.0.5",
+                "gpu": true,
+                "expose": 8188,
+                "resources": [
+                  {
+                    "type": "S3",
+                    "url": "https://models.nosana.io/flux/schnell",
+                    "target": "/comfyui/models/checkpoints"
+                  }
+                ]
+              }
+            }
+          ],
+          "meta": {
+            "trigger": "dashboard",
+            "system_requirements": {
+              "required_vram": 12
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "deepseek-janus",
+    "name": "DeepSeek Janus Pro Models",
+    "category": [
+      "Web UI",
+      "API",
+      "Image Generation"
+    ],
+    "icon": "https://avatars.githubusercontent.com/u/148330874?s=48&v=4",
+    "variants": [
+      {
+        "id": "1b",
+        "name": "1B Model",
+        "description": "Lightweight 1B parameter multimodal model",
+        "jobDefinition": {
+          "version": "0.1",
+          "type": "container",
+          "ops": [
+            {
+              "type": "container/run",
+              "id": "Janus1b",
+              "args": {
+                "cmd": [],
+                "gpu": true,
+                "image": "docker.io/nosana/janus-pro:0.0.0",
+                "expose": 7860,
+                "resources": [
+                  {
+                    "url": "https://models.nosana.io/hugging-face/deepseek/janus/models-deepseek-ai-Janus-Pro-1B",
+                    "type": "S3",
+                    "target": "/Janus/models/models--deepseek-ai--Janus-Pro-1B",
+                    "allowWrite": true
+                  }
+                ]
+              }
+            }
+          ],
+          "meta": {
+            "trigger": "dashboard",
+            "system_requirements": {
+              "required_vram": 5
+            }
+          }
+        }
+      },
+      {
+        "id": "7b",
+        "name": "7B Model",
+        "description": "Standard 7B parameter multimodal model with enhanced capabilities",
+        "jobDefinition": {
+          "version": "0.1",
+          "type": "container",
+          "ops": [
+            {
+              "type": "container/run",
+              "id": "Janus7b",
+              "args": {
+                "cmd": [],
+                "env": {
+                  "MODEL_PATH": "deepseek-ai/Janus-Pro-7B"
+                },
+                "gpu": true,
+                "image": "docker.io/nosana/janus-pro:0.0.0",
+                "expose": 7860,
+                "resources": [
+                  {
+                    "url": "https://models.nosana.io/hugging-face/deepseek/janus/models-deepseek-ai-Janus-Pro-7B",
+                    "type": "S3",
+                    "target": "/Janus/models/models--deepseek-ai--Janus-Pro-7B",
+                    "allowWrite": true
+                  }
+                ]
+              }
+            }
+          ],
+          "meta": {
+            "trigger": "dashboard",
+            "system_requirements": {
+              "required_vram": 17
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "deepseek-r1-qwen",
+    "name": "DeepSeek R1 Qwen Models",
+    "category": [
+      "Official",
+      "API",
+      "LLM",
+      "vLLM"
+    ],
+    "icon": "https://avatars.githubusercontent.com/u/148330874?s=48&v=4",
+    "variants": [
+      {
+        "id": "1.5b",
+        "name": "1.5B Model",
+        "description": "Lightweight 1.5B parameter model - lowest VRAM requirement",
+        "jobDefinition": {
+          "version": "0.1",
+          "type": "container",
+          "ops": [
+            {
+              "type": "container/run",
+              "id": "Qwen1.5b",
+              "args": {
+                "cmd": [
+                  "--model",
+                  "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
+                  "--served-model-name",
+                  "DeepSeek-R1-Distill-Qwen-1.5B",
+                  "--port",
+                  "9000",
+                  "--max-model-len",
+                  "30000"
+                ],
+                "gpu": true,
+                "image": "docker.io/vllm/vllm-openai:v0.10.2",
+                "expose": [
+                  {
+                    "port": 9000,
+                    "health_checks": [
+                      {
+                        "body": "{\"model\":\"DeepSeek-R1-Distill-Qwen-1.5B\",\"messages\":[{\"role\":\"user\",\"content\":\"Respond with a single word: Ready\"}],\"stream\":false}",
+                        "path": "/v1/chat/completions",
+                        "type": "http",
+                        "method": "POST",
+                        "headers": {
+                          "Content-Type": "application/json"
+                        },
+                        "expected_status": 200,
+                        "continuous": false
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ],
+          "meta": {
+            "trigger": "dashboard",
+            "system_requirements": {
+              "required_vram": 6,
+              "required_cuda": [
+                "12.8",
+                "12.9"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "7b",
+        "name": "7B Model",
+        "description": "Standard 7B parameter model - balanced performance",
+        "jobDefinition": {
+          "version": "0.1",
+          "type": "container",
+          "ops": [
+            {
+              "type": "container/run",
+              "id": "Qwen7b",
+              "args": {
+                "cmd": [
+                  "--model",
+                  "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
+                  "--served-model-name",
+                  "DeepSeek-R1-Distill-Qwen-7B",
+                  "--port",
+                  "9000",
+                  "--max-model-len",
+                  "30000"
+                ],
+                "gpu": true,
+                "image": "docker.io/vllm/vllm-openai:v0.10.2",
+                "expose": [
+                  {
+                    "port": 9000,
+                    "health_checks": [
+                      {
+                        "body": "{\"model\":\"DeepSeek-R1-Distill-Qwen-7B\",\"messages\":[{\"role\":\"user\",\"content\":\"Respond with a single word: Ready\"}],\"stream\":false}",
+                        "path": "/v1/chat/completions",
+                        "type": "http",
+                        "method": "POST",
+                        "headers": {
+                          "Content-Type": "application/json"
+                        },
+                        "expected_status": 200,
+                        "continuous": false
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ],
+          "meta": {
+            "trigger": "dashboard",
+            "system_requirements": {
+              "required_vram": 17,
+              "required_cuda": [
+                "12.8",
+                "12.9"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "14b",
+        "name": "14B Model",
+        "description": "Large 14B parameter model - high performance",
+        "jobDefinition": {
+          "version": "0.1",
+          "type": "container",
+          "ops": [
+            {
+              "type": "container/run",
+              "id": "Qwen14b",
+              "args": {
+                "cmd": [
+                  "--model",
+                  "deepseek-ai/DeepSeek-R1-Distill-Qwen-14B",
+                  "--served-model-name",
+                  "DeepSeek-R1-Distill-Qwen-14B",
+                  "--port",
+                  "9000",
+                  "--max-model-len",
+                  "30000"
+                ],
+                "gpu": true,
+                "image": "docker.io/vllm/vllm-openai:v0.10.2",
+                "expose": [
+                  {
+                    "port": 9000,
+                    "health_checks": [
+                      {
+                        "body": "{\"model\":\"DeepSeek-R1-Distill-Qwen-14B\",\"messages\":[{\"role\":\"user\",\"content\":\"Respond with a single word: Ready\"}],\"stream\":false}",
+                        "path": "/v1/chat/completions",
+                        "type": "http",
+                        "method": "POST",
+                        "headers": {
+                          "Content-Type": "application/json"
+                        },
+                        "expected_status": 200,
+                        "continuous": false
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ],
+          "meta": {
+            "trigger": "dashboard",
+            "system_requirements": {
+              "required_vram": 32,
+              "required_cuda": [
+                "12.8",
+                "12.9"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "32b",
+        "name": "32B Model",
+        "description": "Extra large 32B parameter model - highest performance",
+        "jobDefinition": {
+          "version": "0.1",
+          "type": "container",
+          "ops": [
+            {
+              "type": "container/run",
+              "id": "Qwen32b",
+              "args": {
+                "cmd": [
+                  "--model",
+                  "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
+                  "--served-model-name",
+                  "DeepSeek-R1-Distill-Qwen-32B",
+                  "--port",
+                  "9000",
+                  "--max-model-len",
+                  "30000"
+                ],
+                "gpu": true,
+                "image": "docker.io/vllm/vllm-openai:v0.10.2",
+                "expose": [
+                  {
+                    "port": 9000,
+                    "health_checks": [
+                      {
+                        "body": "{\"model\":\"DeepSeek-R1-Distill-Qwen-32B\",\"messages\":[{\"role\":\"user\",\"content\":\"Respond with a single word: Ready\"}],\"stream\":false}",
+                        "path": "/v1/chat/completions",
+                        "type": "http",
+                        "method": "POST",
+                        "headers": {
+                          "Content-Type": "application/json"
+                        },
+                        "expected_status": 200,
+                        "continuous": false
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ],
+          "meta": {
+            "trigger": "dashboard",
+            "system_requirements": {
+              "required_vram": 67,
+              "required_cuda": [
+                "12.8",
+                "12.9"
+              ]
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "folding-at-home",
+    "name": "Folding@Home",
+    "category": [
+      "Official"
+    ],
+    "icon": "https://foldingathome.org/wp-content/uploads/2016/09/folding-at-home-logo.png",
+    "jobDefinition": {
+      "ops": [
+        {
+          "id": "foldingathome",
+          "type": "container/run",
+          "args": {
+            "entrypoint": [
+              "/bin/sh",
+              "./config/entrypoint.sh"
+            ],
+            "gpu": true,
+            "image": "lscr.io/linuxserver/foldingathome:latest",
+            "resources": [
+              {
+                "type": "S3",
+                "url": "https://models.nosana.io/foldingAtHome",
+                "target": "/config/",
+                "allowWrite": true
+              }
+            ]
+          }
+        }
+      ],
+      "type": "container",
+      "version": "0.1"
+    }
+  },
+  {
+    "id": "forge-sd",
+    "name": "Forge Stable Diffusion",
+    "category": [
+      "Web UI",
+      "API",
+      "Image Generation"
+    ],
+    "icon": "https://raw.githubusercontent.com/nosana-ci/templates/refs/heads/main/templates/Forge-stable-diffusion-1.5/forge.png",
+    "jobDefinition": {
+      "version": "0.1",
+      "type": "container",
+      "meta": {
+        "trigger": "dashboard",
+        "system_requirements": {
+          "required_vram": 8
+        }
+      },
+      "ops": [
+        {
+          "type": "container/run",
+          "id": "Forge",
+          "args": {
+            "cmd": [
+              "python",
+              "-u",
+              "launch.py",
+              "--api",
+              "--listen",
+              "--port",
+              "7861"
+            ],
+            "image": "docker.io/nosana/sd-forge-bench:1.0.0",
+            "gpu": true,
+            "expose": 7861,
+            "resources": [
+              {
+                "type": "S3",
+                "url": "https://models.nosana.io/stable-diffusion/1.5",
+                "target": "/opt/stable-diffusion-webui-forge/models/Stable-diffusion"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "gpt-oss",
+    "name": "GPT-OSS Models",
+    "category": [
+      "Official",
+      "API",
+      "LLM",
+      "Benchmark",
+      "Ollama"
+    ],
+    "icon": "https://www.datocms-assets.com/96965/1685731715-open-ai-stars-2x.png",
+    "variants": [
+      {
+        "id": "20b",
+        "name": "20B Model",
+        "description": "GPT-OSS 20B parameter model - balanced performance and efficiency",
+        "jobDefinition": {
+          "version": "0.1",
+          "type": "container",
+          "global": {
+            "variables": {
+              "MODEL": "gpt-oss:20b"
+            }
+          },
+          "ops": [
+            {
+              "id": "gpt-oss:20b",
+              "type": "container/run",
+              "args": {
+                "gpu": true,
+                "image": "docker.io/ollama/ollama:0.12.0",
+                "expose": [
+                  {
+                    "port": 11434,
+                    "health_checks": [
+                      {
+                        "type": "http",
+                        "path": "/api/tags",
+                        "method": "GET",
+                        "expected_status": 200,
+                        "continuous": false
+                      }
+                    ]
+                  }
+                ],
+                "resources": [
+                  {
+                    "type": "Ollama",
+                    "model": "%%global.variables.MODEL%%"
+                  }
+                ]
+              }
+            }
+          ],
+          "meta": {
+            "trigger": "dashboard",
+            "system_requirements": {
+              "required_vram": 16
+            }
+          }
+        }
+      },
+      {
+        "id": "120b",
+        "name": "120B Model",
+        "description": "GPT-OSS 120B parameter model - maximum performance and capabilities",
+        "jobDefinition": {
+          "version": "0.1",
+          "type": "container",
+          "global": {
+            "variables": {
+              "MODEL": "gpt-oss:120b"
+            }
+          },
+          "ops": [
+            {
+              "id": "gpt-oss:120b",
+              "type": "container/run",
+              "args": {
+                "gpu": true,
+                "image": "docker.io/ollama/ollama:0.12.0",
+                "expose": [
+                  {
+                    "port": 11434,
+                    "health_checks": [
+                      {
+                        "type": "http",
+                        "path": "/api/tags",
+                        "method": "GET",
+                        "expected_status": 200,
+                        "continuous": false
+                      }
+                    ]
+                  }
+                ],
+                "resources": [
+                  {
+                    "type": "Ollama",
+                    "model": "%%global.variables.MODEL%%"
+                  }
+                ]
+              }
+            }
+          ],
+          "meta": {
+            "trigger": "dashboard",
+            "system_requirements": {
+              "required_vram": 67
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "gaia",
+    "name": "Gaia",
+    "category": [
+      "LLM"
+    ],
+    "icon": "https://www.gaianet.ai/images/logo-big.png",
+    "jobDefinition": {
+      "version": "0.1",
+      "type": "container",
+      "meta": {
+        "trigger": "dashboard"
+      },
+      "ops": [
+        {
+          "type": "container/run",
+          "id": "Gaia",
+          "args": {
+            "cmd": [],
+            "expose": 8080,
+            "image": "thenocodeguyonline/llama-3.2:latest",
+            "gpu": true
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "gemma3",
+    "name": "Gemma 3 Models",
+    "category": [
+      "Official",
+      "API",
+      "LLM",
+      "Benchmark",
+      "Ollama"
+    ],
+    "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/768px-Google_%22G%22_logo.svg.png",
+    "variants": [
+      {
+        "id": "4b",
+        "name": "4B Model",
+        "description": "4B parameter model with instruction tuning and quantization",
+        "jobDefinition": {
+          "version": "0.1",
+          "type": "container",
+          "global": {
+            "variables": {
+              "MODEL": "gemma3:4b-it-qat"
+            }
+          },
+          "ops": [
+            {
+              "id": "Gemma3-4b",
+              "type": "container/run",
+              "args": {
+                "gpu": true,
+                "image": "docker.io/ollama/ollama:0.12.0",
+                "expose": [
+                  {
+                    "port": 11434,
+                    "health_checks": [
+                      {
+                        "type": "http",
+                        "path": "/api/tags",
+                        "method": "GET",
+                        "expected_status": 200,
+                        "continuous": false
+                      }
+                    ]
+                  }
+                ],
+                "resources": [
+                  {
+                    "type": "Ollama",
+                    "model": "%%global.variables.MODEL%%"
+                  }
+                ]
+              }
+            }
+          ],
+          "meta": {
+            "trigger": "dashboard",
+            "system_requirements": {
+              "required_vram": 5
+            }
+          }
+        }
+      },
+      {
+        "id": "12b",
+        "name": "12B Model",
+        "description": "12B parameter model with instruction tuning and quantization",
+        "jobDefinition": {
+          "version": "0.1",
+          "type": "container",
+          "global": {
+            "variables": {
+              "MODEL": "gemma3:12b-it-qat"
+            }
+          },
+          "ops": [
+            {
+              "id": "Gemma3-12b",
+              "type": "container/run",
+              "args": {
+                "gpu": true,
+                "image": "docker.io/ollama/ollama:0.12.0",
+                "expose": [
+                  {
+                    "port": 11434,
+                    "health_checks": [
+                      {
+                        "type": "http",
+                        "path": "/api/tags",
+                        "method": "GET",
+                        "expected_status": 200,
+                        "continuous": false
+                      }
+                    ]
+                  }
+                ],
+                "resources": [
+                  {
+                    "type": "Ollama",
+                    "model": "%%global.variables.MODEL%%"
+                  }
+                ]
+              }
+            }
+          ],
+          "meta": {
+            "trigger": "dashboard",
+            "system_requirements": {
+              "required_vram": 10
+            }
+          }
+        }
+      },
+      {
+        "id": "27b",
+        "name": "27B Model",
+        "description": "27B parameter model with instruction tuning and quantization",
+        "jobDefinition": {
+          "version": "0.1",
+          "type": "container",
+          "global": {
+            "variables": {
+              "MODEL": "gemma3:27b-it-qat"
+            }
+          },
+          "ops": [
+            {
+              "id": "Gemma3-27b",
+              "type": "container/run",
+              "args": {
+                "gpu": true,
+                "image": "docker.io/ollama/ollama:0.12.0",
+                "expose": [
+                  {
+                    "port": 11434,
+                    "health_checks": [
+                      {
+                        "type": "http",
+                        "path": "/api/tags",
+                        "method": "GET",
+                        "expected_status": 200,
+                        "continuous": false
+                      }
+                    ]
+                  }
+                ],
+                "resources": [
+                  {
+                    "type": "Ollama",
+                    "model": "%%global.variables.MODEL%%"
+                  }
+                ]
+              }
+            }
+          ],
+          "meta": {
+            "trigger": "dashboard",
+            "system_requirements": {
+              "required_vram": 19
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "invoke-ai",
+    "name": "InvokeAI",
+    "category": [
+      "Web UI",
+      "API",
+      "Image Generation"
+    ],
+    "icon": "https://d4.alternativeto.net/xsSoWnh09YOroqDfDTYx-QcFdoXjOMcxLtDc7FZleA0/rs:fit:280:280:0/g:ce:0:0/exar:1/YWJzOi8vZGlzdC9pY29ucy9pbnZva2VhaV8yMjc0ODEucG5n.png",
+    "jobDefinition": {
+      "version": "0.1",
+      "type": "container",
+      "meta": {
+        "trigger": "dashboard",
+        "system_requirements": {
+          "required_vram": 8
+        }
+      },
+      "ops": [
+        {
+          "type": "container/run",
+          "id": "Invoke",
+          "args": {
+            "cmd": [
+              "invokeai-web"
+            ],
+            "image": "docker.io/nosana/sd-invoke-bench:1.0.0",
+            "gpu": true,
+            "expose": 9090
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "kohya-ss",
+    "name": "Kohya SS GUI",
+    "category": [
+      "Web UI",
+      "API",
+      "Image Generation Fine-tuning"
+    ],
+    "icon": "https://avatars.githubusercontent.com/u/7474674?v=4",
+    "jobDefinition": {
+      "version": "0.1",
+      "type": "container",
+      "meta": {
+        "trigger": "dashboard",
+        "system_requirements": {
+          "required_vram": 8
+        }
+      },
+      "ops": [
+        {
+          "type": "container/run",
+          "id": "Kohya",
+          "args": {
+            "image": "nosana/kohya_ss:1.0.0",
+            "cmd": [
+              "python3",
+              "kohya_gui.py",
+              "--listen",
+              "0.0.0.0",
+              "--server_port",
+              "7860",
+              "--headless"
+            ],
+            "gpu": true,
+            "expose": 7860,
+            "env": {
+              "NVIDIA_VISIBLE_DEVICES": "all",
+              "NVIDIA_DRIVER_CAPABILITIES": "compute,utility"
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "lmdeploy-api",
+    "name": "LMDeploy API",
+    "category": [
+      "API",
+      "LLM"
+    ],
+    "icon": "https://avatars.githubusercontent.com/u/135356492?s=280&v=4",
+    "jobDefinition": {
+      "version": "0.1",
+      "type": "container",
+      "meta": {
+        "trigger": "dashboard"
+      },
+      "ops": [
+        {
+          "type": "container/run",
+          "id": "Lmdepoy",
+          "args": {
+            "cmd": [
+              "lmdeploy",
+              "serve",
+              "api_server",
+              "Qwen/Qwen2.5-7B",
+              "--model-name",
+              "Qwen2.5-7B"
+            ],
+            "image": "docker.io/openmmlab/lmdeploy:v0.7.0.post3-cu12",
+            "gpu": true,
+            "expose": 23333
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "llama-factory",
+    "name": "Llama Factory",
+    "category": [
+      "Web UI",
+      "API",
+      "LLM Fine-tuning"
+    ],
+    "icon": "https://devocean.sk.com/thumnail/2024/6/10/3922058082f048e98d3a63eaa4ab1053020d501b48a69ab8ba4c2fda8883086a.png",
+    "jobDefinition": {
+      "version": "0.1",
+      "type": "container",
+      "meta": {
+        "trigger": "dashboard",
+        "system_requirements": {
+          "required_vram": 8
+        }
+      },
+      "ops": [
+        {
+          "type": "container/run",
+          "id": "Factory",
+          "args": {
+            "image": "docker.io/nosana/llama-factory:0.0.0",
+            "cmd": [
+              "llamafactory-cli",
+              "webui"
+            ],
+            "gpu": true,
+            "expose": 7860
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "Nanonets-OCR2",
+    "name": "Nanonets OCR 2 Models",
+    "category": [
+      "Official",
+      "API",
+      "OCR",
+      "vLLM"
+    ],
+    "icon": "https://avatars.githubusercontent.com/u/30330951?s=200&v=4",
+    "variants": [
+      {
+        "id": "3b",
+        "name": "3B Model",
+        "description": "Nanonets OCR 2 3B parameter model - balanced performance and efficiency",
+        "jobDefinition": {
+          "version": "0.1",
+          "type": "container",
+          "global": {
+            "variables": {
+              "MODEL": "nanonets/Nanonets-OCR2-3B"
+            }
+          },
+          "ops": [
+            {
+              "id": "Nanonets-OCR2:3B",
+              "type": "container/run",
+              "args": {
+                "cmd": [
+                  "--model",
+                  "%%global.variables.MODEL%%",
+                  "--served-model-name",
+                  "%%global.variables.MODEL%%",
+                  "--port",
+                  "8000",
+                  "--max-model-len",
+                  "30000"
+                ],
+                "gpu": true,
+                "image": "docker.io/vllm/vllm-openai:v0.10.2",
+                "expose": 8000
+              }
+            }
+          ],
+          "meta": {
+            "trigger": "dashboard",
+            "system_requirements": {
+              "required_vram": 8
+            }
+          }
+        }
+      },
+      {
+        "id": "1.5b",
+        "name": "1.5B Model",
+        "description": "Nanonets OCR 2 1.5B parameter model - optimized for lower resource usage",
+        "jobDefinition": {
+          "version": "0.1",
+          "type": "container",
+          "global": {
+            "variables": {
+              "MODEL": "nanonets/Nanonets-OCR2-1.5B-exp"
+            }
+          },
+          "ops": [
+            {
+              "id": "Nanonets-OCR2:1.5B",
+              "type": "container/run",
+              "args": {
+                "cmd": [
+                  "--model",
+                  "%%global.variables.MODEL%%",
+                  "--served-model-name",
+                  "%%global.variables.MODEL%%",
+                  "--port",
+                  "8000",
+                  "--max-model-len",
+                  "30000"
+                ],
+                "gpu": true,
+                "image": "docker.io/vllm/vllm-openai:v0.10.2",
+                "expose": 8000
+              }
+            }
+          ],
+          "meta": {
+            "trigger": "dashboard",
+            "system_requirements": {
+              "required_vram": 6
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "nosana-rag",
+    "name": "Nosana RAG Bot WebUI",
+    "category": [
+      "Web UI",
+      "API"
+    ],
+    "icon": "https://nosana.io/img/Nosana_Logomark_color.png",
+    "jobDefinition": {
+      "version": "0.1",
+      "type": "container",
+      "meta": {
+        "trigger": "dashboard",
+        "system_requirements": {
+          "required_vram": 44
+        }
+      },
+      "ops": [
+        {
+          "type": "container/run",
+          "id": "Nosana-chat-bot",
+          "args": {
+            "image": "docker.io/nosana/nosana-chat-bot:0.1.1",
+            "cmd": [
+              "sh",
+              "-c",
+              "lmdeploy serve api_server ./models/snapshots/2123003760781134cfc31124aa6560a45b491fdf --model-name llama3.1 --chat-template ./chat_template.json --model-format awq & npm start"
+            ],
+            "gpu": true,
+            "expose": 3000,
+            "resources": [
+              {
+                "type": "S3",
+                "url": "s3://nos-ai-models-qllsn32u/hugging-face/llama3.1/70b/4x/models--hugging-quants--Meta-Llama-3.1-70B-Instruct-AWQ-INT4",
+                "target": "/app/models/"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "onetrainer",
+    "name": "Onetrainer Jupyter Notebook",
+    "category": [
+      "Web UI",
+      "API",
+      "Image Generation Fine-tuning"
+    ],
+    "icon": "https://avatars.githubusercontent.com/u/3390934?v=4",
+    "jobDefinition": {
+      "version": "0.1",
+      "type": "container",
+      "meta": {
+        "trigger": "dashboard",
+        "system_requirements": {
+          "required_vram": 4
+        }
+      },
+      "ops": [
+        {
+          "type": "container/run",
+          "id": "Trainer",
+          "args": {
+            "image": "nosana/onetrainercomplete:0.0.0",
+            "cmd": [
+              "jupyter",
+              "notebook",
+              "--ip=0.0.0.0",
+              "--port=8888",
+              "--no-browser",
+              "--allow-root",
+              "--ServerApp.token=''",
+              "--ServerApp.password=''"
+            ],
+            "expose": 8888,
+            "gpu": true
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "oobabooga",
+    "name": "Oobabooga web UI",
+    "category": [
+      "Web UI",
+      "API",
+      "LLM"
+    ],
+    "icon": "https://raw.githubusercontent.com/nosana-ci/templates/refs/heads/main/templates/Oobabooga/oobabooga.png",
+    "jobDefinition": {
+      "version": "0.1",
+      "type": "container",
+      "meta": {
+        "trigger": "dashboard"
+      },
+      "ops": [
+        {
+          "type": "container/run",
+          "id": "Oobabooga-webui",
+          "args": {
+            "image": "docker.io/atinoda/text-generation-webui:default-nvidia-v2.4",
+            "cmd": [],
+            "gpu": true,
+            "expose": 7860,
+            "env": {
+              "EXTRA_LAUNCH_ARGS": "--listen --verbose"
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "pytorch-jupyter",
+    "name": "Pytorch Jupyter Notebook",
+    "category": [
+      "Official",
+      "Web UI",
+      "API"
+    ],
+    "icon": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQhyOAyEZ7rQuXiP6Kxx0B9y_aJ59fRniUVRw&s",
+    "jobDefinition": {
+      "version": "0.1",
+      "type": "container",
+      "meta": {
+        "trigger": "dashboard",
+        "system_requirements": {
+          "required_vram": 4
+        }
+      },
+      "ops": [
+        {
+          "type": "container/run",
+          "id": "Pytorch",
+          "args": {
+            "image": "docker.io/nosana/pytorch-jupyter:2.0.0",
+            "cmd": [
+              "jupyter",
+              "lab",
+              "--ip=0.0.0.0",
+              "--port=8888",
+              "--no-browser",
+              "--allow-root",
+              "--ServerApp.token=''",
+              "--ServerApp.password=''"
+            ],
+            "expose": 8888,
+            "gpu": true
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "rstudio",
+    "name": "RStudio Server",
+    "category": [
+      "Official",
+      "Web UI",
+      "API"
+    ],
+    "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/R_logo.svg/1200px-R_logo.svg.png",
+    "jobDefinition": {
+      "version": "0.1",
+      "type": "container",
+      "meta": {
+        "trigger": "dashboard"
+      },
+      "ops": [
+        {
+          "type": "container/run",
+          "id": "Rocker-rstudio",
+          "args": {
+            "image": "docker.io/nosana/rstudio:2.0.0",
+            "cmd": [],
+            "gpu": true,
+            "expose": 8787,
+            "env": {}
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "tgi-api",
+    "name": "Text Generation Inference API",
+    "category": [
+      "API",
+      "LLM"
+    ],
+    "icon": "https://huggingface.co/front/assets/huggingface_logo-noborder.svg",
+    "jobDefinition": {
+      "version": "0.1",
+      "type": "container",
+      "meta": {
+        "trigger": "dashboard",
+        "system_requirements": {
+          "required_vram": 16
+        }
+      },
+      "ops": [
+        {
+          "type": "container/run",
+          "id": "Tgi",
+          "args": {
+            "cmd": [
+              "--model-id",
+              "Qwen/Qwen2.5-7B",
+              "--port",
+              "8080"
+            ],
+            "image": "ghcr.io/huggingface/text-generation-inference:2.3.1",
+            "gpu": true,
+            "expose": 8080
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "tf-jupyter",
+    "name": "Tensorflow Jupyter Notebook",
+    "category": [
+      "Official",
+      "Web UI",
+      "API"
+    ],
+    "icon": "https://user-images.githubusercontent.com/40668801/42043955-fbb838a2-7af7-11e8-9795-7f890e871d13.png",
+    "jobDefinition": {
+      "version": "0.1",
+      "type": "container",
+      "meta": {
+        "trigger": "dashboard",
+        "system_requirements": {
+          "required_vram": 4
+        }
+      },
+      "ops": [
+        {
+          "type": "container/run",
+          "id": "Tf",
+          "args": {
+            "cmd": [
+              "jupyter",
+              "lab",
+              "--ip=0.0.0.0",
+              "--port=8888",
+              "--no-browser",
+              "--allow-root",
+              "--ServerApp.token=''",
+              "--ServerApp.password=''"
+            ],
+            "expose": 8888,
+            "image": "docker.io/nosana/tensorflow-jupyter:2.0.0",
+            "gpu": true
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "tts-webui",
+    "name": "Text-To-Speech UI",
+    "category": [
+      "Web UI",
+      "API"
+    ],
+    "icon": "https://cdn-icons-png.flaticon.com/512/8984/8984813.png",
+    "jobDefinition": {
+      "version": "0.1",
+      "type": "container",
+      "meta": {
+        "trigger": "dashboard"
+      },
+      "ops": [
+        {
+          "type": "container/run",
+          "id": "Tts",
+          "args": {
+            "image": "ghcr.io/rsxdalv/tts-generation-webui:main",
+            "cmd": [],
+            "gpu": true,
+            "expose": 3000
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "vscode-server",
+    "name": "VSCode Server",
+    "category": [
+      "Official",
+      "Web UI",
+      "API"
+    ],
+    "icon": "https://avatars.githubusercontent.com/u/12324908?s=280&v=4",
+    "jobDefinition": {
+      "version": "0.1",
+      "type": "container",
+      "meta": {
+        "trigger": "dashboard"
+      },
+      "ops": [
+        {
+          "type": "container/run",
+          "id": "Vscode",
+          "args": {
+            "image": "docker.io/nosana/vscode-server:2.0.0",
+            "cmd": [],
+            "gpu": true,
+            "expose": 8080,
+            "env": {}
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "whisper-asr",
+    "name": "Whisper ASR Webservice",
+    "category": [
+      "Official",
+      "API"
+    ],
+    "icon": "https://www.datocms-assets.com/96965/1685731715-open-ai-stars-2x.png",
+    "jobDefinition": {
+      "version": "0.1",
+      "type": "container",
+      "meta": {
+        "trigger": "dashboard",
+        "system_requirements": {
+          "required_vram": 5
+        }
+      },
+      "ops": [
+        {
+          "type": "container/run",
+          "id": "Whisper",
+          "args": {
+            "image": "docker.io/nosana/whisper-asr:2.0.0",
+            "cmd": [],
+            "gpu": true,
+            "expose": 9000,
+            "env": {}
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "hello-world",
+    "name": "Hello World",
+    "category": [
+      "Featured"
+    ],
+    "icon": "https://miro.medium.com/v2/resize:fit:1000/1*aPfdrf5Y14OzFUXgEwB9TA.jpeg",
+    "jobDefinition": {
+      "version": "0.1",
+      "type": "container",
+      "meta": {
+        "trigger": "dashboard"
+      },
+      "ops": [
+        {
+          "type": "container/run",
+          "id": "Hello-world",
+          "args": {
+            "cmd": "echo hello world",
+            "image": "ubuntu",
+            "gpu": true
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "open-webui",
+    "name": "Open WebUI using Ollama",
+    "category": [
+      "Web UI",
+      "API",
+      "LLM"
+    ],
+    "icon": "https://openwebui.com/user.png",
+    "jobDefinition": {
+      "version": "0.1",
+      "type": "container",
+      "meta": {
+        "trigger": "dashboard"
+      },
+      "ops": [
+        {
+          "type": "container/run",
+          "id": "Webui",
+          "args": {
+            "cmd": [],
+            "env": {
+              "WEBUI_AUTH": "False",
+              "WEBUI_NAME": "Nosana Chat"
+            },
+            "image": "ghcr.io/open-webui/open-webui:ollama",
+            "gpu": true,
+            "expose": 8080
+          }
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,41 @@
+name: Nosana MCP Build
+
+on:
+  push:
+    branches:
+      - main
+      - nosana-chat-mcp
+
+jobs:
+  build:
+    name: Build Nosana MCP
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/nosana_mcp
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Restore pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: mcp-${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            mcp-${{ runner.os }}-pnpm-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check & build
+        run: pnpm run build

@@ -1,0 +1,23 @@
+{
+  "extends": "@nosana-chat/typescript-config/base.json",
+  "compilerOptions": {
+    "target": "esnext",
+    "types": ["node"],
+    "sourceMap": true,
+    "strictNullChecks": true,
+    "exactOptionalPropertyTypes": true,
+    "verbatimModuleSyntax": true,
+    "noUncheckedSideEffectImports": true,
+    "allowImportingTsExtensions": false,
+    "noEmit": false,
+    "outDir": "dist",
+    "rootDir": "src",
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": false,
+    "moduleResolution": "bundler",
+    "module": "esnext"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}

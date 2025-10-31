@@ -1,0 +1,27 @@
+{
+  "name": "@nosana-chat/monorepo",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "check-types": "turbo run check-types",
+    "build:package": "turbo run build --filter=packages/**",
+    "deploy": "turbo run deploy",
+    "deploy:mcp": "turbo run deploy --filter=apps/nosana_mcp"
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2",
+    "turbo": "^2.5.6",
+    "typescript": "5.7.2"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "ws": "8.18.0",
+    "zod": "3.23.8"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "@nosana-chat/mcp",
+  "version": "1.0.0",
+  "description": "nosana deployer api",
+  "scripts": {
+    "build": "tsc",
+    "dev": "set NODE_ENV=development&& vercel dev --listen 3001",
+    "deploy": "set NODE_ENV=production&& vercel --prod"
+  },
+
+  "type": "module",
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^20.0.0",
+    "tsx": "^4.16.2",
+    "typescript": "^5.6.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.20.0",
+    "@nosana/sdk": "^0.4.42",
+    "@solana/web3.js": "^1.98.4",
+    "@vercel/node": "^5.4.0",
+    "jsonwebtoken": "^9.0.2",
+    "mcp-handler": "^1.0.3",
+    "zod": "^3.25.76"
+  }
+}

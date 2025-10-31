@@ -1,0 +1,7088 @@
+[
+  {
+    "family": "deepseek-r1",
+    "tags": [
+      "tools",
+      "thinking"
+    ],
+    "parameter_sizes": [
+      "1.5b",
+      "7b",
+      "8b",
+      "14b",
+      "32b",
+      "70b",
+      "671b"
+    ],
+    "models": [
+      {
+        "name": "deepseek-r1:7b",
+        "size": "1.1GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "deepseek-r1:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      },
+      {
+        "name": "deepseek-r1:671b",
+        "size": "43GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "deepseek-r1:671b",
+          "parameters": "671.0B",
+          "gpuCount": 22,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "1745GB",
+          "pricePerHour": 35.2,
+          "vramPerGpu": "80GB",
+          "memoryUtilization": "100%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "deepseek-r1:32b",
+        "size": "9.0GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "deepseek-r1:32b",
+          "parameters": "32.0B",
+          "gpuCount": 2,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "83GB",
+          "pricePerHour": 3.2,
+          "vramPerGpu": "42GB",
+          "memoryUtilization": "52%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "deepseek-r1:1.5b",
+        "size": "5.2GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "deepseek-r1:1.5b",
+          "parameters": "1.5B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "4GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "33%"
+        }
+      },
+      {
+        "name": "deepseek-r1:14b",
+        "size": "5.2GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "deepseek-r1:14b",
+          "parameters": "14.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "36GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "45%"
+        }
+      },
+      {
+        "name": "deepseek-r1:8b",
+        "size": "4.7GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "deepseek-r1:8b",
+          "parameters": "8.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "21GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "88%"
+        }
+      },
+      {
+        "name": "deepseek-r1:70b",
+        "size": "20GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "deepseek-r1:70b",
+          "parameters": "70.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "182GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "61GB",
+          "memoryUtilization": "76%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "gemma3",
+    "tags": [
+      "vision"
+    ],
+    "parameter_sizes": [
+      "1b",
+      "4b",
+      "12b",
+      "27b"
+    ],
+    "models": [
+      {
+        "name": "gemma3:12b",
+        "size": "3.3GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "gemma3:12b",
+          "parameters": "12.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 40GB",
+          "requiredVram": "31GB",
+          "pricePerHour": 1.28,
+          "memoryUtilization": "78%"
+        }
+      },
+      {
+        "name": "gemma3:4b",
+        "size": "815MB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "gemma3:4b",
+          "parameters": "4.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "10GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "83%"
+        }
+      },
+      {
+        "name": "gemma3:1b",
+        "size": "3.3GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "gemma3:1b",
+          "parameters": "1.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "3GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "25%"
+        }
+      },
+      {
+        "name": "gemma3:27b",
+        "size": "8.1GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "gemma3:27b",
+          "parameters": "27.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "70GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "88%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "qwen3",
+    "tags": [
+      "tools",
+      "thinking"
+    ],
+    "parameter_sizes": [
+      "0.6b",
+      "1.7b",
+      "4b",
+      "8b",
+      "14b",
+      "30b",
+      "32b",
+      "235b"
+    ],
+    "models": [
+      {
+        "name": "qwen3:0.6b",
+        "size": "5.2GB",
+        "context": "40K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen3:0.6b",
+          "parameters": "0.6B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "2GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "17%"
+        }
+      },
+      {
+        "name": "qwen3:8b",
+        "size": "2.6GB",
+        "context": "40K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen3:8b",
+          "parameters": "8.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "21GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "88%"
+        }
+      },
+      {
+        "name": "qwen3:30b",
+        "size": "9.3GB",
+        "context": "40K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen3:30b",
+          "parameters": "30.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "78GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "98%"
+        }
+      },
+      {
+        "name": "qwen3:14b",
+        "size": "5.2GB",
+        "context": "40K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen3:14b",
+          "parameters": "14.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "36GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "45%"
+        }
+      },
+      {
+        "name": "qwen3:32b",
+        "size": "19GB",
+        "context": "40K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen3:32b",
+          "parameters": "32.0B",
+          "gpuCount": 2,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "83GB",
+          "pricePerHour": 3.2,
+          "vramPerGpu": "42GB",
+          "memoryUtilization": "52%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "qwen3:4b",
+        "size": "1.4GB",
+        "context": "40K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen3:4b",
+          "parameters": "4.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "10GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "83%"
+        }
+      },
+      {
+        "name": "qwen3:1.7b",
+        "size": "523MB",
+        "context": "40K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen3:1.7b",
+          "parameters": "1.7B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "4GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "33%"
+        }
+      },
+      {
+        "name": "qwen3:235b",
+        "size": "20GB",
+        "context": "40K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen3:235b",
+          "parameters": "235.0B",
+          "gpuCount": 8,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "611GB",
+          "pricePerHour": 12.8,
+          "vramPerGpu": "77GB",
+          "memoryUtilization": "96%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "devstral",
+    "tags": [
+      "tools"
+    ],
+    "parameter_sizes": [
+      "24b"
+    ],
+    "models": [
+      {
+        "name": "devstral:24b",
+        "size": "14GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "devstral:24b",
+          "parameters": "24.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "62GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "78%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "llama4",
+    "tags": [
+      "tools",
+      "vision"
+    ],
+    "parameter_sizes": [
+      "16x17b",
+      "128x17b"
+    ],
+    "models": [
+      {
+        "name": "llama4:128x17b",
+        "size": "67GB",
+        "recommendedGPU": {
+          "success": true,
+          "model": "llama4:128x17b",
+          "parameters": "17.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "44GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "55%"
+        }
+      },
+      {
+        "name": "llama4:16x17b",
+        "size": "67GB",
+        "recommendedGPU": {
+          "success": true,
+          "model": "llama4:16x17b",
+          "parameters": "17.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "44GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "55%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "qwen2.5vl",
+    "tags": [
+      "vision"
+    ],
+    "parameter_sizes": [
+      "3b",
+      "7b",
+      "32b",
+      "72b"
+    ],
+    "models": [
+      {
+        "name": "qwen2.5vl:3b",
+        "size": "6.0GB",
+        "context": "125K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen2.5vl:3b",
+          "parameters": "3.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "8GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "67%"
+        }
+      },
+      {
+        "name": "qwen2.5vl:32b",
+        "size": "6.0GB",
+        "context": "125K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen2.5vl:32b",
+          "parameters": "32.0B",
+          "gpuCount": 2,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "83GB",
+          "pricePerHour": 3.2,
+          "vramPerGpu": "42GB",
+          "memoryUtilization": "52%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "qwen2.5vl:72b",
+        "size": "21GB",
+        "context": "125K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen2.5vl:72b",
+          "parameters": "72.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "187GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "63GB",
+          "memoryUtilization": "79%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "5vl:72b",
+        "size": "21GB",
+        "context": "125K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "5vl:72b",
+          "parameters": "72.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "187GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "63GB",
+          "memoryUtilization": "79%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "5vl:3b",
+        "size": "6.0GB",
+        "context": "125K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "5vl:3b",
+          "parameters": "3.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "8GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "67%"
+        }
+      },
+      {
+        "name": "5vl:7b",
+        "size": "3.2GB",
+        "context": "125K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "5vl:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      },
+      {
+        "name": "qwen2.5vl:7b",
+        "size": "3.2GB",
+        "context": "125K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen2.5vl:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      },
+      {
+        "name": "5vl:32b",
+        "size": "6.0GB",
+        "context": "125K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "5vl:32b",
+          "parameters": "32.0B",
+          "gpuCount": 2,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "83GB",
+          "pricePerHour": 3.2,
+          "vramPerGpu": "42GB",
+          "memoryUtilization": "52%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "llama3.3",
+    "tags": [
+      "tools"
+    ],
+    "parameter_sizes": [
+      "70b"
+    ],
+    "models": [
+      {
+        "name": "llama3.3:70b",
+        "size": "43GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "llama3.3:70b",
+          "parameters": "70.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "182GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "61GB",
+          "memoryUtilization": "76%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "3:70b",
+        "size": "43GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "3:70b",
+          "parameters": "70.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "182GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "61GB",
+          "memoryUtilization": "76%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "phi4",
+    "tags": [],
+    "parameter_sizes": [
+      "14b"
+    ],
+    "models": [
+      {
+        "name": "phi4:14b",
+        "size": "9.1GB",
+        "context": "16K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "phi4:14b",
+          "parameters": "14.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "36GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "45%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "llama3.2",
+    "tags": [
+      "tools"
+    ],
+    "parameter_sizes": [
+      "1b",
+      "3b"
+    ],
+    "models": [
+      {
+        "name": "2:3b",
+        "size": "1.3GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "2:3b",
+          "parameters": "3.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "8GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "67%"
+        }
+      },
+      {
+        "name": "llama3.2:1b",
+        "size": "2.0GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "llama3.2:1b",
+          "parameters": "1.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "3GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "25%"
+        }
+      },
+      {
+        "name": "llama3.2:3b",
+        "size": "1.3GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "llama3.2:3b",
+          "parameters": "3.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "8GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "67%"
+        }
+      },
+      {
+        "name": "2:1b",
+        "size": "2.0GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "2:1b",
+          "parameters": "1.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "3GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "25%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "llama3.1",
+    "tags": [
+      "tools"
+    ],
+    "parameter_sizes": [
+      "8b",
+      "70b",
+      "405b"
+    ],
+    "models": [
+      {
+        "name": "llama3.1:70b",
+        "size": "4.9GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "llama3.1:70b",
+          "parameters": "70.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "182GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "61GB",
+          "memoryUtilization": "76%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "1:70b",
+        "size": "4.9GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "1:70b",
+          "parameters": "70.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "182GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "61GB",
+          "memoryUtilization": "76%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "llama3.1:405b",
+        "size": "43GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "llama3.1:405b",
+          "parameters": "405.0B",
+          "gpuCount": 14,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "1053GB",
+          "pricePerHour": 22.400000000000002,
+          "vramPerGpu": "76GB",
+          "memoryUtilization": "95%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "1:8b",
+        "size": "4.9GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "1:8b",
+          "parameters": "8.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "21GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "88%"
+        }
+      },
+      {
+        "name": "llama3.1:8b",
+        "size": "4.9GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "llama3.1:8b",
+          "parameters": "8.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "21GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "88%"
+        }
+      },
+      {
+        "name": "1:405b",
+        "size": "43GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "1:405b",
+          "parameters": "405.0B",
+          "gpuCount": 14,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "1053GB",
+          "pricePerHour": 22.400000000000002,
+          "vramPerGpu": "76GB",
+          "memoryUtilization": "95%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "mistral",
+    "tags": [
+      "tools"
+    ],
+    "parameter_sizes": [
+      "7b"
+    ],
+    "models": [
+      {
+        "name": "mistral:7b",
+        "size": "4.1GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "mistral:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "qwen2.5",
+    "tags": [
+      "tools"
+    ],
+    "parameter_sizes": [
+      "0.5b",
+      "1.5b",
+      "3b",
+      "7b",
+      "14b",
+      "32b",
+      "72b"
+    ],
+    "models": [
+      {
+        "name": "5:0.5b",
+        "size": "4.7GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "5:0.5b",
+          "parameters": "0.5B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "1GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "8%"
+        }
+      },
+      {
+        "name": "qwen2.5:32b",
+        "size": "9.0GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen2.5:32b",
+          "parameters": "32.0B",
+          "gpuCount": 2,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "83GB",
+          "pricePerHour": 3.2,
+          "vramPerGpu": "42GB",
+          "memoryUtilization": "52%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "5:14b",
+        "size": "4.7GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "5:14b",
+          "parameters": "14.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "36GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "45%"
+        }
+      },
+      {
+        "name": "qwen2.5:1.5b",
+        "size": "398MB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen2.5:1.5b",
+          "parameters": "1.5B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "4GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "33%"
+        }
+      },
+      {
+        "name": "qwen2.5:3b",
+        "size": "986MB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen2.5:3b",
+          "parameters": "3.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "8GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "67%"
+        }
+      },
+      {
+        "name": "5:72b",
+        "size": "20GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "5:72b",
+          "parameters": "72.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "187GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "63GB",
+          "memoryUtilization": "79%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "qwen2.5:14b",
+        "size": "4.7GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen2.5:14b",
+          "parameters": "14.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "36GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "45%"
+        }
+      },
+      {
+        "name": "5:1.5b",
+        "size": "398MB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "5:1.5b",
+          "parameters": "1.5B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "4GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "33%"
+        }
+      },
+      {
+        "name": "qwen2.5:72b",
+        "size": "20GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen2.5:72b",
+          "parameters": "72.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "187GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "63GB",
+          "memoryUtilization": "79%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "qwen2.5:7b",
+        "size": "1.9GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen2.5:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      },
+      {
+        "name": "5:32b",
+        "size": "9.0GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "5:32b",
+          "parameters": "32.0B",
+          "gpuCount": 2,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "83GB",
+          "pricePerHour": 3.2,
+          "vramPerGpu": "42GB",
+          "memoryUtilization": "52%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "5:7b",
+        "size": "1.9GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "5:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      },
+      {
+        "name": "qwen2.5:0.5b",
+        "size": "4.7GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen2.5:0.5b",
+          "parameters": "0.5B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "1GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "8%"
+        }
+      },
+      {
+        "name": "5:3b",
+        "size": "986MB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "5:3b",
+          "parameters": "3.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "8GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "67%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "llama3",
+    "tags": [],
+    "parameter_sizes": [
+      "8b",
+      "70b"
+    ],
+    "models": [
+      {
+        "name": "llama3:70b",
+        "size": "4.7GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "llama3:70b",
+          "parameters": "70.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "182GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "61GB",
+          "memoryUtilization": "76%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "llama3:8b",
+        "size": "4.7GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "llama3:8b",
+          "parameters": "8.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "21GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "88%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "llava",
+    "tags": [
+      "vision"
+    ],
+    "parameter_sizes": [
+      "7b",
+      "13b",
+      "34b"
+    ],
+    "models": [
+      {
+        "name": "llava:13b",
+        "size": "4.7GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "llava:13b",
+          "parameters": "13.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "34GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "42%"
+        }
+      },
+      {
+        "name": "llava:34b",
+        "size": "8.0GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "llava:34b",
+          "parameters": "34.0B",
+          "gpuCount": 2,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "88GB",
+          "pricePerHour": 3.2,
+          "vramPerGpu": "44GB",
+          "memoryUtilization": "55%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "llava:7b",
+        "size": "4.7GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "llava:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "qwen2.5-coder",
+    "tags": [
+      "tools"
+    ],
+    "parameter_sizes": [
+      "0.5b",
+      "1.5b",
+      "3b",
+      "7b",
+      "14b",
+      "32b"
+    ],
+    "models": [
+      {
+        "name": "qwen2.5-coder:7b",
+        "size": "1.9GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen2.5-coder:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      },
+      {
+        "name": "qwen2.5-coder:32b",
+        "size": "9.0GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen2.5-coder:32b",
+          "parameters": "32.0B",
+          "gpuCount": 2,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "83GB",
+          "pricePerHour": 3.2,
+          "vramPerGpu": "42GB",
+          "memoryUtilization": "52%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "5-coder:7b",
+        "size": "1.9GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "5-coder:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      },
+      {
+        "name": "qwen2.5-coder:1.5b",
+        "size": "398MB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen2.5-coder:1.5b",
+          "parameters": "1.5B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "4GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "33%"
+        }
+      },
+      {
+        "name": "5-coder:32b",
+        "size": "9.0GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "5-coder:32b",
+          "parameters": "32.0B",
+          "gpuCount": 2,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "83GB",
+          "pricePerHour": 3.2,
+          "vramPerGpu": "42GB",
+          "memoryUtilization": "52%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "qwen2.5-coder:14b",
+        "size": "4.7GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen2.5-coder:14b",
+          "parameters": "14.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "36GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "45%"
+        }
+      },
+      {
+        "name": "5-coder:0.5b",
+        "size": "4.7GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "5-coder:0.5b",
+          "parameters": "0.5B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "1GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "8%"
+        }
+      },
+      {
+        "name": "qwen2.5-coder:3b",
+        "size": "986MB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen2.5-coder:3b",
+          "parameters": "3.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "8GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "67%"
+        }
+      },
+      {
+        "name": "qwen2.5-coder:0.5b",
+        "size": "4.7GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen2.5-coder:0.5b",
+          "parameters": "0.5B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "1GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "8%"
+        }
+      },
+      {
+        "name": "5-coder:1.5b",
+        "size": "398MB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "5-coder:1.5b",
+          "parameters": "1.5B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "4GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "33%"
+        }
+      },
+      {
+        "name": "5-coder:14b",
+        "size": "4.7GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "5-coder:14b",
+          "parameters": "14.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "36GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "45%"
+        }
+      },
+      {
+        "name": "5-coder:3b",
+        "size": "986MB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "5-coder:3b",
+          "parameters": "3.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "8GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "67%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "gemma2",
+    "tags": [],
+    "parameter_sizes": [
+      "2b",
+      "9b",
+      "27b"
+    ],
+    "models": [
+      {
+        "name": "gemma2:9b",
+        "size": "1.6GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "gemma2:9b",
+          "parameters": "9.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "23GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "96%"
+        }
+      },
+      {
+        "name": "gemma2:27b",
+        "size": "5.4GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "gemma2:27b",
+          "parameters": "27.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "70GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "88%"
+        }
+      },
+      {
+        "name": "gemma2:2b",
+        "size": "5.4GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "gemma2:2b",
+          "parameters": "2.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "5GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "42%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "gemma",
+    "tags": [],
+    "parameter_sizes": [
+      "2b",
+      "7b"
+    ],
+    "models": [
+      {
+        "name": "gemma:7b",
+        "size": "1.7GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "gemma:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      },
+      {
+        "name": "gemma:2b",
+        "size": "5.0GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "gemma:2b",
+          "parameters": "2.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "5GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "42%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "qwen",
+    "tags": [],
+    "parameter_sizes": [
+      "0.5b",
+      "110b",
+      "1.8b",
+      "4b",
+      "7b",
+      "14b",
+      "32b",
+      "72b"
+    ],
+    "models": [
+      {
+        "name": "qwen:32b",
+        "size": "8.2GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen:32b",
+          "parameters": "32.0B",
+          "gpuCount": 2,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "83GB",
+          "pricePerHour": 3.2,
+          "vramPerGpu": "42GB",
+          "memoryUtilization": "52%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "qwen:14b",
+        "size": "4.5GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen:14b",
+          "parameters": "14.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "36GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "45%"
+        }
+      },
+      {
+        "name": "qwen:7b",
+        "size": "2.3GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      },
+      {
+        "name": "qwen:1.8b",
+        "size": "395MB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen:1.8b",
+          "parameters": "1.8B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "5GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "42%"
+        }
+      },
+      {
+        "name": "qwen:0.5b",
+        "size": "2.3GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen:0.5b",
+          "parameters": "0.5B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "1GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "8%"
+        }
+      },
+      {
+        "name": "qwen:72b",
+        "size": "18GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen:72b",
+          "parameters": "72.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "187GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "63GB",
+          "memoryUtilization": "79%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "qwen:110b",
+        "size": "41GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen:110b",
+          "parameters": "110.0B",
+          "gpuCount": 4,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "286GB",
+          "pricePerHour": 6.4,
+          "vramPerGpu": "72GB",
+          "memoryUtilization": "90%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "qwen:4b",
+        "size": "1.1GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen:4b",
+          "parameters": "4.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "10GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "83%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "qwen2",
+    "tags": [
+      "tools"
+    ],
+    "parameter_sizes": [
+      "0.5b",
+      "1.5b",
+      "7b",
+      "72b"
+    ],
+    "models": [
+      {
+        "name": "qwen2:7b",
+        "size": "935MB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen2:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      },
+      {
+        "name": "qwen2:0.5b",
+        "size": "4.4GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen2:0.5b",
+          "parameters": "0.5B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "1GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "8%"
+        }
+      },
+      {
+        "name": "qwen2:72b",
+        "size": "4.4GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen2:72b",
+          "parameters": "72.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "187GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "63GB",
+          "memoryUtilization": "79%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "qwen2:1.5b",
+        "size": "352MB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen2:1.5b",
+          "parameters": "1.5B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "4GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "33%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "phi3",
+    "tags": [],
+    "parameter_sizes": [
+      "14b",
+      "3.8b"
+    ],
+    "models": [
+      {
+        "name": "phi3:3.8b",
+        "size": "2.2GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "phi3:3.8b",
+          "parameters": "3.8B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "10GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "83%"
+        }
+      },
+      {
+        "name": "phi3:14b",
+        "size": "2.2GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "phi3:14b",
+          "parameters": "14.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "36GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "45%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "llama2",
+    "tags": [],
+    "parameter_sizes": [
+      "7b",
+      "70b",
+      "13b"
+    ],
+    "models": [
+      {
+        "name": "llama2:7b",
+        "size": "3.8GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "llama2:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      },
+      {
+        "name": "llama2:13b",
+        "size": "3.8GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "llama2:13b",
+          "parameters": "13.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "34GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "42%"
+        }
+      },
+      {
+        "name": "llama2:70b",
+        "size": "7.4GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "llama2:70b",
+          "parameters": "70.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "182GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "61GB",
+          "memoryUtilization": "76%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "codellama",
+    "tags": [],
+    "parameter_sizes": [
+      "7b",
+      "13b",
+      "34b",
+      "70b"
+    ],
+    "models": [
+      {
+        "name": "codellama:70b",
+        "size": "19GB",
+        "context": "16K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "codellama:70b",
+          "parameters": "70.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "182GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "61GB",
+          "memoryUtilization": "76%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "codellama:13b",
+        "size": "3.8GB",
+        "context": "16K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "codellama:13b",
+          "parameters": "13.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "34GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "42%"
+        }
+      },
+      {
+        "name": "codellama:34b",
+        "size": "7.4GB",
+        "context": "16K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "codellama:34b",
+          "parameters": "34.0B",
+          "gpuCount": 2,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "88GB",
+          "pricePerHour": 3.2,
+          "vramPerGpu": "44GB",
+          "memoryUtilization": "55%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "codellama:7b",
+        "size": "3.8GB",
+        "context": "16K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "codellama:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "llama3.2-vision",
+    "tags": [
+      "vision"
+    ],
+    "parameter_sizes": [
+      "11b",
+      "90b"
+    ],
+    "models": [
+      {
+        "name": "llama3.2-vision:90b",
+        "size": "7.8GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "llama3.2-vision:90b",
+          "parameters": "90.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "234GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "78GB",
+          "memoryUtilization": "98%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "2-vision:11b",
+        "size": "7.8GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "2-vision:11b",
+          "parameters": "11.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 40GB",
+          "requiredVram": "29GB",
+          "pricePerHour": 1.28,
+          "memoryUtilization": "72%"
+        }
+      },
+      {
+        "name": "2-vision:90b",
+        "size": "7.8GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "2-vision:90b",
+          "parameters": "90.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "234GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "78GB",
+          "memoryUtilization": "98%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "llama3.2-vision:11b",
+        "size": "7.8GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "llama3.2-vision:11b",
+          "parameters": "11.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 40GB",
+          "requiredVram": "29GB",
+          "pricePerHour": 1.28,
+          "memoryUtilization": "72%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "tinyllama",
+    "tags": [],
+    "parameter_sizes": [
+      "1.1b"
+    ],
+    "models": [
+      {
+        "name": "tinyllama:1.1b",
+        "size": "638MB",
+        "context": "2K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "tinyllama:1.1b",
+          "parameters": "1.1B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "3GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "25%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "mistral-nemo",
+    "tags": [
+      "tools"
+    ],
+    "parameter_sizes": [
+      "12b"
+    ],
+    "models": [
+      {
+        "name": "mistral-nemo:12b",
+        "size": "7.1GB",
+        "context": "1000K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "mistral-nemo:12b",
+          "parameters": "12.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 40GB",
+          "requiredVram": "31GB",
+          "pricePerHour": 1.28,
+          "memoryUtilization": "78%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "minicpm-v",
+    "tags": [
+      "vision"
+    ],
+    "parameter_sizes": [
+      "8b"
+    ],
+    "models": [
+      {
+        "name": "minicpm-v:8b",
+        "size": "5.5GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "minicpm-v:8b",
+          "parameters": "8.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "21GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "88%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "dolphin3",
+    "tags": [],
+    "parameter_sizes": [
+      "8b"
+    ],
+    "models": [
+      {
+        "name": "dolphin3:8b",
+        "size": "4.9GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "dolphin3:8b",
+          "parameters": "8.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "21GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "88%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "olmo2",
+    "tags": [],
+    "parameter_sizes": [
+      "7b",
+      "13b"
+    ],
+    "models": [
+      {
+        "name": "olmo2:7b",
+        "size": "4.5GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "olmo2:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      },
+      {
+        "name": "olmo2:13b",
+        "size": "4.5GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "olmo2:13b",
+          "parameters": "13.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "34GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "42%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "qwq",
+    "tags": [
+      "tools"
+    ],
+    "parameter_sizes": [
+      "32b"
+    ],
+    "models": [
+      {
+        "name": "qwq:32b",
+        "size": "20GB",
+        "context": "40K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwq:32b",
+          "parameters": "32.0B",
+          "gpuCount": 2,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "83GB",
+          "pricePerHour": 3.2,
+          "vramPerGpu": "42GB",
+          "memoryUtilization": "52%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "deepseek-v3",
+    "tags": [],
+    "parameter_sizes": [
+      "671b"
+    ],
+    "models": [
+      {
+        "name": "deepseek-v3:671b",
+        "size": "404GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "deepseek-v3:671b",
+          "parameters": "671.0B",
+          "gpuCount": 22,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "1745GB",
+          "pricePerHour": 35.2,
+          "vramPerGpu": "80GB",
+          "memoryUtilization": "100%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "llama2-uncensored",
+    "tags": [],
+    "parameter_sizes": [
+      "7b",
+      "70b"
+    ],
+    "models": [
+      {
+        "name": "llama2-uncensored:70b",
+        "size": "3.8GB",
+        "context": "2K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "llama2-uncensored:70b",
+          "parameters": "70.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "182GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "61GB",
+          "memoryUtilization": "76%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "llama2-uncensored:7b",
+        "size": "3.8GB",
+        "context": "2K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "llama2-uncensored:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "llava-llama3",
+    "tags": [
+      "vision"
+    ],
+    "parameter_sizes": [
+      "8b"
+    ],
+    "models": [
+      {
+        "name": "llava-llama3:8b",
+        "size": "5.5GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "llava-llama3:8b",
+          "parameters": "8.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "21GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "88%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "mixtral",
+    "tags": [
+      "tools"
+    ],
+    "parameter_sizes": [
+      "8x7b",
+      "8x22b"
+    ],
+    "models": [
+      {
+        "name": "mixtral:8x22b",
+        "size": "26GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "mixtral:8x22b",
+          "parameters": "22.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "57GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "71%"
+        }
+      },
+      {
+        "name": "mixtral:8x7b",
+        "size": "80GB",
+        "context": "64K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "mixtral:8x7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "mistral-small",
+    "tags": [
+      "tools"
+    ],
+    "parameter_sizes": [
+      "22b",
+      "24b"
+    ],
+    "models": [
+      {
+        "name": "mistral-small:24b",
+        "size": "13GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "mistral-small:24b",
+          "parameters": "24.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "62GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "78%"
+        }
+      },
+      {
+        "name": "mistral-small:22b",
+        "size": "14GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "mistral-small:22b",
+          "parameters": "22.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "57GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "71%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "smollm2",
+    "tags": [
+      "tools"
+    ],
+    "parameter_sizes": [
+      "1.7b"
+    ],
+    "models": [
+      {
+        "name": "smollm2:1.7b",
+        "size": "726MB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "smollm2:1.7b",
+          "parameters": "1.7B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "4GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "33%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "starcoder2",
+    "tags": [],
+    "parameter_sizes": [
+      "3b",
+      "7b",
+      "15b"
+    ],
+    "models": [
+      {
+        "name": "starcoder2:7b",
+        "size": "1.7GB",
+        "context": "16K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "starcoder2:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      },
+      {
+        "name": "starcoder2:3b",
+        "size": "9.1GB",
+        "context": "16K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "starcoder2:3b",
+          "parameters": "3.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "8GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "67%"
+        }
+      },
+      {
+        "name": "starcoder2:15b",
+        "size": "4.0GB",
+        "context": "16K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "starcoder2:15b",
+          "parameters": "15.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "39GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "49%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "deepseek-coder-v2",
+    "tags": [],
+    "parameter_sizes": [
+      "16b",
+      "236b"
+    ],
+    "models": [
+      {
+        "name": "deepseek-coder-v2:236b",
+        "size": "8.9GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "deepseek-coder-v2:236b",
+          "parameters": "236.0B",
+          "gpuCount": 8,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "614GB",
+          "pricePerHour": 12.8,
+          "vramPerGpu": "77GB",
+          "memoryUtilization": "96%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "deepseek-coder-v2:16b",
+        "size": "8.9GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "deepseek-coder-v2:16b",
+          "parameters": "16.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "42GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "52%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "deepseek-coder",
+    "tags": [],
+    "parameter_sizes": [
+      "1.3b",
+      "6.7b",
+      "33b"
+    ],
+    "models": [
+      {
+        "name": "deepseek-coder:33b",
+        "size": "3.8GB",
+        "context": "16K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "deepseek-coder:33b",
+          "parameters": "33.0B",
+          "gpuCount": 2,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "86GB",
+          "pricePerHour": 3.2,
+          "vramPerGpu": "43GB",
+          "memoryUtilization": "54%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "deepseek-coder:6.7b",
+        "size": "776MB",
+        "context": "16K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "deepseek-coder:6.7b",
+          "parameters": "6.7B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "17GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "71%"
+        }
+      },
+      {
+        "name": "deepseek-coder:1.3b",
+        "size": "776MB",
+        "context": "16K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "deepseek-coder:1.3b",
+          "parameters": "1.3B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "3GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "25%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "codegemma",
+    "tags": [],
+    "parameter_sizes": [
+      "2b",
+      "7b"
+    ],
+    "models": [
+      {
+        "name": "codegemma:2b",
+        "size": "5.0GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "codegemma:2b",
+          "parameters": "2.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "5GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "42%"
+        }
+      },
+      {
+        "name": "codegemma:7b",
+        "size": "1.6GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "codegemma:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "dolphin-mixtral",
+    "tags": [],
+    "parameter_sizes": [
+      "8x7b",
+      "8x22b"
+    ],
+    "models": [
+      {
+        "name": "dolphin-mixtral:8x22b",
+        "size": "26GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "dolphin-mixtral:8x22b",
+          "parameters": "22.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "57GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "71%"
+        }
+      },
+      {
+        "name": "dolphin-mixtral:8x7b",
+        "size": "26GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "dolphin-mixtral:8x7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "phi",
+    "tags": [],
+    "parameter_sizes": [
+      "2.7b"
+    ],
+    "models": [
+      {
+        "name": "phi:2.7b",
+        "size": "1.6GB",
+        "context": "2K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "phi:2.7b",
+          "parameters": "2.7B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "7GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "58%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "openthinker",
+    "tags": [],
+    "parameter_sizes": [
+      "7b",
+      "32b"
+    ],
+    "models": [
+      {
+        "name": "openthinker:32b",
+        "size": "4.7GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "openthinker:32b",
+          "parameters": "32.0B",
+          "gpuCount": 2,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "83GB",
+          "pricePerHour": 3.2,
+          "vramPerGpu": "42GB",
+          "memoryUtilization": "52%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "openthinker:7b",
+        "size": "4.7GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "openthinker:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "wizardlm2",
+    "tags": [],
+    "parameter_sizes": [
+      "7b",
+      "8x22b"
+    ],
+    "models": [
+      {
+        "name": "wizardlm2:7b",
+        "size": "4.1GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "wizardlm2:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      },
+      {
+        "name": "wizardlm2:8x22b",
+        "size": "4.1GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "wizardlm2:8x22b",
+          "parameters": "22.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "57GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "71%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "orca-mini",
+    "tags": [],
+    "parameter_sizes": [
+      "3b",
+      "7b",
+      "13b",
+      "70b"
+    ],
+    "models": [
+      {
+        "name": "orca-mini:3b",
+        "size": "2.0GB",
+        "context": "2K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "orca-mini:3b",
+          "parameters": "3.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "8GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "67%"
+        }
+      },
+      {
+        "name": "orca-mini:7b",
+        "size": "2.0GB",
+        "context": "2K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "orca-mini:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      },
+      {
+        "name": "orca-mini:13b",
+        "size": "3.8GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "orca-mini:13b",
+          "parameters": "13.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "34GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "42%"
+        }
+      },
+      {
+        "name": "orca-mini:70b",
+        "size": "7.4GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "orca-mini:70b",
+          "parameters": "70.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "182GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "61GB",
+          "memoryUtilization": "76%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "dolphin-mistral",
+    "tags": [],
+    "parameter_sizes": [
+      "7b"
+    ],
+    "models": [
+      {
+        "name": "dolphin-mistral:7b",
+        "size": "4.1GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "dolphin-mistral:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "dolphin-llama3",
+    "tags": [],
+    "parameter_sizes": [
+      "8b",
+      "70b"
+    ],
+    "models": [
+      {
+        "name": "dolphin-llama3:8b",
+        "size": "4.7GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "dolphin-llama3:8b",
+          "parameters": "8.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "21GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "88%"
+        }
+      },
+      {
+        "name": "dolphin-llama3:70b",
+        "size": "4.7GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "dolphin-llama3:70b",
+          "parameters": "70.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "182GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "61GB",
+          "memoryUtilization": "76%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "codestral",
+    "tags": [],
+    "parameter_sizes": [
+      "22b"
+    ],
+    "models": [
+      {
+        "name": "codestral:22b",
+        "size": "13GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "codestral:22b",
+          "parameters": "22.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "57GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "71%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "smollm",
+    "tags": [],
+    "parameter_sizes": [
+      "1.7b"
+    ],
+    "models": [
+      {
+        "name": "smollm:1.7b",
+        "size": "229MB",
+        "context": "2K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "smollm:1.7b",
+          "parameters": "1.7B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "4GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "33%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "command-r",
+    "tags": [
+      "tools"
+    ],
+    "parameter_sizes": [
+      "35b"
+    ],
+    "models": [
+      {
+        "name": "command-r:35b",
+        "size": "20GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "command-r:35b",
+          "parameters": "35.0B",
+          "gpuCount": 2,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "91GB",
+          "pricePerHour": 3.2,
+          "vramPerGpu": "46GB",
+          "memoryUtilization": "57%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "hermes3",
+    "tags": [
+      "tools"
+    ],
+    "parameter_sizes": [
+      "3b",
+      "8b",
+      "70b",
+      "405b"
+    ],
+    "models": [
+      {
+        "name": "hermes3:405b",
+        "size": "40GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "hermes3:405b",
+          "parameters": "405.0B",
+          "gpuCount": 14,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "1053GB",
+          "pricePerHour": 22.400000000000002,
+          "vramPerGpu": "76GB",
+          "memoryUtilization": "95%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "hermes3:70b",
+        "size": "4.7GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "hermes3:70b",
+          "parameters": "70.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "182GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "61GB",
+          "memoryUtilization": "76%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "hermes3:3b",
+        "size": "4.7GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "hermes3:3b",
+          "parameters": "3.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "8GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "67%"
+        }
+      },
+      {
+        "name": "hermes3:8b",
+        "size": "2.0GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "hermes3:8b",
+          "parameters": "8.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "21GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "88%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "phi3.5",
+    "tags": [],
+    "parameter_sizes": [
+      "3.8b"
+    ],
+    "models": [
+      {
+        "name": "phi3.5:3.8b",
+        "size": "2.2GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "phi3.5:3.8b",
+          "parameters": "3.8B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "10GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "83%"
+        }
+      },
+      {
+        "name": "5:3.8b",
+        "size": "2.2GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "5:3.8b",
+          "parameters": "3.8B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "10GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "83%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "yi",
+    "tags": [],
+    "parameter_sizes": [
+      "6b",
+      "9b",
+      "34b"
+    ],
+    "models": [
+      {
+        "name": "yi:9b",
+        "size": "3.5GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "yi:9b",
+          "parameters": "9.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "23GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "96%"
+        }
+      },
+      {
+        "name": "yi:34b",
+        "size": "5.0GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "yi:34b",
+          "parameters": "34.0B",
+          "gpuCount": 2,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "88GB",
+          "pricePerHour": 3.2,
+          "vramPerGpu": "44GB",
+          "memoryUtilization": "55%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "yi:6b",
+        "size": "3.5GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "yi:6b",
+          "parameters": "6.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 4060",
+          "requiredVram": "16GB",
+          "pricePerHour": 0.06,
+          "memoryUtilization": "100%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "zephyr",
+    "tags": [],
+    "parameter_sizes": [
+      "7b",
+      "141b"
+    ],
+    "models": [
+      {
+        "name": "zephyr:7b",
+        "size": "4.1GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "zephyr:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      },
+      {
+        "name": "zephyr:141b",
+        "size": "4.1GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "zephyr:141b",
+          "parameters": "141.0B",
+          "gpuCount": 5,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "367GB",
+          "pricePerHour": 8,
+          "vramPerGpu": "74GB",
+          "memoryUtilization": "92%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "granite-code",
+    "tags": [],
+    "parameter_sizes": [
+      "3b",
+      "8b",
+      "20b",
+      "34b"
+    ],
+    "models": [
+      {
+        "name": "granite-code:34b",
+        "size": "12GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "granite-code:34b",
+          "parameters": "34.0B",
+          "gpuCount": 2,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "88GB",
+          "pricePerHour": 3.2,
+          "vramPerGpu": "44GB",
+          "memoryUtilization": "55%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "granite-code:20b",
+        "size": "4.6GB",
+        "context": "125K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "granite-code:20b",
+          "parameters": "20.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "52GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "65%"
+        }
+      },
+      {
+        "name": "granite-code:8b",
+        "size": "2.0GB",
+        "context": "125K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "granite-code:8b",
+          "parameters": "8.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "21GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "88%"
+        }
+      },
+      {
+        "name": "granite-code:3b",
+        "size": "2.0GB",
+        "context": "125K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "granite-code:3b",
+          "parameters": "3.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "8GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "67%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "wizard-vicuna-uncensored",
+    "tags": [],
+    "parameter_sizes": [
+      "7b",
+      "13b",
+      "30b"
+    ],
+    "models": [
+      {
+        "name": "wizard-vicuna-uncensored:7b",
+        "size": "3.8GB",
+        "context": "2K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "wizard-vicuna-uncensored:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      },
+      {
+        "name": "wizard-vicuna-uncensored:13b",
+        "size": "3.8GB",
+        "context": "2K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "wizard-vicuna-uncensored:13b",
+          "parameters": "13.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "34GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "42%"
+        }
+      },
+      {
+        "name": "wizard-vicuna-uncensored:30b",
+        "size": "7.4GB",
+        "context": "2K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "wizard-vicuna-uncensored:30b",
+          "parameters": "30.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "78GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "98%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "moondream",
+    "tags": [
+      "vision"
+    ],
+    "parameter_sizes": [
+      "1.8b"
+    ],
+    "models": [
+      {
+        "name": "moondream:1.8b",
+        "size": "1.7GB",
+        "context": "2K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "moondream:1.8b",
+          "parameters": "1.8B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "5GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "42%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "starcoder",
+    "tags": [],
+    "parameter_sizes": [
+      "1b",
+      "3b",
+      "7b",
+      "15b"
+    ],
+    "models": [
+      {
+        "name": "starcoder:7b",
+        "size": "1.8GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "starcoder:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      },
+      {
+        "name": "starcoder:1b",
+        "size": "1.8GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "starcoder:1b",
+          "parameters": "1.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "3GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "25%"
+        }
+      },
+      {
+        "name": "starcoder:3b",
+        "size": "726MB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "starcoder:3b",
+          "parameters": "3.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "8GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "67%"
+        }
+      },
+      {
+        "name": "starcoder:15b",
+        "size": "4.3GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "starcoder:15b",
+          "parameters": "15.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "39GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "49%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "phi4-mini",
+    "tags": [
+      "tools"
+    ],
+    "parameter_sizes": [
+      "3.8b"
+    ],
+    "models": [
+      {
+        "name": "phi4-mini:3.8b",
+        "size": "2.5GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "phi4-mini:3.8b",
+          "parameters": "3.8B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "10GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "83%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "vicuna",
+    "tags": [],
+    "parameter_sizes": [
+      "7b",
+      "13b",
+      "33b"
+    ],
+    "models": [
+      {
+        "name": "vicuna:13b",
+        "size": "3.8GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "vicuna:13b",
+          "parameters": "13.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "34GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "42%"
+        }
+      },
+      {
+        "name": "vicuna:7b",
+        "size": "3.8GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "vicuna:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      },
+      {
+        "name": "vicuna:33b",
+        "size": "7.4GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "vicuna:33b",
+          "parameters": "33.0B",
+          "gpuCount": 2,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "86GB",
+          "pricePerHour": 3.2,
+          "vramPerGpu": "43GB",
+          "memoryUtilization": "54%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "mistral-openorca",
+    "tags": [],
+    "parameter_sizes": [
+      "7b"
+    ],
+    "models": [
+      {
+        "name": "mistral-openorca:7b",
+        "size": "4.1GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "mistral-openorca:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "openchat",
+    "tags": [],
+    "parameter_sizes": [
+      "7b"
+    ],
+    "models": [
+      {
+        "name": "openchat:7b",
+        "size": "4.1GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "openchat:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "deepseek-v2",
+    "tags": [],
+    "parameter_sizes": [
+      "16b",
+      "236b"
+    ],
+    "models": [
+      {
+        "name": "deepseek-v2:16b",
+        "size": "8.9GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "deepseek-v2:16b",
+          "parameters": "16.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "42GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "52%"
+        }
+      },
+      {
+        "name": "deepseek-v2:236b",
+        "size": "8.9GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "deepseek-v2:236b",
+          "parameters": "236.0B",
+          "gpuCount": 8,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "614GB",
+          "pricePerHour": 12.8,
+          "vramPerGpu": "77GB",
+          "memoryUtilization": "96%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "codeqwen",
+    "tags": [],
+    "parameter_sizes": [
+      "7b"
+    ],
+    "models": [
+      {
+        "name": "codeqwen:7b",
+        "size": "4.2GB",
+        "context": "64K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "codeqwen:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "deepseek-llm",
+    "tags": [],
+    "parameter_sizes": [
+      "7b",
+      "67b"
+    ],
+    "models": [
+      {
+        "name": "deepseek-llm:67b",
+        "size": "4.0GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "deepseek-llm:67b",
+          "parameters": "67.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "174GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "58GB",
+          "memoryUtilization": "72%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "deepseek-llm:7b",
+        "size": "4.0GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "deepseek-llm:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "llama2-chinese",
+    "tags": [],
+    "parameter_sizes": [
+      "7b",
+      "13b"
+    ],
+    "models": [
+      {
+        "name": "llama2-chinese:7b",
+        "size": "3.8GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "llama2-chinese:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      },
+      {
+        "name": "llama2-chinese:13b",
+        "size": "3.8GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "llama2-chinese:13b",
+          "parameters": "13.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "34GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "42%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "deepcoder",
+    "tags": [],
+    "parameter_sizes": [
+      "14b",
+      "1.5b"
+    ],
+    "models": [
+      {
+        "name": "deepcoder:1.5b",
+        "size": "9.0GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "deepcoder:1.5b",
+          "parameters": "1.5B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "4GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "33%"
+        }
+      },
+      {
+        "name": "deepcoder:14b",
+        "size": "1.1GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "deepcoder:14b",
+          "parameters": "14.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "36GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "45%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "mistral-small3.1",
+    "tags": [
+      "tools",
+      "vision"
+    ],
+    "parameter_sizes": [
+      "24b"
+    ],
+    "models": [
+      {
+        "name": "1:24b",
+        "size": "15GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "1:24b",
+          "parameters": "24.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "62GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "78%"
+        }
+      },
+      {
+        "name": "mistral-small3.1:24b",
+        "size": "15GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "mistral-small3.1:24b",
+          "parameters": "24.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "62GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "78%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "codegeex4",
+    "tags": [],
+    "parameter_sizes": [
+      "9b"
+    ],
+    "models": [
+      {
+        "name": "codegeex4:9b",
+        "size": "5.5GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "codegeex4:9b",
+          "parameters": "9.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "23GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "96%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "aya",
+    "tags": [],
+    "parameter_sizes": [
+      "8b",
+      "35b"
+    ],
+    "models": [
+      {
+        "name": "aya:8b",
+        "size": "4.8GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "aya:8b",
+          "parameters": "8.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "21GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "88%"
+        }
+      },
+      {
+        "name": "aya:35b",
+        "size": "4.8GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "aya:35b",
+          "parameters": "35.0B",
+          "gpuCount": 2,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "91GB",
+          "pricePerHour": 3.2,
+          "vramPerGpu": "46GB",
+          "memoryUtilization": "57%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "granite3.3",
+    "tags": [
+      "tools"
+    ],
+    "parameter_sizes": [
+      "2b",
+      "8b"
+    ],
+    "models": [
+      {
+        "name": "3:2b",
+        "size": "4.9GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "3:2b",
+          "parameters": "2.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "5GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "42%"
+        }
+      },
+      {
+        "name": "3:8b",
+        "size": "1.5GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "3:8b",
+          "parameters": "8.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "21GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "88%"
+        }
+      },
+      {
+        "name": "granite3.3:2b",
+        "size": "4.9GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "granite3.3:2b",
+          "parameters": "2.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "5GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "42%"
+        }
+      },
+      {
+        "name": "granite3.3:8b",
+        "size": "1.5GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "granite3.3:8b",
+          "parameters": "8.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "21GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "88%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "mistral-large",
+    "tags": [
+      "tools"
+    ],
+    "parameter_sizes": [
+      "123b"
+    ],
+    "models": [
+      {
+        "name": "mistral-large:123b",
+        "size": "73GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "mistral-large:123b",
+          "parameters": "123.0B",
+          "gpuCount": 4,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "320GB",
+          "pricePerHour": 6.4,
+          "vramPerGpu": "80GB",
+          "memoryUtilization": "100%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "stable-code",
+    "tags": [],
+    "parameter_sizes": [
+      "3b"
+    ],
+    "models": [
+      {
+        "name": "stable-code:3b",
+        "size": "1.6GB",
+        "context": "16K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "stable-code:3b",
+          "parameters": "3.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "8GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "67%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "glm4",
+    "tags": [],
+    "parameter_sizes": [
+      "9b"
+    ],
+    "models": [
+      {
+        "name": "glm4:9b",
+        "size": "5.5GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "glm4:9b",
+          "parameters": "9.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "23GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "96%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "cogito",
+    "tags": [
+      "tools"
+    ],
+    "parameter_sizes": [
+      "3b",
+      "8b",
+      "14b",
+      "32b",
+      "70b"
+    ],
+    "models": [
+      {
+        "name": "cogito:3b",
+        "size": "4.9GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "cogito:3b",
+          "parameters": "3.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "8GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "67%"
+        }
+      },
+      {
+        "name": "cogito:14b",
+        "size": "4.9GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "cogito:14b",
+          "parameters": "14.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "36GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "45%"
+        }
+      },
+      {
+        "name": "cogito:70b",
+        "size": "20GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "cogito:70b",
+          "parameters": "70.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "182GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "61GB",
+          "memoryUtilization": "76%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "cogito:32b",
+        "size": "9.0GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "cogito:32b",
+          "parameters": "32.0B",
+          "gpuCount": 2,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "83GB",
+          "pricePerHour": 3.2,
+          "vramPerGpu": "42GB",
+          "memoryUtilization": "52%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "cogito:8b",
+        "size": "2.2GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "cogito:8b",
+          "parameters": "8.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "21GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "88%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "tinydolphin",
+    "tags": [],
+    "parameter_sizes": [
+      "1.1b"
+    ],
+    "models": [
+      {
+        "name": "tinydolphin:1.1b",
+        "size": "637MB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "tinydolphin:1.1b",
+          "parameters": "1.1B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "3GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "25%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "nous-hermes2",
+    "tags": [],
+    "parameter_sizes": [
+      "10.7b",
+      "34b"
+    ],
+    "models": [
+      {
+        "name": "nous-hermes2:34b",
+        "size": "6.1GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "nous-hermes2:34b",
+          "parameters": "34.0B",
+          "gpuCount": 2,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "88GB",
+          "pricePerHour": 3.2,
+          "vramPerGpu": "44GB",
+          "memoryUtilization": "55%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "nous-hermes2:10.7b",
+        "size": "6.1GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "nous-hermes2:10.7b",
+          "parameters": "10.7B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 5090",
+          "requiredVram": "28GB",
+          "pricePerHour": 0.68,
+          "memoryUtilization": "88%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "qwen2-math",
+    "tags": [],
+    "parameter_sizes": [
+      "1.5b",
+      "7b",
+      "72b"
+    ],
+    "models": [
+      {
+        "name": "qwen2-math:1.5b",
+        "size": "4.4GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen2-math:1.5b",
+          "parameters": "1.5B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "4GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "33%"
+        }
+      },
+      {
+        "name": "qwen2-math:7b",
+        "size": "935MB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen2-math:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      },
+      {
+        "name": "qwen2-math:72b",
+        "size": "4.4GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "qwen2-math:72b",
+          "parameters": "72.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "187GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "63GB",
+          "memoryUtilization": "79%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "magistral",
+    "tags": [
+      "tools",
+      "thinking"
+    ],
+    "parameter_sizes": [
+      "24b"
+    ],
+    "models": [
+      {
+        "name": "magistral:24b",
+        "size": "14GB",
+        "context": "39K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "magistral:24b",
+          "parameters": "24.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "62GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "78%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "command-r-plus",
+    "tags": [
+      "tools"
+    ],
+    "parameter_sizes": [
+      "104b"
+    ],
+    "models": [
+      {
+        "name": "command-r-plus:104b",
+        "size": "59GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "command-r-plus:104b",
+          "parameters": "104.0B",
+          "gpuCount": 4,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "270GB",
+          "pricePerHour": 6.4,
+          "vramPerGpu": "68GB",
+          "memoryUtilization": "85%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "wizardcoder",
+    "tags": [],
+    "parameter_sizes": [
+      "33b"
+    ],
+    "models": [
+      {
+        "name": "wizardcoder:33b",
+        "size": "3.8GB",
+        "context": "16K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "wizardcoder:33b",
+          "parameters": "33.0B",
+          "gpuCount": 2,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "86GB",
+          "pricePerHour": 3.2,
+          "vramPerGpu": "43GB",
+          "memoryUtilization": "54%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "bakllava",
+    "tags": [
+      "vision"
+    ],
+    "parameter_sizes": [
+      "7b"
+    ],
+    "models": [
+      {
+        "name": "bakllava:7b",
+        "size": "4.7GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "bakllava:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "neural-chat",
+    "tags": [],
+    "parameter_sizes": [
+      "7b"
+    ],
+    "models": [
+      {
+        "name": "neural-chat:7b",
+        "size": "4.1GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "neural-chat:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "granite3.2-vision",
+    "tags": [
+      "tools",
+      "vision"
+    ],
+    "parameter_sizes": [
+      "2b"
+    ],
+    "models": [
+      {
+        "name": "granite3.2-vision:2b",
+        "size": "2.4GB",
+        "context": "16K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "granite3.2-vision:2b",
+          "parameters": "2.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "5GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "42%"
+        }
+      },
+      {
+        "name": "2-vision:2b",
+        "size": "2.4GB",
+        "context": "16K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "2-vision:2b",
+          "parameters": "2.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "5GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "42%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "stablelm2",
+    "tags": [],
+    "parameter_sizes": [
+      "1.6b",
+      "12b"
+    ],
+    "models": [
+      {
+        "name": "stablelm2:1.6b",
+        "size": "983MB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "stablelm2:1.6b",
+          "parameters": "1.6B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "4GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "33%"
+        }
+      },
+      {
+        "name": "stablelm2:12b",
+        "size": "983MB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "stablelm2:12b",
+          "parameters": "12.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 40GB",
+          "requiredVram": "31GB",
+          "pricePerHour": 1.28,
+          "memoryUtilization": "78%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "granite3.2",
+    "tags": [
+      "tools"
+    ],
+    "parameter_sizes": [
+      "2b",
+      "8b"
+    ],
+    "models": [
+      {
+        "name": "2:8b",
+        "size": "1.5GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "2:8b",
+          "parameters": "8.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "21GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "88%"
+        }
+      },
+      {
+        "name": "granite3.2:8b",
+        "size": "1.5GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "granite3.2:8b",
+          "parameters": "8.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "21GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "88%"
+        }
+      },
+      {
+        "name": "2:2b",
+        "size": "4.9GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "2:2b",
+          "parameters": "2.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "5GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "42%"
+        }
+      },
+      {
+        "name": "granite3.2:2b",
+        "size": "4.9GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "granite3.2:2b",
+          "parameters": "2.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "5GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "42%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "sqlcoder",
+    "tags": [],
+    "parameter_sizes": [
+      "7b",
+      "15b"
+    ],
+    "models": [
+      {
+        "name": "sqlcoder:7b",
+        "size": "4.1GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "sqlcoder:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      },
+      {
+        "name": "sqlcoder:15b",
+        "size": "4.1GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "sqlcoder:15b",
+          "parameters": "15.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "39GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "49%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "llama3-chatqa",
+    "tags": [],
+    "parameter_sizes": [
+      "8b",
+      "70b"
+    ],
+    "models": [
+      {
+        "name": "llama3-chatqa:8b",
+        "size": "4.7GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "llama3-chatqa:8b",
+          "parameters": "8.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "21GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "88%"
+        }
+      },
+      {
+        "name": "llama3-chatqa:70b",
+        "size": "4.7GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "llama3-chatqa:70b",
+          "parameters": "70.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "182GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "61GB",
+          "memoryUtilization": "76%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "reflection",
+    "tags": [],
+    "parameter_sizes": [
+      "70b"
+    ],
+    "models": [
+      {
+        "name": "reflection:70b",
+        "size": "40GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "reflection:70b",
+          "parameters": "70.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "182GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "61GB",
+          "memoryUtilization": "76%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "wizard-math",
+    "tags": [],
+    "parameter_sizes": [
+      "7b",
+      "13b",
+      "70b"
+    ],
+    "models": [
+      {
+        "name": "wizard-math:70b",
+        "size": "7.4GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "wizard-math:70b",
+          "parameters": "70.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "182GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "61GB",
+          "memoryUtilization": "76%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "wizard-math:7b",
+        "size": "4.1GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "wizard-math:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      },
+      {
+        "name": "wizard-math:13b",
+        "size": "4.1GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "wizard-math:13b",
+          "parameters": "13.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "34GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "42%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "phi4-reasoning",
+    "tags": [],
+    "parameter_sizes": [
+      "14b"
+    ],
+    "models": [
+      {
+        "name": "phi4-reasoning:14b",
+        "size": "11GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "phi4-reasoning:14b",
+          "parameters": "14.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "36GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "45%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "llama3-gradient",
+    "tags": [],
+    "parameter_sizes": [
+      "8b",
+      "70b"
+    ],
+    "models": [
+      {
+        "name": "llama3-gradient:70b",
+        "size": "4.7GB",
+        "recommendedGPU": {
+          "success": true,
+          "model": "llama3-gradient:70b",
+          "parameters": "70.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "182GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "61GB",
+          "memoryUtilization": "76%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "llama3-gradient:8b",
+        "size": "4.7GB",
+        "recommendedGPU": {
+          "success": true,
+          "model": "llama3-gradient:8b",
+          "parameters": "8.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "21GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "88%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "granite3-dense",
+    "tags": [
+      "tools"
+    ],
+    "parameter_sizes": [
+      "2b",
+      "8b"
+    ],
+    "models": [
+      {
+        "name": "granite3-dense:2b",
+        "size": "1.6GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "granite3-dense:2b",
+          "parameters": "2.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "5GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "42%"
+        }
+      },
+      {
+        "name": "granite3-dense:8b",
+        "size": "1.6GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "granite3-dense:8b",
+          "parameters": "8.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "21GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "88%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "llava-phi3",
+    "tags": [
+      "vision"
+    ],
+    "parameter_sizes": [
+      "3.8b"
+    ],
+    "models": [
+      {
+        "name": "llava-phi3:3.8b",
+        "size": "2.9GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "llava-phi3:3.8b",
+          "parameters": "3.8B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "10GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "83%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "granite3.1-dense",
+    "tags": [
+      "tools"
+    ],
+    "parameter_sizes": [
+      "2b",
+      "8b"
+    ],
+    "models": [
+      {
+        "name": "1-dense:2b",
+        "size": "5.0GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "1-dense:2b",
+          "parameters": "2.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "5GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "42%"
+        }
+      },
+      {
+        "name": "1-dense:8b",
+        "size": "1.6GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "1-dense:8b",
+          "parameters": "8.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "21GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "88%"
+        }
+      },
+      {
+        "name": "granite3.1-dense:8b",
+        "size": "1.6GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "granite3.1-dense:8b",
+          "parameters": "8.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "21GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "88%"
+        }
+      },
+      {
+        "name": "granite3.1-dense:2b",
+        "size": "5.0GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "granite3.1-dense:2b",
+          "parameters": "2.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "5GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "42%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "samantha-mistral",
+    "tags": [],
+    "parameter_sizes": [
+      "7b"
+    ],
+    "models": [
+      {
+        "name": "samantha-mistral:7b",
+        "size": "4.1GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "samantha-mistral:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "dolphincoder",
+    "tags": [],
+    "parameter_sizes": [
+      "7b",
+      "15b"
+    ],
+    "models": [
+      {
+        "name": "dolphincoder:7b",
+        "size": "4.2GB",
+        "context": "16K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "dolphincoder:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      },
+      {
+        "name": "dolphincoder:15b",
+        "size": "4.2GB",
+        "context": "16K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "dolphincoder:15b",
+          "parameters": "15.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "39GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "49%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "exaone3.5",
+    "tags": [],
+    "parameter_sizes": [
+      "2.4b",
+      "32b",
+      "7.8b"
+    ],
+    "models": [
+      {
+        "name": "5:32b",
+        "size": "4.8GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "5:32b",
+          "parameters": "32.0B",
+          "gpuCount": 2,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "83GB",
+          "pricePerHour": 3.2,
+          "vramPerGpu": "42GB",
+          "memoryUtilization": "52%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "5:7.8b",
+        "size": "1.6GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "5:7.8b",
+          "parameters": "7.8B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "20GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "83%"
+        }
+      },
+      {
+        "name": "exaone3.5:32b",
+        "size": "4.8GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "exaone3.5:32b",
+          "parameters": "32.0B",
+          "gpuCount": 2,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "83GB",
+          "pricePerHour": 3.2,
+          "vramPerGpu": "42GB",
+          "memoryUtilization": "52%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "5:2.4b",
+        "size": "4.8GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "5:2.4b",
+          "parameters": "2.4B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "6GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "50%"
+        }
+      },
+      {
+        "name": "exaone3.5:7.8b",
+        "size": "1.6GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "exaone3.5:7.8b",
+          "parameters": "7.8B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "20GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "83%"
+        }
+      },
+      {
+        "name": "exaone3.5:2.4b",
+        "size": "4.8GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "exaone3.5:2.4b",
+          "parameters": "2.4B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "6GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "50%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "nous-hermes",
+    "tags": [],
+    "parameter_sizes": [
+      "7b",
+      "13b"
+    ],
+    "models": [
+      {
+        "name": "nous-hermes:7b",
+        "size": "3.8GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "nous-hermes:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      },
+      {
+        "name": "nous-hermes:13b",
+        "size": "3.8GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "nous-hermes:13b",
+          "parameters": "13.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "34GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "42%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "xwinlm",
+    "tags": [],
+    "parameter_sizes": [
+      "7b",
+      "13b"
+    ],
+    "models": [
+      {
+        "name": "xwinlm:13b",
+        "size": "3.8GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "xwinlm:13b",
+          "parameters": "13.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "34GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "42%"
+        }
+      },
+      {
+        "name": "xwinlm:7b",
+        "size": "3.8GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "xwinlm:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "starling-lm",
+    "tags": [],
+    "parameter_sizes": [
+      "7b"
+    ],
+    "models": [
+      {
+        "name": "starling-lm:7b",
+        "size": "4.1GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "starling-lm:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "phind-codellama",
+    "tags": [],
+    "parameter_sizes": [
+      "34b"
+    ],
+    "models": [
+      {
+        "name": "phind-codellama:34b",
+        "size": "19GB",
+        "context": "16K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "phind-codellama:34b",
+          "parameters": "34.0B",
+          "gpuCount": 2,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "88GB",
+          "pricePerHour": 3.2,
+          "vramPerGpu": "44GB",
+          "memoryUtilization": "55%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "nemotron-mini",
+    "tags": [
+      "tools"
+    ],
+    "parameter_sizes": [
+      "4b"
+    ],
+    "models": [
+      {
+        "name": "nemotron-mini:4b",
+        "size": "2.7GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "nemotron-mini:4b",
+          "parameters": "4.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "10GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "83%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "yi-coder",
+    "tags": [],
+    "parameter_sizes": [
+      "1.5b",
+      "9b"
+    ],
+    "models": [
+      {
+        "name": "yi-coder:1.5b",
+        "size": "5.0GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "yi-coder:1.5b",
+          "parameters": "1.5B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "4GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "33%"
+        }
+      },
+      {
+        "name": "yi-coder:9b",
+        "size": "866MB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "yi-coder:9b",
+          "parameters": "9.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "23GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "96%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "solar",
+    "tags": [],
+    "parameter_sizes": [
+      "10.7b"
+    ],
+    "models": [
+      {
+        "name": "solar:10.7b",
+        "size": "6.1GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "solar:10.7b",
+          "parameters": "10.7B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 5090",
+          "requiredVram": "28GB",
+          "pricePerHour": 0.68,
+          "memoryUtilization": "88%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "athene-v2",
+    "tags": [
+      "tools"
+    ],
+    "parameter_sizes": [
+      "72b"
+    ],
+    "models": [
+      {
+        "name": "athene-v2:72b",
+        "size": "47GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "athene-v2:72b",
+          "parameters": "72.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "187GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "63GB",
+          "memoryUtilization": "79%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "deepscaler",
+    "tags": [],
+    "parameter_sizes": [
+      "1.5b"
+    ],
+    "models": [
+      {
+        "name": "deepscaler:1.5b",
+        "size": "3.6GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "deepscaler:1.5b",
+          "parameters": "1.5B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "4GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "33%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "yarn-llama2",
+    "tags": [],
+    "parameter_sizes": [
+      "7b",
+      "13b"
+    ],
+    "models": [
+      {
+        "name": "yarn-llama2:7b",
+        "size": "3.8GB",
+        "context": "64K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "yarn-llama2:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      },
+      {
+        "name": "yarn-llama2:13b",
+        "size": "3.8GB",
+        "context": "64K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "yarn-llama2:13b",
+          "parameters": "13.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "34GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "42%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "internlm2",
+    "tags": [],
+    "parameter_sizes": [
+      "7b",
+      "1.8b",
+      "20b"
+    ],
+    "models": [
+      {
+        "name": "internlm2:1.8b",
+        "size": "4.5GB",
+        "context": "256K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "internlm2:1.8b",
+          "parameters": "1.8B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "5GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "42%"
+        }
+      },
+      {
+        "name": "internlm2:20b",
+        "size": "4.5GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "internlm2:20b",
+          "parameters": "20.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "52GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "65%"
+        }
+      },
+      {
+        "name": "internlm2:7b",
+        "size": "1.1GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "internlm2:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "dolphin-phi",
+    "tags": [],
+    "parameter_sizes": [
+      "2.7b"
+    ],
+    "models": [
+      {
+        "name": "dolphin-phi:2.7b",
+        "size": "1.6GB",
+        "context": "2K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "dolphin-phi:2.7b",
+          "parameters": "2.7B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "7GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "58%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "falcon",
+    "tags": [],
+    "parameter_sizes": [
+      "7b",
+      "40b",
+      "180b"
+    ],
+    "models": [
+      {
+        "name": "falcon:180b",
+        "size": "24GB",
+        "context": "2K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "falcon:180b",
+          "parameters": "180.0B",
+          "gpuCount": 6,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "468GB",
+          "pricePerHour": 9.600000000000001,
+          "vramPerGpu": "78GB",
+          "memoryUtilization": "98%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "falcon:7b",
+        "size": "4.2GB",
+        "context": "2K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "falcon:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      },
+      {
+        "name": "falcon:40b",
+        "size": "4.2GB",
+        "context": "2K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "falcon:40b",
+          "parameters": "40.0B",
+          "gpuCount": 2,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "104GB",
+          "pricePerHour": 3.2,
+          "vramPerGpu": "52GB",
+          "memoryUtilization": "65%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "nemotron",
+    "tags": [
+      "tools"
+    ],
+    "parameter_sizes": [
+      "70b"
+    ],
+    "models": [
+      {
+        "name": "nemotron:70b",
+        "size": "43GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "nemotron:70b",
+          "parameters": "70.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "182GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "61GB",
+          "memoryUtilization": "76%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "llama3-groq-tool-use",
+    "tags": [
+      "tools"
+    ],
+    "parameter_sizes": [
+      "8b",
+      "70b"
+    ],
+    "models": [
+      {
+        "name": "llama3-groq-tool-use:70b",
+        "size": "4.7GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "llama3-groq-tool-use:70b",
+          "parameters": "70.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "182GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "61GB",
+          "memoryUtilization": "76%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "llama3-groq-tool-use:8b",
+        "size": "4.7GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "llama3-groq-tool-use:8b",
+          "parameters": "8.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "21GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "88%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "wizardlm-uncensored",
+    "tags": [],
+    "parameter_sizes": [
+      "13b"
+    ],
+    "models": [
+      {
+        "name": "wizardlm-uncensored:13b",
+        "size": "7.4GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "wizardlm-uncensored:13b",
+          "parameters": "13.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "34GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "42%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "orca2",
+    "tags": [],
+    "parameter_sizes": [
+      "7b",
+      "13b"
+    ],
+    "models": [
+      {
+        "name": "orca2:7b",
+        "size": "3.8GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "orca2:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      },
+      {
+        "name": "orca2:13b",
+        "size": "3.8GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "orca2:13b",
+          "parameters": "13.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "34GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "42%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "aya-expanse",
+    "tags": [
+      "tools"
+    ],
+    "parameter_sizes": [
+      "8b",
+      "32b"
+    ],
+    "models": [
+      {
+        "name": "aya-expanse:8b",
+        "size": "5.1GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "aya-expanse:8b",
+          "parameters": "8.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "21GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "88%"
+        }
+      },
+      {
+        "name": "aya-expanse:32b",
+        "size": "5.1GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "aya-expanse:32b",
+          "parameters": "32.0B",
+          "gpuCount": 2,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "83GB",
+          "pricePerHour": 3.2,
+          "vramPerGpu": "42GB",
+          "memoryUtilization": "52%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "stable-beluga",
+    "tags": [],
+    "parameter_sizes": [
+      "7b",
+      "13b",
+      "70b"
+    ],
+    "models": [
+      {
+        "name": "stable-beluga:13b",
+        "size": "3.8GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "stable-beluga:13b",
+          "parameters": "13.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "34GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "42%"
+        }
+      },
+      {
+        "name": "stable-beluga:7b",
+        "size": "3.8GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "stable-beluga:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      },
+      {
+        "name": "stable-beluga:70b",
+        "size": "7.4GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "stable-beluga:70b",
+          "parameters": "70.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "182GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "61GB",
+          "memoryUtilization": "76%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "smallthinker",
+    "tags": [],
+    "parameter_sizes": [
+      "3b"
+    ],
+    "models": [
+      {
+        "name": "smallthinker:3b",
+        "size": "3.6GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "smallthinker:3b",
+          "parameters": "3.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "8GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "67%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "nous-hermes2-mixtral",
+    "tags": [],
+    "parameter_sizes": [
+      "8x7b"
+    ],
+    "models": [
+      {
+        "name": "nous-hermes2-mixtral:8x7b",
+        "size": "26GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "nous-hermes2-mixtral:8x7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "opencoder",
+    "tags": [],
+    "parameter_sizes": [
+      "1.5b",
+      "8b"
+    ],
+    "models": [
+      {
+        "name": "opencoder:1.5b",
+        "size": "4.7GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "opencoder:1.5b",
+          "parameters": "1.5B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "4GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "33%"
+        }
+      },
+      {
+        "name": "opencoder:8b",
+        "size": "1.4GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "opencoder:8b",
+          "parameters": "8.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "21GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "88%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "exaone-deep",
+    "tags": [],
+    "parameter_sizes": [
+      "2.4b",
+      "32b",
+      "7.8b"
+    ],
+    "models": [
+      {
+        "name": "exaone-deep:7.8b",
+        "size": "1.6GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "exaone-deep:7.8b",
+          "parameters": "7.8B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "20GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "83%"
+        }
+      },
+      {
+        "name": "exaone-deep:32b",
+        "size": "4.8GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "exaone-deep:32b",
+          "parameters": "32.0B",
+          "gpuCount": 2,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "83GB",
+          "pricePerHour": 3.2,
+          "vramPerGpu": "42GB",
+          "memoryUtilization": "52%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "exaone-deep:2.4b",
+        "size": "4.8GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "exaone-deep:2.4b",
+          "parameters": "2.4B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "6GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "50%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "falcon3",
+    "tags": [],
+    "parameter_sizes": [
+      "10b",
+      "1b",
+      "3b",
+      "7b"
+    ],
+    "models": [
+      {
+        "name": "falcon3:3b",
+        "size": "1.8GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "falcon3:3b",
+          "parameters": "3.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "8GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "67%"
+        }
+      },
+      {
+        "name": "falcon3:7b",
+        "size": "2.0GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "falcon3:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      },
+      {
+        "name": "falcon3:10b",
+        "size": "4.6GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "falcon3:10b",
+          "parameters": "10.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 5090",
+          "requiredVram": "26GB",
+          "pricePerHour": 0.68,
+          "memoryUtilization": "81%"
+        }
+      },
+      {
+        "name": "falcon3:1b",
+        "size": "4.6GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "falcon3:1b",
+          "parameters": "1.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "3GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "25%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "meditron",
+    "tags": [],
+    "parameter_sizes": [
+      "7b",
+      "70b"
+    ],
+    "models": [
+      {
+        "name": "meditron:70b",
+        "size": "3.8GB",
+        "context": "2K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "meditron:70b",
+          "parameters": "70.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "182GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "61GB",
+          "memoryUtilization": "76%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "meditron:7b",
+        "size": "3.8GB",
+        "context": "2K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "meditron:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "deepseek-v2.5",
+    "tags": [],
+    "parameter_sizes": [
+      "236b"
+    ],
+    "models": [
+      {
+        "name": "deepseek-v2.5:236b",
+        "size": "133GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "deepseek-v2.5:236b",
+          "parameters": "236.0B",
+          "gpuCount": 8,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "614GB",
+          "pricePerHour": 12.8,
+          "vramPerGpu": "77GB",
+          "memoryUtilization": "96%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "5:236b",
+        "size": "133GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "5:236b",
+          "parameters": "236.0B",
+          "gpuCount": 8,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "614GB",
+          "pricePerHour": 12.8,
+          "vramPerGpu": "77GB",
+          "memoryUtilization": "96%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "medllama2",
+    "tags": [],
+    "parameter_sizes": [
+      "7b"
+    ],
+    "models": [
+      {
+        "name": "medllama2:7b",
+        "size": "3.8GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "medllama2:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "granite3-moe",
+    "tags": [
+      "tools"
+    ],
+    "parameter_sizes": [
+      "1b",
+      "3b"
+    ],
+    "models": [
+      {
+        "name": "granite3-moe:3b",
+        "size": "822MB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "granite3-moe:3b",
+          "parameters": "3.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "8GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "67%"
+        }
+      },
+      {
+        "name": "granite3-moe:1b",
+        "size": "822MB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "granite3-moe:1b",
+          "parameters": "1.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "3GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "25%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "yarn-mistral",
+    "tags": [],
+    "parameter_sizes": [
+      "7b"
+    ],
+    "models": [
+      {
+        "name": "yarn-mistral:7b",
+        "size": "4.1GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "yarn-mistral:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "granite3.1-moe",
+    "tags": [
+      "tools"
+    ],
+    "parameter_sizes": [
+      "1b",
+      "3b"
+    ],
+    "models": [
+      {
+        "name": "1-moe:3b",
+        "size": "1.4GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "1-moe:3b",
+          "parameters": "3.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "8GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "67%"
+        }
+      },
+      {
+        "name": "1-moe:1b",
+        "size": "2.0GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "1-moe:1b",
+          "parameters": "1.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "3GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "25%"
+        }
+      },
+      {
+        "name": "granite3.1-moe:1b",
+        "size": "2.0GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "granite3.1-moe:1b",
+          "parameters": "1.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "3GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "25%"
+        }
+      },
+      {
+        "name": "granite3.1-moe:3b",
+        "size": "1.4GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "granite3.1-moe:3b",
+          "parameters": "3.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "8GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "67%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "r1-1776",
+    "tags": [],
+    "parameter_sizes": [
+      "70b",
+      "671b"
+    ],
+    "models": [
+      {
+        "name": "r1-1776:70b",
+        "size": "43GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "r1-1776:70b",
+          "parameters": "70.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "182GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "61GB",
+          "memoryUtilization": "76%",
+          "tensorParallelism": true
+        }
+      },
+      {
+        "name": "r1-1776:671b",
+        "size": "43GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "r1-1776:671b",
+          "parameters": "671.0B",
+          "gpuCount": 22,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "1745GB",
+          "pricePerHour": 35.2,
+          "vramPerGpu": "80GB",
+          "memoryUtilization": "100%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "nexusraven",
+    "tags": [],
+    "parameter_sizes": [
+      "13b"
+    ],
+    "models": [
+      {
+        "name": "nexusraven:13b",
+        "size": "7.4GB",
+        "context": "16K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "nexusraven:13b",
+          "parameters": "13.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "34GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "42%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "shieldgemma",
+    "tags": [],
+    "parameter_sizes": [
+      "2b",
+      "9b",
+      "27b"
+    ],
+    "models": [
+      {
+        "name": "shieldgemma:9b",
+        "size": "1.7GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "shieldgemma:9b",
+          "parameters": "9.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "23GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "96%"
+        }
+      },
+      {
+        "name": "shieldgemma:27b",
+        "size": "5.8GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "shieldgemma:27b",
+          "parameters": "27.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "70GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "88%"
+        }
+      },
+      {
+        "name": "shieldgemma:2b",
+        "size": "5.8GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "shieldgemma:2b",
+          "parameters": "2.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "5GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "42%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "llama-guard3",
+    "tags": [],
+    "parameter_sizes": [
+      "1b",
+      "8b"
+    ],
+    "models": [
+      {
+        "name": "llama-guard3:8b",
+        "size": "1.6GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "llama-guard3:8b",
+          "parameters": "8.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "21GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "88%"
+        }
+      },
+      {
+        "name": "llama-guard3:1b",
+        "size": "4.9GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "llama-guard3:1b",
+          "parameters": "1.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "3GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "25%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "codeup",
+    "tags": [],
+    "parameter_sizes": [
+      "13b"
+    ],
+    "models": [
+      {
+        "name": "codeup:13b",
+        "size": "7.4GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "codeup:13b",
+          "parameters": "13.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "34GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "42%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "everythinglm",
+    "tags": [],
+    "parameter_sizes": [
+      "13b"
+    ],
+    "models": [
+      {
+        "name": "everythinglm:13b",
+        "size": "7.4GB",
+        "context": "16K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "everythinglm:13b",
+          "parameters": "13.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "34GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "42%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "reader-lm",
+    "tags": [],
+    "parameter_sizes": [
+      "0.5b",
+      "1.5b"
+    ],
+    "models": [
+      {
+        "name": "reader-lm:0.5b",
+        "size": "935MB",
+        "context": "250K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "reader-lm:0.5b",
+          "parameters": "0.5B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "1GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "8%"
+        }
+      },
+      {
+        "name": "reader-lm:1.5b",
+        "size": "352MB",
+        "context": "250K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "reader-lm:1.5b",
+          "parameters": "1.5B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "4GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "33%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "dbrx",
+    "tags": [],
+    "parameter_sizes": [
+      "132b"
+    ],
+    "models": [
+      {
+        "name": "dbrx:132b",
+        "size": "74GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "dbrx:132b",
+          "parameters": "132.0B",
+          "gpuCount": 5,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "343GB",
+          "pricePerHour": 8,
+          "vramPerGpu": "69GB",
+          "memoryUtilization": "86%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "stablelm-zephyr",
+    "tags": [],
+    "parameter_sizes": [
+      "3b"
+    ],
+    "models": [
+      {
+        "name": "stablelm-zephyr:3b",
+        "size": "1.6GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "stablelm-zephyr:3b",
+          "parameters": "3.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "8GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "67%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "mathstral",
+    "tags": [],
+    "parameter_sizes": [
+      "7b"
+    ],
+    "models": [
+      {
+        "name": "mathstral:7b",
+        "size": "4.1GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "mathstral:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "solar-pro",
+    "tags": [],
+    "parameter_sizes": [
+      "22b"
+    ],
+    "models": [
+      {
+        "name": "solar-pro:22b",
+        "size": "13GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "solar-pro:22b",
+          "parameters": "22.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "57GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "71%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "command-r7b",
+    "tags": [
+      "tools"
+    ],
+    "parameter_sizes": [
+      "7b"
+    ],
+    "models": [
+      {
+        "name": "command-r7b:7b",
+        "size": "5.1GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "command-r7b:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "marco-o1",
+    "tags": [],
+    "parameter_sizes": [
+      "7b"
+    ],
+    "models": [
+      {
+        "name": "marco-o1:7b",
+        "size": "4.7GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "marco-o1:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "duckdb-nsql",
+    "tags": [],
+    "parameter_sizes": [
+      "7b"
+    ],
+    "models": [
+      {
+        "name": "duckdb-nsql:7b",
+        "size": "3.8GB",
+        "context": "16K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "duckdb-nsql:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "falcon2",
+    "tags": [],
+    "parameter_sizes": [
+      "11b"
+    ],
+    "models": [
+      {
+        "name": "falcon2:11b",
+        "size": "6.4GB",
+        "context": "2K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "falcon2:11b",
+          "parameters": "11.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 40GB",
+          "requiredVram": "29GB",
+          "pricePerHour": 1.28,
+          "memoryUtilization": "72%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "magicoder",
+    "tags": [],
+    "parameter_sizes": [
+      "7b"
+    ],
+    "models": [
+      {
+        "name": "magicoder:7b",
+        "size": "3.8GB",
+        "context": "16K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "magicoder:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "mistrallite",
+    "tags": [],
+    "parameter_sizes": [
+      "7b"
+    ],
+    "models": [
+      {
+        "name": "mistrallite:7b",
+        "size": "4.1GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "mistrallite:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "codebooga",
+    "tags": [],
+    "parameter_sizes": [
+      "34b"
+    ],
+    "models": [
+      {
+        "name": "codebooga:34b",
+        "size": "19GB",
+        "context": "16K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "codebooga:34b",
+          "parameters": "34.0B",
+          "gpuCount": 2,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "88GB",
+          "pricePerHour": 3.2,
+          "vramPerGpu": "44GB",
+          "memoryUtilization": "55%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "wizard-vicuna",
+    "tags": [],
+    "parameter_sizes": [
+      "13b"
+    ],
+    "models": [
+      {
+        "name": "wizard-vicuna:13b",
+        "size": "7.4GB",
+        "context": "2K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "wizard-vicuna:13b",
+          "parameters": "13.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "34GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "42%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "nuextract",
+    "tags": [],
+    "parameter_sizes": [
+      "3.8b"
+    ],
+    "models": [
+      {
+        "name": "nuextract:3.8b",
+        "size": "2.2GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "nuextract:3.8b",
+          "parameters": "3.8B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "10GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "83%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "bespoke-minicheck",
+    "tags": [],
+    "parameter_sizes": [
+      "7b"
+    ],
+    "models": [
+      {
+        "name": "bespoke-minicheck:7b",
+        "size": "4.7GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "bespoke-minicheck:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "tulu3",
+    "tags": [],
+    "parameter_sizes": [
+      "8b",
+      "70b"
+    ],
+    "models": [
+      {
+        "name": "tulu3:8b",
+        "size": "4.9GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "tulu3:8b",
+          "parameters": "8.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "21GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "88%"
+        }
+      },
+      {
+        "name": "tulu3:70b",
+        "size": "4.9GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "tulu3:70b",
+          "parameters": "70.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "182GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "61GB",
+          "memoryUtilization": "76%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "megadolphin",
+    "tags": [],
+    "parameter_sizes": [
+      "120b"
+    ],
+    "models": [
+      {
+        "name": "megadolphin:120b",
+        "size": "68GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "megadolphin:120b",
+          "parameters": "120.0B",
+          "gpuCount": 4,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "312GB",
+          "pricePerHour": 6.4,
+          "vramPerGpu": "78GB",
+          "memoryUtilization": "98%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "phi4-mini-reasoning",
+    "tags": [],
+    "parameter_sizes": [
+      "3.8b"
+    ],
+    "models": [
+      {
+        "name": "phi4-mini-reasoning:3.8b",
+        "size": "3.2GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "phi4-mini-reasoning:3.8b",
+          "parameters": "3.8B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "10GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "83%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "notux",
+    "tags": [],
+    "parameter_sizes": [
+      "8x7b"
+    ],
+    "models": [
+      {
+        "name": "notux:8x7b",
+        "size": "26GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "notux:8x7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "open-orca-platypus2",
+    "tags": [],
+    "parameter_sizes": [
+      "13b"
+    ],
+    "models": [
+      {
+        "name": "open-orca-platypus2:13b",
+        "size": "7.4GB",
+        "context": "4K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "open-orca-platypus2:13b",
+          "parameters": "13.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "34GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "42%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "notus",
+    "tags": [],
+    "parameter_sizes": [
+      "7b"
+    ],
+    "models": [
+      {
+        "name": "notus:7b",
+        "size": "4.1GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "notus:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "firefunction-v2",
+    "tags": [
+      "tools"
+    ],
+    "parameter_sizes": [
+      "70b"
+    ],
+    "models": [
+      {
+        "name": "firefunction-v2:70b",
+        "size": "40GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "firefunction-v2:70b",
+          "parameters": "70.0B",
+          "gpuCount": 3,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "182GB",
+          "pricePerHour": 4.800000000000001,
+          "vramPerGpu": "61GB",
+          "memoryUtilization": "76%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "granite3-guardian",
+    "tags": [],
+    "parameter_sizes": [
+      "2b",
+      "8b"
+    ],
+    "models": [
+      {
+        "name": "granite3-guardian:2b",
+        "size": "2.7GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "granite3-guardian:2b",
+          "parameters": "2.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "5GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "42%"
+        }
+      },
+      {
+        "name": "granite3-guardian:8b",
+        "size": "2.7GB",
+        "context": "8K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "granite3-guardian:8b",
+          "parameters": "8.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "21GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "88%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "command-a",
+    "tags": [
+      "tools"
+    ],
+    "parameter_sizes": [
+      "111b"
+    ],
+    "models": [
+      {
+        "name": "command-a:111b",
+        "size": "67GB",
+        "context": "16K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "command-a:111b",
+          "parameters": "111.0B",
+          "gpuCount": 4,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "289GB",
+          "pricePerHour": 6.4,
+          "vramPerGpu": "73GB",
+          "memoryUtilization": "91%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "alfred",
+    "tags": [],
+    "parameter_sizes": [
+      "40b"
+    ],
+    "models": [
+      {
+        "name": "alfred:40b",
+        "size": "24GB",
+        "context": "2K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "alfred:40b",
+          "parameters": "40.0B",
+          "gpuCount": 2,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "104GB",
+          "pricePerHour": 3.2,
+          "vramPerGpu": "52GB",
+          "memoryUtilization": "65%",
+          "tensorParallelism": true
+        }
+      }
+    ]
+  },
+  {
+    "family": "sailor2",
+    "tags": [],
+    "parameter_sizes": [
+      "1b",
+      "8b",
+      "20b"
+    ],
+    "models": [
+      {
+        "name": "sailor2:20b",
+        "size": "5.2GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "sailor2:20b",
+          "parameters": "20.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "52GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "65%"
+        }
+      },
+      {
+        "name": "sailor2:8b",
+        "size": "1.1GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "sailor2:8b",
+          "parameters": "8.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "21GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "88%"
+        }
+      },
+      {
+        "name": "sailor2:1b",
+        "size": "5.2GB",
+        "context": "32K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "sailor2:1b",
+          "parameters": "1.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3060",
+          "requiredVram": "3GB",
+          "pricePerHour": 0.05,
+          "memoryUtilization": "25%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "command-r7b-arabic",
+    "tags": [
+      "tools"
+    ],
+    "parameter_sizes": [
+      "7b"
+    ],
+    "models": [
+      {
+        "name": "command-r7b-arabic:7b",
+        "size": "5.1GB",
+        "context": "16K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "command-r7b-arabic:7b",
+          "parameters": "7.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA 3090",
+          "requiredVram": "18GB",
+          "pricePerHour": 0.19,
+          "memoryUtilization": "75%"
+        }
+      }
+    ]
+  },
+  {
+    "family": "mistral-small3.2",
+    "tags": [
+      "tools",
+      "vision"
+    ],
+    "parameter_sizes": [
+      "24b"
+    ],
+    "models": [
+      {
+        "name": "2:24b",
+        "size": "15GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "2:24b",
+          "parameters": "24.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "62GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "78%"
+        }
+      },
+      {
+        "name": "mistral-small3.2:24b",
+        "size": "15GB",
+        "context": "128K",
+        "recommendedGPU": {
+          "success": true,
+          "model": "mistral-small3.2:24b",
+          "parameters": "24.0B",
+          "gpuCount": 1,
+          "gpuModel": "NVIDIA A100 80GB",
+          "requiredVram": "62GB",
+          "pricePerHour": 1.6,
+          "memoryUtilization": "78%"
+        }
+      }
+    ]
+  }
+]

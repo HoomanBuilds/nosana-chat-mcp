@@ -1,0 +1,416 @@
+/* Light Markdown Presentation Styles */
+/* A clean, minimal stylesheet for HTML converted from Markdown */
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap");
+:root {
+  /* Light color palette */
+  --secondary: #718096;
+  --light: #f7fafc;
+  --border: #e7e7e7;
+  --code-bg: #efefef;
+
+  --code-foreground: #fcaf61b8;
+  --primary: #1a202c;
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+
+  /* Typography */
+  --font-size-base: 1rem;
+  --font-size-sm: 0.875rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+
+  /* Borders */
+  --border-radius: 0.375rem;
+  --border-width: 1px;
+}
+.dark {
+  --code-bg: #141414f9;
+  --border: #232323;
+}
+/* Base styles */
+.markdown-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--space-xl);
+  color: var(--primary);
+  line-height: 1.7;
+  font-size: var(--font-size-base);
+  font-family:
+    "Space Grotesk",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+}
+
+/* Headings */
+.markdown-container h1 {
+  font-size: var(--font-size-3xl);
+  margin-top: var(--space-sm);
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-sm);
+  border-bottom: var(--border-width) solid var(--border);
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.markdown-container h2 {
+  font-size: var(--font-size-2xl);
+  margin-top: var(--space-xl);
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-xs);
+  border-bottom: var(--border-width) solid var(--border);
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.markdown-container h3 {
+  font-size: var(--font-size-xl);
+  margin-top: var(--space-lg);
+  margin-bottom: var(--space-sm);
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.markdown-container h4 {
+  font-size: var(--font-size-lg);
+  margin-top: var(--space-lg);
+  margin-bottom: var(--space-sm);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.markdown-container h5 {
+  font-size: var(--font-size-base);
+  margin-top: var(--space-md);
+  margin-bottom: var(--space-sm);
+  color: var(--secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.markdown-container h6 {
+  font-size: var(--font-size-sm);
+  margin-top: var(--space-md);
+  margin-bottom: var(--space-sm);
+  color: var(--secondary);
+  font-style: italic;
+}
+
+/* Paragraphs */
+.markdown-container p {
+  margin-bottom: var(--space-md);
+  line-height: 1.8;
+}
+
+/* Links */
+.markdown-container a {
+  font-weight: 200;
+  margin: 5px;
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(237, 237, 237, 0.5);
+  transition:
+    color 0.2s ease,
+    border-bottom 0.2s ease;
+  position: relative;
+}
+
+.markdown-container a:hover {
+  color: rgb(102, 145, 255);
+  border-bottom: 1px dashed rgb(102, 145, 255);
+}
+
+.markdown-container a::after {
+  content: "↗";
+  display: inline-block;
+  margin-left: 3px;
+  font-size: 0.75em;
+  opacity: 0.7;
+  transform: translateY(-0.25em);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.markdown-container a:hover::after {
+  opacity: 1;
+  transform: translateY(-0.25em) translateX(2px);
+}
+/* 
+.markdown-container a:hover {
+  color: #3182ce;
+  text-decoration: underline;
+} */
+
+/* Lists */
+.markdown-container ul,
+.markdown-container ol {
+  margin-bottom: var(--space-md);
+  padding-left: var(--space-lg);
+}
+
+.markdown-container li {
+  margin-bottom: var(--space-xs);
+}
+
+.markdown-container li > ul,
+.markdown-container li > ol {
+  margin-top: var(--space-xs);
+  margin-bottom: 0;
+}
+
+.markdown-container ul {
+  list-style-type: disc;
+}
+
+.markdown-container ol {
+  list-style-type: decimal;
+}
+
+/* Blockquotes */
+.markdown-container blockquote {
+  margin: var(--space-md) 0;
+  padding: var(--space-md) var(--space-lg);
+  background-color: var(--light);
+  border-left: 4px solid var(--border);
+  border-radius: 0 var(--border-radius) var(--border-radius) 0;
+  font-style: italic;
+  color: var(--secondary);
+}
+
+.markdown-container blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+/* Code blocks */
+.markdown-container pre {
+  margin: var(--space-md) 0;
+  padding: var(--space-md);
+  background-color: var(--code-bg);
+  border-radius: var(--border-radius);
+  overflow-x: auto;
+  border: var(--border-width) solid var(--border);
+}
+
+.markdown-container code {
+  font-size: var(--font-size-sm);
+  background-color: var(--code-bg);
+  padding: 0.2em 0.4em;
+  margin-right: 5px;
+  border-radius: 3px;
+  font-weight: 100;
+  color: var(--code-foreground);
+}
+
+.markdown-container pre code {
+  background-color: transparent;
+  padding: 0;
+  color: inherit;
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+}
+/* Horizontal rules */
+.markdown-container hr {
+  height: 1px;
+  background-color: var(--border);
+  border: none;
+  margin: var(--space-lg) 0;
+}
+
+/* Wrapper */
+.markdown-container .table-wrapper {
+  max-width: 100%;
+  overflow-x: auto; /* scroll if table is wider than container */
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius);
+  margin: var(--space-md) 0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Table */
+.markdown-container table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 10px;
+  background-color: transparent;
+  font-family:
+    "Space Grotesk",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  table-layout: auto; /* browser distributes column widths dynamically */
+}
+
+/* Table Header */
+.markdown-container thead {
+  background-color: var(--code-bg);
+  border-bottom: 2px solid var(--border);
+}
+
+/* Header & Cell Shared Styles */
+.markdown-container th,
+.markdown-container td {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  border-right: 1px solid var(--border);
+  vertical-align: top;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--text);
+
+  /* Smart width behavior */
+  min-width: 80px; /* compact for short words */
+  max-width: 340px; /* stop stretching after this */
+  width: fit-content; /* grow only as needed */
+
+  /* Wrapping logic */
+  white-space: normal; /* allow wrapping */
+  overflow-wrap: break-word; /* break only if needed */
+  word-break: normal; /* preserve whole words */
+}
+
+/* Header Styling */
+.markdown-container th {
+  font-weight: 600;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap; /* headers stay on one line */
+  background-color: var(--code-bg);
+}
+
+/* Row Styling */
+.markdown-container tr:nth-child(even) {
+  background: var(--code-bg);
+}
+
+/* Images */
+.markdown-container img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--border-radius);
+  margin: var(--space-md) 0;
+}
+
+/* Emphasis */
+.markdown-container strong {
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.markdown-container em {
+  font-style: italic;
+}
+
+.markdown-container del {
+  text-decoration: line-through;
+  color: var(--secondary);
+}
+
+/* Keyboard input */
+.markdown-container kbd {
+  display: inline-block;
+  padding: 0.2em 0.4em;
+  font-size: var(--font-size-sm);
+  color: var(--primary);
+  background-color: var(--light);
+  border: var(--border-width) solid var(--border);
+  border-radius: 3px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+/* Task lists */
+.markdown-container .task-list-item {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.markdown-container .task-list-item-checkbox {
+  margin-right: var(--space-xs);
+}
+
+/* Definition lists */
+.markdown-container dl {
+  margin: var(--space-md) 0;
+}
+
+.markdown-container dt {
+  font-weight: 600;
+  color: var(--primary);
+  margin-top: var(--space-sm);
+}
+
+.markdown-container dd {
+  margin-left: var(--space-md);
+  margin-bottom: var(--space-sm);
+  color: var(--secondary);
+}
+
+/* Superscript and subscript */
+.markdown-container sup,
+.markdown-container sub {
+  font-size: var(--font-size-sm);
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+.markdown-container sup {
+  top: -0.5em;
+}
+
+.markdown-container sub {
+  bottom: -0.25em;
+}
+
+/* Highlighted text */
+.markdown-container mark {
+  background-color: #fffacd;
+  padding: 0.1em 0.3em;
+  border-radius: 2px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .markdown-container {
+    padding: var(--space-md);
+  }
+
+  .markdown-container h1 {
+    font-size: var(--font-size-2xl);
+  }
+
+  .markdown-container h2 {
+    font-size: var(--font-size-xl);
+  }
+
+  .markdown-container h3 {
+    font-size: var(--font-size-lg);
+  }
+
+  .markdown-container pre {
+    padding: var(--space-sm);
+    font-size: var(--font-size-sm);
+  }
+
+  .markdown-container table {
+    overflow-x: auto;
+  }
+}
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+
+*::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}
