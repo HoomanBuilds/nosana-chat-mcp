@@ -13,44 +13,41 @@ export interface ModelGroup {
 }
 
 export const useModelGroups = () => {
-  const [geminiKeyExists, setGeminiKeyExists] = useState(false);
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setGeminiKeyExists(!!localStorage.getItem("geminiApiKey"));
-    }
-  }, []);
+  const [localModels, setLocalModels] = useState<ModelItem[]>([]);
 
+  useEffect(() => {
+    const fetchModels = async () => {
+      try {
+        const url =
+          process.env.NEXT_PUBLIC_INFERIA_LLM_URL || "http://localhost:8001/v1";
+        const res = await fetch(`${url}/models`);
+        const json = await res.json();
+        if (json.data && Array.isArray(json.data)) {
+          const items: ModelItem[] = json.data.map((m: any) => ({
+            label: m.id,
+            value: m.id,
+          }));
+          setLocalModels(items);
+        }
+      } catch (err) {
+        console.error("Failed to fetch models from endpoint:", err);
+      }
+    };
+    fetchModels();
+  }, []);
 
   const groups = useMemo(
     () => [
       {
-        label: "Models",
-        models: [
-          { label: "Qwen3 4B", value: "self/qwen3:4b" },
-          { label: "DeepSeek-R1 7B", value: "self/deepseek-r1:7b" },
-          { label: "Qwen3 0.6B", value: "self/qwen3:0.6b" },
-          { label: "LLaMA 3.8B", value: "self/llama-3.8b" },
-          { label: "Mistral 7B", value: "self/mistral-7b", disabled: true },
-        ],
-      },
-      {
-        label: "Popular Models",
-        models: [
-          { label: "gemini-2.0-flash", value: "gemini/gemini-2.0-flash" },
-          { label: "gemini-2.5-flash", value: "gemini/gemini-2.5-flash" },
-          { label: "gemini-2.5-pro", value: "gemini/gemini-2.5-pro", disabled: !geminiKeyExists },
-          { label: "gemini-2.0-flash-lite", value: "gemini/gemini-2.0-flash-lite"},
-        ],
+        label: "Available Models",
+        models: localModels,
       },
     ],
-    [geminiKeyExists]
+    [localModels],
   );
 
   const filteredGroups: ModelGroup[] = useMemo(() => {
-    return groups.map(group => ({
-      ...group,
-      models: group.models,
-    }));
+    return groups;
   }, [groups]);
 
   return filteredGroups;
