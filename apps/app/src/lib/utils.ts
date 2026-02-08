@@ -1,7 +1,5 @@
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { createOpenAI } from "@ai-sdk/openai";
-import { generateText } from "ai";
 import { twMerge } from "tailwind-merge";
+import OpenAI from "openai";
 
 export function cn(...classes: (string | undefined | false)[]) {
   return twMerge(...classes.filter(Boolean));
@@ -16,12 +14,7 @@ interface PingOptions {
 
 export async function ping({ provider, apiKey, modelName }: PingOptions) {
   try {
-    let model: any;
     switch (provider) {
-      case "Gemini":
-        const google = createGoogleGenerativeAI({ apiKey });
-        model = google(modelName);
-        break;
       case "Tavily":
         try {
           await fetch(
@@ -46,19 +39,16 @@ export async function ping({ provider, apiKey, modelName }: PingOptions) {
           return false;
         }
       case "openai":
-        const openai = createOpenAI({ apiKey });
-        model = openai(modelName);
-        break;
+        const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
+        await openai.chat.completions.create({
+          model: modelName,
+          messages: [{ role: "user", content: "Ping" }],
+          max_tokens: 5,
+        });
+        return true;
       default:
-        throw new Error("Unsupported AI provider");
+        return false;
     }
-    const { text } = await generateText({
-      model,
-      prompt: "Ping",
-      maxOutputTokens: 10,
-    });
-    console.log("ping test response :- ", text);
-    return true;
   } catch {
     return false;
   }

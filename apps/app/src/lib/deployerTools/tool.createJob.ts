@@ -156,7 +156,7 @@ export const createJob = tool({
                     const extract_jobdef: ExtractedJobDefinition = await chatJSON(
                          extract_jobdef_prompt,
                          JobDefinitionSchema,
-                         "gemini-2.0-flash-lite"
+                         "qwen3:0.6b"
                     );
 
                     try {
@@ -268,7 +268,7 @@ export const getModels = tool({
      execute: async ({ prompt }) => {
           console.log(prompt);
           const resolvedPrompt = getResolvedPrompt(prompt, model_families);
-          const query = await chatJSON(resolvedPrompt, ModelQuerySchema, "gemini-2.5-flash-lite");
+          const query = await chatJSON(resolvedPrompt, ModelQuerySchema, "qwen3:0.6b");
           const models = await getModelData();
 
           console.log(query);

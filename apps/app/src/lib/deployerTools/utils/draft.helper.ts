@@ -229,9 +229,9 @@ export function createJobDefination(
 export async function chatJSONRetry<T>(
     prompt: string,
     schema: z.ZodSchema<T>,
-    primaryModel = "gemini-2.0-flash-lite"
+    primaryModel = "qwen3:0.6b"
 ): Promise<T> {
-    const fallbackModels = ["gemini-2.5-flash-lite", "gemini-2.0-flash"];
+    const fallbackModels = ["llama-3.8b", "mistral-7b"];
     const modelsToTry = [primaryModel, ...fallbackModels];
     const maxRetries = 1;
 

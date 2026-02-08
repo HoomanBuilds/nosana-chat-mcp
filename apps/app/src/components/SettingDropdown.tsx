@@ -34,7 +34,6 @@ interface ApiConfig {
 }
 
 const apis: ApiConfig[] = [
-    { name: "Gemini", storageKey: "geminiApiKey", placeholder: "Paste your Gemini API key", pingModel: "gemini-2.0-flash", guide: "https://aistudio.google.com/api-keys" },
     { name: "Tavily", storageKey: "TavilyApiKey", placeholder: "Paste your Tavily API key", pingModel: "tavilydefault", guide: "" },
 ];
 

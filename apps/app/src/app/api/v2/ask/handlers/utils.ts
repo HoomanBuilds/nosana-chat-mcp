@@ -1,6 +1,5 @@
 import { ChatMessage } from "@/lib/types";
 import { ContextCutter } from "@/lib/utils/ContextCutter";
-import { Gemini } from "@nosana-chat/ai";
 import { StreamThrottleConfig, type PromptMode } from "./types";
 import { Payload } from "@/lib/utils/validation";
 
@@ -490,8 +489,8 @@ export function createStreamingParser(
 
 export function registerApiKeys(payload: Payload, headers: Headers) {
   const keyMap: Record<string, string> = {
-    "x-gemini-key": "gemini",
-    "x-tavily-key": "tavily",
+    "x-openai-key": "openai",
+
   };
 
   const apiKeys: Record<string, string> = {};

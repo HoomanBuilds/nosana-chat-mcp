@@ -4,14 +4,15 @@ import { MARKETS } from "./supportingModel";
 import { GpuMarketSlug, JobsResponse, ModelSpec } from "./types";
 import { PublicKey } from "@solana/web3.js";
 import { NosanaDeployer } from "../Deployer";
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createOpenAI } from "@ai-sdk/openai";
 import { generateObject } from "ai";
 import { ZodType } from "zod";
 import { Pipeline, TResult } from "./schema";
 
 
-const google = createGoogleGenerativeAI({
-  apiKey: process.env.GOOGLE_API_KEY,
+const openai = createOpenAI({
+  apiKey: process.env.INFERIA_LLM_API_KEY,
+  baseURL: process.env.INFERIA_LLM_URL,
 });
 
 
@@ -158,12 +159,10 @@ export function buildJobTable(jobs: JobsResponse["jobs"]) {
 }
 
 
-export async function chatJSON<T>(prompt: string, schema: ZodType<T> , model: string = "gemini-2.0-flash"): Promise<T> {
+export async function chatJSON<T>(prompt: string, schema: ZodType<T> , model: string = "qwen3:0.6b"): Promise<T> {
   const { object } = await generateObject({
-    model: google(model),
+    model: openai(model),
     prompt,
-    tools: { google_search: google.tools.googleSearch({}) },
-    providerOptions: { google: { structuredOutputs: true } },
     schema,
   });
   return object;

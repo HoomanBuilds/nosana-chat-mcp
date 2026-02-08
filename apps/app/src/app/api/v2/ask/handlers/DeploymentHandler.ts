@@ -1,4 +1,4 @@
-import { google } from "@ai-sdk/google";
+import { createOpenAI } from "@ai-sdk/openai";
 import {
   stepCountIs,
   streamText,
@@ -9,7 +9,12 @@ import { getModels, createJob } from "@/lib/deployerTools/tool.createJob"
 
 import { estimateJobCost, extendJobRuntime, getMarket, getJob, getWalletBalance, listGpuMarkets, getAllJobs, stopJob, suggest_model_market } from "@/lib/deployerTools/deployer.tools";
 import { streamThrottle } from './utils';
-import { openai } from "@ai-sdk/openai";
+
+const openai = createOpenAI({
+  apiKey: process.env.INFERIA_LLM_API_KEY,
+  baseURL: process.env.INFERIA_LLM_URL,
+});
+
 async function getTools(): Promise<ToolSet> {
   return { estimateJobCost, extendJobRuntime, getMarket, getJob, getWalletBalance, createJob, getModels, listGpuMarkets, getAllJobs, stopJob, suggest_model_market };
 }
@@ -82,7 +87,7 @@ ${payload.customPrompt || ""}
   let stream;
   try {
     stream = streamText({
-      model: google("gemini-2.0-flash"),
+      model: openai("qwen3:0.6b"),
       messages,
       tools,
       toolChoice: "auto",

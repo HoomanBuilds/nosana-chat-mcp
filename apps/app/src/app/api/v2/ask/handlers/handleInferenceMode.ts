@@ -3,6 +3,7 @@ import { Payload } from "@/lib/utils/validation";
 import OpenAI from "openai";
 import { createStreamingParser, buildMessages } from "./handleSelfHostedMode";
 import { getInstructions } from "@/lib/utils/keyword";
+import { performSearch } from "@/lib/tools/webSearch";
 
 export const handleInferenceMode = async (
   payload: Payload,
@@ -21,6 +22,46 @@ export const handleInferenceMode = async (
     });
   }
 
+  // Web Search logic
+  let searchContext = "";
+  if (payload.websearch) {
+    try {
+      send("event", "Searching the web...");
+      const searchResult = await performSearch({
+        query: payload.query,
+        maxResults: 5,
+        searchDepth: "advanced",
+      });
+
+      if (
+        searchResult &&
+        searchResult.results &&
+        searchResult.results.length > 0
+      ) {
+        send(
+          "searchResult",
+          JSON.stringify(
+            searchResult.results.map((r) => ({
+              url: r.url,
+              title: r.title,
+              content: r.content,
+            })),
+          ),
+        );
+
+        searchContext = `
+        <search_results>
+        ${searchResult.results.map((r, i) => `[${i + 1}] ${r.title} (${r.url}): ${r.content}`).join("\n\n")}
+        </search_results>
+        
+        Use the provided search results to enhance your answer. Cite your sources using [1], [2], etc.
+        `;
+      }
+    } catch (err) {
+      console.error("Search integration failed:", err);
+    }
+  }
+
   const systemInstructions = getInstructions(payload.query);
   let systemInstruction = `
         <user_metadata>
@@ -29,11 +70,12 @@ export const handleInferenceMode = async (
             Model Being used := ${modelName}
         </user_metadata>
 
-        You are an expert AI assistant. Use previous chat context to provide clear, accurate answers.
+        You are an expert AI assistant. Use previous chat context and any search results provided to deliver clear, accurate answers.
         
         Instructions :
         ${systemInstructions ?? ""}
         - Keep answers concise and relevant.
+        ${searchContext}
         `;
 
   if (payload?.customPrompt) {

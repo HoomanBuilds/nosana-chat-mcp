@@ -12,14 +12,12 @@ export interface Model {
   generate: (messages: any[], payload?: any, onChunk?: (chunk: string) => void) => Promise<string>;
 }
 
-export type GEMINI_MODEL_AVAILABLE = "gemini-2.5-flash" | "gemini-2.0-flash" | "gemini-2.5-pro" | "gemini-2.0-flash-lite" | "gemini-2.5-flash-lite"
 export const SELF_MODEL_AVAILABLE = ["qwen3:0.6b", "llama-3.8b", "deepseek-r1:7b", "mistral-7b" , "qwen3:4b"] as const;
 
 export type SELF_MODEL_AVAILABLE = typeof SELF_MODEL_AVAILABLE[number];
 
-export type MODEL_AVAILABLE = GEMINI_MODEL_AVAILABLE | SELF_MODEL_AVAILABLE
+export type MODEL_AVAILABLE = SELF_MODEL_AVAILABLE
 export enum ModelProvider {
-  GEMINI = 'gemini',
   SELF = 'self',
 }
 

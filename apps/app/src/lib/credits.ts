@@ -6,11 +6,11 @@ export const CREDIT_CONFIG = {
   TTL_SECONDS: 60 * 60 * 24,
 
   MODELS: {
-    "gemini/gemini-2.0-flash-lite": 1,
-    "gemini/gemini-2.5-flash-lite": 1,
-    "gemini/gemini-2.0-flash": 2,
-    "gemini/gemini-2.5-flash": 3,
-    "gemini/gemini-2.5-pro": 5,
+    "qwen3:0.6b": 0,
+    "llama-3.8b": 0,
+    "deepseek-r1:7b": 0,
+    "mistral-7b": 0,
+    "qwen3:4b": 0,
   },
 };
 

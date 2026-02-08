@@ -1,14 +1,19 @@
 import type { ChatMessage, SearchRequest } from "./types";
-import z from "zod";
-import { GeminiModel } from "./models/gemini";
+import OpenAI from "openai";
 
 
 export default class Agents {
-  private model: ReturnType<typeof GeminiModel>;
+  private client: OpenAI;
+  private modelName: string;
 
-  constructor({ apiKey }: { apiKey: string }) {
-    this.model = GeminiModel('gemini-2.0-flash', apiKey);
+  constructor({ apiKey, baseURL, model }: { apiKey?: string; baseURL?: string; model?: string }) {
+    this.client = new OpenAI({
+        apiKey: apiKey || process.env.INFERIA_LLM_API_KEY || "dummy",
+        baseURL: baseURL || process.env.INFERIA_LLM_URL || "https://api.inferia.ai/v1",
+    });
+    this.modelName = model || "qwen3:0.6b";
   }
+  
   getSearchQuery = async (history: ChatMessage[], query: string): Promise<SearchRequest> => {
     const messages = [
       ...history.slice(-2).map(m => ({ role: 'user' as const, content: m.content })),
@@ -16,15 +21,19 @@ export default class Agents {
     ];
 
     try {
-      const schema = z.object({
-        query: z.string().describe("The search query string"),
-        topic: z.enum(['general', 'news', 'finance']).default('general').describe("The type of content to search"),
-        searchDepth: z.enum(['basic', 'advanced']).default('basic').describe("Depth of search"),
-        maxResults: z.number().min(1).max(3).default(1).describe("Maximum number of results"),
-        country: z.string().default('us').describe("Country for the search results"),
+      const response = await this.client.chat.completions.create({
+        model: this.modelName,
+        messages: messages.map(m => ({
+            role: m.role === "user" ? "user" : "assistant",
+            content: m.content
+        })),
+        response_format: { type: "json_object" }
       });
 
-      const parsed: SearchRequest = await this.model.generateObjectGemini(messages, schema);
+      const content = response.choices[0].message.content;
+      if (!content) throw new Error("Empty response from AI");
+      
+      const parsed = JSON.parse(content);
 
       return {
         query: parsed.query || query,
@@ -47,6 +56,15 @@ export default class Agents {
 
   private getSearchQueryPrompt = (query: string): string => `
   Generate a JSON object for a search request based on: "${query}".
+
+  Return a JSON object with the following structure:
+  {
+    "query": "string",
+    "topic": "general" | "news" | "finance",
+    "searchDepth": "basic" | "advanced",
+    "maxResults": number (1-3),
+    "country": "string" (e.g. "us")
+  }
 
   - Rewrite for clarity and accuracy.
   - Merge multiple aspects into one query.

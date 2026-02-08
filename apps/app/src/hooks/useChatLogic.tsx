@@ -195,14 +195,6 @@ export function useChatLogic() {
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
       };
-      const geminiKey = localStorage.getItem("geminiApiKey");
-      if (geminiKey) {
-        headers["x-gemini-key"] = geminiKey;
-      }
-      const gptApiKey = localStorage.getItem("openaiapikey");
-      if (gptApiKey) {
-        headers["x-gpt-key"] = gptApiKey;
-      }
       const tavilyKey = localStorage.getItem("TavilyApiKey");
       if (tavilyKey) {
         headers["x-tavily-key"] = tavilyKey;
@@ -381,7 +373,7 @@ export function useChatLogic() {
                         result:
                           "no result as approval cancelled by user itself | ask user what happend? do you want any refinement? show tools remember prev chat and conclude?",
                       }),
-                      "gemini/gemini-2.0-flash-lite",
+                      "openai/qwen3:0.6b",
                       true
                     );
                     console.log(`✖ Cancelled: ${funcName}`);
