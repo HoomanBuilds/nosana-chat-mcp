@@ -4,6 +4,7 @@ import { chatRequestSchema, Payload } from "@/lib/utils/validation";
 import { createSSEStream } from "./sse";
 import { registerApiKeys } from "./handlers/utils";
 import {
+  CREDIT_CONFIG,
   CREDIT_LIMIT_ERROR_CODE,
   CREDIT_LIMIT_MESSAGE,
   deductCredits,
@@ -59,6 +60,9 @@ export async function POST(req: NextRequest) {
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     req.headers.get("x-real-ip") ||
     "unknown-ip";
+  const totalCredits =
+    CREDIT_CONFIG.DAILY_LIMIT +
+    (data.walletPublicKey ? CREDIT_CONFIG.WALLET_BONUS : 0);
 
   let remainingCredits = 0;
   try {
@@ -80,6 +84,7 @@ export async function POST(req: NextRequest) {
           headers: {
             "Content-Type": "application/json",
             "x-remaining-credits": "0",
+            "x-credit-limit": String(totalCredits),
           },
         },
       );
@@ -97,6 +102,7 @@ export async function POST(req: NextRequest) {
       headers: {
         ...SSE_HEADERS,
         "x-remaining-credits": String(remainingCredits),
+        "x-credit-limit": String(totalCredits),
       },
     });
   } catch (err) {

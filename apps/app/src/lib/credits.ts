@@ -16,7 +16,7 @@ function getDateKey(): string {
 }
 
 function makeKey(identifier: string): string {
-  return `credits:${identifier}:${getDateKey()}`;
+  return `credits:used:${identifier}:${getDateKey()}`;
 }
 
 function getBaseCredits(wallet?: string): number {
@@ -28,14 +28,9 @@ export async function getCredits(ip: string, wallet?: string): Promise<number> {
   if (!id) throw new Error("Missing IP or wallet identifier");
 
   const key = makeKey(id);
-  let credits = await kv.get<number>(key);
-
-  if (credits == null) {
-    credits = getBaseCredits(wallet);
-    await kv.set(key, credits, { ex: CREDIT_CONFIG.TTL_SECONDS });
-  }
-
-  return credits;
+  const used = (await kv.get<number>(key)) ?? 0;
+  const credits = getBaseCredits(wallet) - used;
+  return Math.max(0, credits);
 }
 
 export async function checkCredits(
@@ -58,19 +53,24 @@ export async function deductCredits(
 
   const key = makeKey(id);
   const cost = CREDIT_CONFIG.MESSAGE_COST;
-  const current = await getCredits(ip, wallet);
+  const baseCredits = getBaseCredits(wallet);
 
-  if (current < cost) throw new Error(CREDIT_LIMIT_ERROR_CODE);
+  // Atomic increment to prevent races from concurrent requests.
+  const used = await kv.incrby(key, cost);
+  await kv.expire(key, CREDIT_CONFIG.TTL_SECONDS);
 
-  const newBalance = current - cost;
-  await kv.set(key, newBalance, { ex: CREDIT_CONFIG.TTL_SECONDS });
-  return newBalance;
+  if (used > baseCredits) {
+    await kv.decrby(key, cost);
+    throw new Error(CREDIT_LIMIT_ERROR_CODE);
+  }
+
+  return baseCredits - used;
 }
 
 export async function resetCredits(ip: string, wallet?: string): Promise<void> {
   const id = wallet || ip;
   const key = makeKey(id);
-  await kv.set(key, getBaseCredits(wallet), { ex: CREDIT_CONFIG.TTL_SECONDS });
+  await kv.del(key);
 }
 
 export async function addCredits(
@@ -78,10 +78,18 @@ export async function addCredits(
   amount: number,
   wallet?: string
 ): Promise<number> {
+  if (amount <= 0) return getCredits(ip, wallet);
+
   const id = wallet || ip;
   const key = makeKey(id);
-  const current = await getCredits(ip, wallet);
-  const updated = current + amount;
-  await kv.set(key, updated, { ex: CREDIT_CONFIG.TTL_SECONDS });
-  return updated;
+  const used = (await kv.get<number>(key)) ?? 0;
+  const nextUsed = Math.max(0, used - amount);
+
+  if (nextUsed === 0) {
+    await kv.del(key);
+  } else {
+    await kv.set(key, nextUsed, { ex: CREDIT_CONFIG.TTL_SECONDS });
+  }
+
+  return getBaseCredits(wallet) - nextUsed;
 }

@@ -15,14 +15,20 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Download, ImportIcon, Info, ListCollapseIcon, Settings2, Trash } from "lucide-react"
 
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import SettingPopover from "./SettingPopover"
 import { useChatStore } from "@/store/chat.store"
 import { useSettingsStore } from "@/store/setting.store"
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog"
 import { Input } from "./ui/input"
 import { cn, ping } from "@/lib/utils"
-import { getRemainingCredits } from "@/lib/client/credit"
+import {
+    getCreditLimit,
+    getRemainingCredits,
+    onCreditsUpdated,
+    refreshCreditsFromServer,
+} from "@/lib/client/credit"
+import { useWalletStore } from "@/store/wallet.store"
 
 
 interface ApiConfig {
@@ -91,6 +97,37 @@ function ApiKeyDialog({ api }: { api: ApiConfig }) {
 export function LoginDropDown({ barOpen, router }: { barOpen?: boolean, router: any }) {
     const { settingsOpen, openSettings, closeSettings } = useSettingsStore();
     const { exportAllThreads, importThreads, clearAll , tool} = useChatStore()
+    const { wallet, isConnected } = useWalletStore();
+    const [creditView, setCreditView] = useState(() => ({
+        remaining: getRemainingCredits(),
+        limit: getCreditLimit(),
+    }));
+
+    useEffect(() => {
+        const syncCredits = async () => {
+            const walletKey = isConnected ? (wallet || undefined) : undefined;
+            const synced = await refreshCreditsFromServer(walletKey);
+            if (synced) {
+                setCreditView(synced);
+                return;
+            }
+            setCreditView({
+                remaining: getRemainingCredits(),
+                limit: getCreditLimit(),
+            });
+        };
+        syncCredits().catch(console.error);
+    }, [isConnected, wallet]);
+
+    useEffect(() => {
+        return onCreditsUpdated(() => {
+            setCreditView({
+                remaining: getRemainingCredits(),
+                limit: getCreditLimit(),
+            });
+        });
+    }, []);
+
     function handleExport() {
         exportAllThreads().catch(console.error)
     }
@@ -173,7 +210,7 @@ export function LoginDropDown({ barOpen, router }: { barOpen?: boolean, router: 
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => null} className={cn(tool == "deployer" && "hidden")}>
                         credits
-                        <DropdownMenuShortcut>{getRemainingCredits()}/10</DropdownMenuShortcut>
+                        <DropdownMenuShortcut>{creditView.remaining}/{creditView.limit}</DropdownMenuShortcut>
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => {
                         router.push("/ask")
