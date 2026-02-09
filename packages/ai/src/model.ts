@@ -1,49 +1,58 @@
 import { ModelProvider, type MODEL_AVAILABLE, type ModelConfig } from "./types";
 
 export const ModelConfigs: Record<MODEL_AVAILABLE, ModelConfig> = {
-  'qwen3:0.6b': {
-    name: 'qwen3-0.6b',
+  "qwen3:0.6b": {
+    name: "qwen3-0.6b",
     provider: ModelProvider.SELF,
     search: false,
     thinking: false,
     retry: true,
     contextWindow: 1048576,
-    maxTokens: 8192
+    maxTokens: 8192,
   },
-  'llama-3.8b': {
-    name: 'llama-3.8b',
+  "llama-3.8b": {
+    name: "llama-3.8b",
     provider: ModelProvider.SELF,
     search: false,
     thinking: false,
     retry: true,
     contextWindow: 1048576,
-    maxTokens: 8192
+    maxTokens: 8192,
   },
-  'deepseek-r1:7b': {
-    name: 'deepseek-r1:7b',
+  "deepseek-r1:7b": {
+    name: "deepseek-r1:7b",
     provider: ModelProvider.SELF,
     search: false,
     thinking: false,
     retry: true,
     contextWindow: 1048576,
-    maxTokens: 8192
+    maxTokens: 8192,
   },
-  'mistral-7b': {
-    name: 'mistral-7b',
+  "mistral-7b": {
+    name: "mistral-7b",
     provider: ModelProvider.SELF,
     search: false,
     thinking: false,
     retry: true,
     contextWindow: 1048576,
-    maxTokens: 8192
+    maxTokens: 8192,
   },
-   'qwen3:4b': {
-    name: 'qwen3:4b',
+  "qwen3:4b": {
+    name: "qwen3:4b",
     provider: ModelProvider.SELF,
     search: false,
     thinking: false,
     retry: true,
     contextWindow: 1048576,
-    maxTokens: 8192
-  }
+    maxTokens: 8192,
+  },
+  inferiallm: {
+    name: "inferiallm",
+    provider: ModelProvider.SELF,
+    search: false,
+    thinking: false,
+    retry: true,
+    contextWindow: 1048576,
+    maxTokens: 8192,
+  },
 };

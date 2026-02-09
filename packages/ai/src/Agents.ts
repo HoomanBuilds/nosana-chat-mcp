@@ -1,55 +1,68 @@
 import type { ChatMessage, SearchRequest } from "./types";
 import OpenAI from "openai";
 
-
 export default class Agents {
   private client: OpenAI;
   private modelName: string;
 
-  constructor({ apiKey, baseURL, model }: { apiKey?: string; baseURL?: string; model?: string }) {
+  constructor({
+    apiKey,
+    baseURL,
+    model,
+  }: {
+    apiKey?: string;
+    baseURL?: string;
+    model?: string;
+  }) {
     this.client = new OpenAI({
-        apiKey: apiKey || process.env.INFERIA_LLM_API_KEY || "dummy",
-        baseURL: baseURL || process.env.INFERIA_LLM_URL || "https://api.inferia.ai/v1",
+      apiKey: apiKey || process.env.INFERIA_LLM_API_KEY || "dummy",
+      baseURL:
+        baseURL || process.env.INFERIA_LLM_URL || "https://api.inferia.ai/v1",
     });
-    this.modelName = model || "qwen3:0.6b";
+    this.modelName = model || "inferiallm";
   }
-  
-  getSearchQuery = async (history: ChatMessage[], query: string): Promise<SearchRequest> => {
+
+  getSearchQuery = async (
+    history: ChatMessage[],
+    query: string,
+  ): Promise<SearchRequest> => {
     const messages = [
-      ...history.slice(-2).map(m => ({ role: 'user' as const, content: m.content })),
-      { role: 'user' as const, content: this.getSearchQueryPrompt(query) },
+      ...history
+        .slice(-2)
+        .map((m) => ({ role: "user" as const, content: m.content })),
+      { role: "user" as const, content: this.getSearchQueryPrompt(query) },
     ];
 
     try {
       const response = await this.client.chat.completions.create({
         model: this.modelName,
-        messages: messages.map(m => ({
-            role: m.role === "user" ? "user" : "assistant",
-            content: m.content
+        messages: messages.map((m) => ({
+          role: m.role === "user" ? "user" : "assistant",
+          content: m.content,
         })),
-        response_format: { type: "json_object" }
+        response_format: { type: "json_object" },
       });
 
-      const content = response.choices[0].message.content;
+      const content = response.choices[0]?.message?.content;
       if (!content) throw new Error("Empty response from AI");
-      
+
       const parsed = JSON.parse(content);
 
       return {
         query: parsed.query || query,
-        topic: parsed.topic || 'general',
-        searchDepth: parsed.searchDepth || 'basic',
+        topic: parsed.topic || "general",
+        searchDepth: parsed.searchDepth || "basic",
         maxResults: Math.min(Math.max(parsed.maxResults || 1, 1), 3),
-        country: parsed.country || 'us',
+        country: parsed.country || "us",
       };
     } catch (e) {
-      console.error('Failed to generate structured search query:', e);
+      console.error("Failed to generate structured search query:", e);
       return {
         query,
-        topic: 'general',
-        searchDepth: 'basic',
+        topic: "general",
+        searchDepth: "basic",
         maxResults: 3,
-        country: 'us',
+        country: "us",
       };
     }
   };

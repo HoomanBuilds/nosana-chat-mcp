@@ -2,17 +2,14 @@ import { kv } from "@vercel/kv";
 
 export const CREDIT_CONFIG = {
   DAILY_LIMIT: 10,
-  WALLET_BONUS: 300,
+  WALLET_BONUS: 0,
+  MESSAGE_COST: 1,
   TTL_SECONDS: 60 * 60 * 24,
-
-  MODELS: {
-    "qwen3:0.6b": 0,
-    "llama-3.8b": 0,
-    "deepseek-r1:7b": 0,
-    "mistral-7b": 0,
-    "qwen3:4b": 0,
-  },
 };
+
+export const CREDIT_LIMIT_ERROR_CODE = "CREDIT_LIMIT_REACHED";
+export const CREDIT_LIMIT_MESSAGE =
+  "You have used all 10 credits. Please deploy your own model using Nosana Deployer to continue.";
 
 function getDateKey(): string {
   return new Date().toISOString().slice(0, 10);
@@ -43,29 +40,27 @@ export async function getCredits(ip: string, wallet?: string): Promise<number> {
 
 export async function checkCredits(
   ip: string,
-  model: string,
+  _model: string,
   wallet?: string
 ): Promise<{ ok: boolean; remaining: number }> {
   const remaining = await getCredits(ip, wallet);
-  const cost = CREDIT_CONFIG.MODELS[model as keyof typeof CREDIT_CONFIG.MODELS] ?? 0;
+  const cost = CREDIT_CONFIG.MESSAGE_COST;
   return { ok: remaining >= cost, remaining };
 }
 
 export async function deductCredits(
   ip: string,
-  model: string,
+  _model: string,
   wallet?: string
 ): Promise<number> {
   const id = wallet || ip;
   if (!id) throw new Error("Missing IP or wallet identifier");
 
   const key = makeKey(id);
-  const cost = CREDIT_CONFIG.MODELS[model as keyof typeof CREDIT_CONFIG.MODELS] ?? 0;
+  const cost = CREDIT_CONFIG.MESSAGE_COST;
   const current = await getCredits(ip, wallet);
 
-  if (cost === 0) return current;
-
-  if (current < cost) throw new Error("Insufficient credits");
+  if (current < cost) throw new Error(CREDIT_LIMIT_ERROR_CODE);
 
   const newBalance = current - cost;
   await kv.set(key, newBalance, { ex: CREDIT_CONFIG.TTL_SECONDS });

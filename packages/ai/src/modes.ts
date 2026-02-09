@@ -4,6 +4,7 @@ export enum ChatMode {
   ZERO = "zero",
   AUTO = "auto",
   qwen3 = "qwen3:0.6b",
+  inferiallm = "inferiallm",
 }
 
 export const ChatModeConfig: Record<
@@ -46,6 +47,12 @@ export const ChatModeConfig: Record<
     auth: false,
     retry: true,
   },
+  [ChatMode.inferiallm]: {
+    thinking: false,
+    search: false,
+    auth: false,
+    retry: true,
+  },
 };
 
 export const CHAT_MODE_CREDIT_COSTS = {
@@ -54,4 +61,5 @@ export const CHAT_MODE_CREDIT_COSTS = {
   [ChatMode.ZERO]: 1,
   [ChatMode.AUTO]: 1,
   [ChatMode.qwen3]: 0,
+  [ChatMode.inferiallm]: 0,
 };

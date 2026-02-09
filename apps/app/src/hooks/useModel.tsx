@@ -18,9 +18,10 @@ export const useModelGroups = () => {
   useEffect(() => {
     const fetchModels = async () => {
       try {
-        const url =
-          process.env.NEXT_PUBLIC_INFERIA_LLM_URL || "http://localhost:8001/v1";
-        const res = await fetch(`${url}/models`);
+        const res = await fetch("/api/v1/models", { cache: "no-store" });
+        if (!res.ok) {
+          throw new Error(`Failed to fetch models: ${res.status}`);
+        }
         const json = await res.json();
         if (json.data && Array.isArray(json.data)) {
           const items: ModelItem[] = json.data.map((m: any) => ({
