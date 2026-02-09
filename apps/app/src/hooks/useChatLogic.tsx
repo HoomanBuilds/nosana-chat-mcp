@@ -185,6 +185,7 @@ export function useChatLogic() {
     let finalThinking = "";
     let responseTime = 0;
     let followUpQuestions: { question: string }[] = [];
+    let remainingCredits: number | null = null;
 
     //model configured
     const DEFAULT_MODEL = DEFAULT.MODEL;
@@ -235,6 +236,20 @@ export function useChatLogic() {
       //zod error handling
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
+        if (res.status === 403 && data?.code === "CREDIT_LIMIT_REACHED") {
+          updateRemainingCredits(res);
+          addMessage({
+            role: "model",
+            model: modelToSend,
+            content:
+              data?.error ||
+              "You have used all 10 credits. Please deploy your own model using Nosana Deployer to continue.",
+            id: crypto.randomUUID(),
+            type: "message",
+          });
+          return;
+        }
+
         let errorsArray: { message: string; path: string[]; code: string }[] =
           [];
         try {
@@ -281,6 +296,10 @@ export function useChatLogic() {
       }
 
       //update credits
+      const creditHeader = Number(res.headers.get("x-remaining-credits"));
+      if (!Number.isNaN(creditHeader)) {
+        remainingCredits = creditHeader;
+      }
       updateRemainingCredits(res);
 
       //parsing the chunk
@@ -596,6 +615,17 @@ export function useChatLogic() {
           followUps: followUpQuestions || [],
           type: "message",
         });
+
+        if (remainingCredits === 0) {
+          addMessage({
+            role: "model",
+            model: modelToSend,
+            content:
+              "You have used all 10 credits. Please deploy your own model using Nosana Deployer to continue.",
+            id: crypto.randomUUID(),
+            type: "message",
+          });
+        }
       } else if (selectedChatId) {
         if (!localConfig.showErrorMessages) {
           deleteSingleChat(selectedChatId, userMessageId).catch(console.error);

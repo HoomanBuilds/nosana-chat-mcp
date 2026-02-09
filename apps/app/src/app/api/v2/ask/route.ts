@@ -3,7 +3,11 @@ import { SSE_HEADERS } from "@/lib/types";
 import { chatRequestSchema, Payload } from "@/lib/utils/validation";
 import { createSSEStream } from "./sse";
 import { registerApiKeys } from "./handlers/utils";
-import { deductCredits } from "@/lib/credits";
+import {
+  CREDIT_LIMIT_ERROR_CODE,
+  CREDIT_LIMIT_MESSAGE,
+  deductCredits,
+} from "@/lib/credits";
 
 export async function POST(req: NextRequest) {
   if (req.method === "OPTIONS")
@@ -56,26 +60,35 @@ export async function POST(req: NextRequest) {
     req.headers.get("x-real-ip") ||
     "unknown-ip";
 
-  let remainingCredits = 1000;
-  // Skip credit deduction for local development
-  if (false) {
-    try {
-      remainingCredits = await deductCredits(
-        ip,
-        data.model,
-        data.walletPublicKey,
+  let remainingCredits = 0;
+  try {
+    remainingCredits = await deductCredits(ip, data.model, data.walletPublicKey);
+    console.log(
+      `💳 [${data.walletPublicKey ? "wallet" : "ip"}:${
+        data.walletPublicKey || ip
+      }] used ${data.model} → remaining: ${remainingCredits}`,
+    );
+  } catch (err) {
+    if ((err as Error).message === CREDIT_LIMIT_ERROR_CODE) {
+      return new Response(
+        JSON.stringify({
+          error: CREDIT_LIMIT_MESSAGE,
+          code: CREDIT_LIMIT_ERROR_CODE,
+        }),
+        {
+          status: 403,
+          headers: {
+            "Content-Type": "application/json",
+            "x-remaining-credits": "0",
+          },
+        },
       );
-      console.log(
-        `💳 [${data.walletPublicKey ? "wallet" : "ip"}:${
-          data.walletPublicKey || ip
-        }] used ${data.model} → remaining: ${remainingCredits}`,
-      );
-    } catch (err) {
-      return new Response(JSON.stringify({ error: (err as Error).message }), {
-        status: 403,
-        headers: { "Content-Type": "application/json" },
-      });
     }
+
+    return new Response(JSON.stringify({ error: (err as Error).message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   try {
