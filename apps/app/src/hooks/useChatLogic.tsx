@@ -5,11 +5,7 @@ import { useChatStore } from "@/store/chat.store";
 import { useConversations } from "@/hooks/useConversation";
 import { useSettingsStore } from "@/store/setting.store";
 import { DEFAULT } from "@/lib/constants";
-import { stopJob } from "@/lib/nosana/stopJob";
-import { createJob } from "@/lib/nosana/createJob";
-import { extendJob } from "@/lib/nosana/extendjob";
 import { useWalletStore } from "@/store/wallet.store";
-import { validateJobDefinition } from "@nosana/sdk";
 import { updateRemainingCredits } from "@/lib/client/credit";
 import {
   getDeployedChatModelByValue,
@@ -425,11 +421,13 @@ export function useChatLogic() {
                           try {
                             console.log(`▶ Executing ${funcName}`);
                             const approvedJobDef = pendingTool?.prompt || parsed.prompt;
+                            const { validateJobDefinition } = await import("@nosana/sdk");
                             const r = validateJobDefinition(approvedJobDef);
                             if (!r.success) {
                               const validationErrors = JSON.stringify(r.errors || []);
                               throw new Error(`Invalid job definition: ${validationErrors}`);
                             }
+                            const { createJob } = await import("@/lib/nosana/createJob");
                             const result = await createJob(
                               approvedJobDef,
                               parsed.args.marketPubKey,
@@ -491,7 +489,7 @@ export function useChatLogic() {
                               undefined,
                               getFollowBackPrompt({
                                 funcName: funcName,
-                                status: "approved",
+                                status: "failed",
                                 result: `The tool failed with error: ${errorMessage}`,
                               }),
                               undefined,
@@ -514,6 +512,7 @@ export function useChatLogic() {
                         onConfirm: async () => {
                           try {
                             console.log(`▶ Executing ${funcName}`);
+                            const { stopJob } = await import("@/lib/nosana/stopJob");
                             const result = await stopJob(parsed.args.jobId);
                             await handleAskChunk(
                               undefined,
@@ -526,12 +525,14 @@ export function useChatLogic() {
                               true
                             );
                           } catch (err) {
+                            const errorMessage =
+                              err instanceof Error ? err.message : String(err);
                             await handleAskChunk(
                               undefined,
                               getFollowBackPrompt({
                                 funcName: funcName,
-                                status: "approved",
-                                result: (err as Error).message,
+                                status: "failed",
+                                result: errorMessage,
                               }),
                               undefined,
                               true
@@ -554,6 +555,7 @@ export function useChatLogic() {
                         onConfirm: async () => {
                           try {
                             console.log(`▶ Executing ${funcName}`);
+                            const { extendJob } = await import("@/lib/nosana/extendjob");
                             const result = await extendJob(
                               parsed.args.jobId,
                               parsed.args.extensionSeconds / 60
@@ -570,20 +572,22 @@ export function useChatLogic() {
                             );
                             // alert("✅ Job extended");
                           } catch (err) {
+                            const errorMessage =
+                              err instanceof Error ? err.message : String(err);
                             console.error(`❌ Error in ${funcName}:`, err);
                             await handleAskChunk(
                               undefined,
                               getFollowBackPrompt({
                                 funcName: funcName,
-                                status: "approved",
-                                result: (err as Error).message,
+                                status: "failed",
+                                result: errorMessage,
                               }),
                               undefined,
                               true
                             );
                             alert(
                               "❌ " +
-                              ((err as Error).message ||
+                              (errorMessage ||
                                 "Error extending job")
                             );
                           } finally {

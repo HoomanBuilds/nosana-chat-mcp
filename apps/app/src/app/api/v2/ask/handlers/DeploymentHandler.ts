@@ -65,8 +65,8 @@ export const handleDeployment = async (
   send: (event: string, data: string) => void
 ) => {
   const plannerModel =
-    payload.model ||
     process.env.DEPLOYER_PLANNER_MODEL ||
+    payload.model ||
     "qwen3:0.6b";
 
   return runWithPlannerModel(plannerModel, async () => {
