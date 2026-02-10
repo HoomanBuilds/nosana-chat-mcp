@@ -70,6 +70,13 @@ export const chatRequestSchema = z.object({
   chatId: z.string().nullable().optional(),
   apiKeys: z.record(z.string(), z.string()).optional(),
   walletPublicKey: z.string().optional(),
+  deployedModel: z
+    .object({
+      baseURL: z.string().url(),
+      model: z.string().min(1),
+      apiKey: z.string().optional(),
+    })
+    .optional(),
 });
 
 type ChatRequest = z.infer<typeof chatRequestSchema>;

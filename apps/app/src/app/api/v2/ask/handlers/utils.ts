@@ -44,9 +44,13 @@ export async function getThreadTitle(query: string, model: string) {
       apiKey: process.env.INFERIA_LLM_API_KEY,
       baseURL: process.env.INFERIA_LLM_URL,
     });
+    const titleModel =
+      process.env.THREAD_TITLE_MODEL ||
+      process.env.DEPLOYER_PLANNER_MODEL ||
+      model;
 
     const res = await client.chat.completions.create({
-      model: model,
+      model: titleModel,
       messages: [
         {
           role: "user",

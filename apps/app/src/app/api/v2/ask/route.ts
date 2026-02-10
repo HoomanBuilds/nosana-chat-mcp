@@ -8,6 +8,7 @@ import {
   CREDIT_LIMIT_ERROR_CODE,
   CREDIT_LIMIT_MESSAGE,
   deductCredits,
+  getCredits,
 } from "@/lib/credits";
 
 export async function POST(req: NextRequest) {
@@ -63,37 +64,42 @@ export async function POST(req: NextRequest) {
   const totalCredits =
     CREDIT_CONFIG.DAILY_LIMIT +
     (data.walletPublicKey ? CREDIT_CONFIG.WALLET_BONUS : 0);
+  const bypassCredits = data.mode === "deployer" || !!data.deployedModel;
 
   let remainingCredits = 0;
-  try {
-    remainingCredits = await deductCredits(ip, data.model, data.walletPublicKey);
-    console.log(
-      `💳 [${data.walletPublicKey ? "wallet" : "ip"}:${
-        data.walletPublicKey || ip
-      }] used ${data.model} → remaining: ${remainingCredits}`,
-    );
-  } catch (err) {
-    if ((err as Error).message === CREDIT_LIMIT_ERROR_CODE) {
-      return new Response(
-        JSON.stringify({
-          error: CREDIT_LIMIT_MESSAGE,
-          code: CREDIT_LIMIT_ERROR_CODE,
-        }),
-        {
-          status: 403,
-          headers: {
-            "Content-Type": "application/json",
-            "x-remaining-credits": "0",
-            "x-credit-limit": String(totalCredits),
-          },
-        },
+  if (bypassCredits) {
+    remainingCredits = await getCredits(ip, data.walletPublicKey).catch(() => 0);
+  } else {
+    try {
+      remainingCredits = await deductCredits(ip, data.model, data.walletPublicKey);
+      console.log(
+        `💳 [${data.walletPublicKey ? "wallet" : "ip"}:${
+          data.walletPublicKey || ip
+        }] used ${data.model} → remaining: ${remainingCredits}`,
       );
-    }
+    } catch (err) {
+      if ((err as Error).message === CREDIT_LIMIT_ERROR_CODE) {
+        return new Response(
+          JSON.stringify({
+            error: CREDIT_LIMIT_MESSAGE,
+            code: CREDIT_LIMIT_ERROR_CODE,
+          }),
+          {
+            status: 403,
+            headers: {
+              "Content-Type": "application/json",
+              "x-remaining-credits": "0",
+              "x-credit-limit": String(totalCredits),
+            },
+          },
+        );
+      }
 
-    return new Response(JSON.stringify({ error: (err as Error).message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+      return new Response(JSON.stringify({ error: (err as Error).message }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
   }
 
   try {

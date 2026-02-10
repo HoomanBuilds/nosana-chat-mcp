@@ -93,18 +93,20 @@ export const ChatForm: React.FC<ChatFormProps> = ({
 
             <div className="flex justify-between items-center pb-2 px-2">
                 <div className="flex gap-4 items-center text-black/50">
-                    {
-                        !tool ? (
-                            <ModelSelector
-                                value={model || selectedModel}
-                                onValueChange={handleModelChange}
-                            />
+                    <ModelSelector
+                        value={model || selectedModel}
+                        onValueChange={handleModelChange}
+                    />
+
+                    {tool && (
+                        wallet ? (
+                            <div onClick={() => navigator.clipboard.writeText(wallet)}>
+                                <Wallet className="text-purple-500" />
+                            </div>
                         ) : (
-                            wallet ? <div onClick={() => navigator.clipboard.writeText(wallet)}><Wallet className="text-purple-500" /></div> : (
-                                <PhantomConnect />
-                            )
+                            <PhantomConnect />
                         )
-                    }
+                    )}
 
                     {currentConfig.search && !tool && (
                         <FeatureToggle

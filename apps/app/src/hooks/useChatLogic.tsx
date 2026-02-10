@@ -11,6 +11,11 @@ import { extendJob } from "@/lib/nosana/extendjob";
 import { useWalletStore } from "@/store/wallet.store";
 import { validateJobDefinition } from "@nosana/sdk";
 import { updateRemainingCredits } from "@/lib/client/credit";
+import {
+  getDeployedChatModelByValue,
+  isDeployedChatModel,
+  saveDeployedChatModelFromJob,
+} from "@/lib/nosana/deployedModels";
 
 export function useChatLogic() {
   const [query, setQuery] = useState("");
@@ -200,6 +205,9 @@ export function useChatLogic() {
       if (tavilyKey) {
         headers["x-tavily-key"] = tavilyKey;
       }
+      const deployedModelConfig = isDeployedChatModel(modelToSend)
+        ? getDeployedChatModelByValue(modelToSend)
+        : undefined;
 
       //making backend ai request
       const res = await fetch(`/api/v2/ask`, {
@@ -229,6 +237,13 @@ export function useChatLogic() {
           thinking: thinking || false,
           threadId: params.id || selectedChatId,
           chatId: userMessageId,
+          deployedModel: deployedModelConfig
+            ? {
+                baseURL: deployedModelConfig.baseURL,
+                model: deployedModelConfig.model,
+                apiKey: deployedModelConfig.apiKey,
+              }
+            : undefined,
         }),
         signal,
       });
@@ -414,8 +429,9 @@ export function useChatLogic() {
 
                           try {
                             console.log(`▶ Executing ${funcName}`);
+                            const approvedJobDef = pendingTool?.prompt || parsed.prompt;
                             const result = await createJob(
-                              pendingTool?.prompt || parsed.prompt,
+                              approvedJobDef,
                               parsed.args.marketPubKey,
                               parsed.args.timeoutSeconds / 60
                             );
@@ -423,6 +439,22 @@ export function useChatLogic() {
                               alert(
                                 "consider checking job manually on nosana dashboard something went wrong no jobId returned https://dashboard.nosana.com"
                               );
+                            else {
+                              const serviceUrl =
+                                result?.result?.jobDetails?.serviceUrl;
+                              if (serviceUrl) {
+                                const deployedModel = saveDeployedChatModelFromJob({
+                                  jobId: result.jobId,
+                                  serviceUrl,
+                                  jobDef: approvedJobDef,
+                                });
+                                if (deployedModel) {
+                                  setSelectedModel(deployedModel.value);
+                                  setModel(deployedModel.value);
+                                  localStorage.setItem("llmmodel", deployedModel.value);
+                                }
+                              }
+                            }
 
                             const curlSnippet =
                               parsed?.args?.provider === "huggingface" && parsed?.args?.testGeneration

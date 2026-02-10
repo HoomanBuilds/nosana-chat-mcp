@@ -1,17 +1,17 @@
 import z from "zod";
 import { tool } from "ai";
 import { chatJSONRetry, createJobDefination, findFamilyByModel, getModelData, getRelatedModels } from "./utils/draft.helper";
-import { chatJSON } from "./utils/helpers";
+import { chatJSON, fail } from "./utils/helpers";
 import { ContainerExecutionTemplate, ModelQuerySchema } from "./utils/schema";
 import { model_families } from "../modelfamily";
 import { DEFAULT_MARKETS } from "./utils/types";
-import { fail } from "assert";
 import { validateJobDefinition } from "@nosana/sdk";
 import { MARKETS } from "./utils/supportingModel";
 import { ensureDeployer } from "./Deployer";
 import { JOB_MESSAGE } from "./utils/contants";
 import { extractDefination, getResolvedPrompt } from "./utils/draft.prompt";
 import { ExtractedJobDefinition, JobDefinitionSchema } from "./utils/draft.schema";
+import { getPlannerModel } from "./utils/plannerContext";
 
 
 export const createJob = tool({
@@ -51,6 +51,10 @@ export const createJob = tool({
 
      execute: async (params) => {
           const deployer = ensureDeployer();
+          const plannerModel =
+               getPlannerModel() ||
+               process.env.DEPLOYER_PLANNER_MODEL ||
+               "qwen3:0.6b";
           let market_public_key: string = "";
           let Job_cost: number | null = null;
 
@@ -60,8 +64,25 @@ export const createJob = tool({
                     try {
                          const validation = validateJobDefinition(params.directJobDef);
                          if (!validation.success) {
+                              const formattedErrors = (validation.errors || [])
+                                   .map((e: any) => {
+                                        const path = Array.isArray(e?.path)
+                                             ? e.path.join(".")
+                                             : typeof e?.path === "string"
+                                                  ? e.path
+                                                  : "";
+                                        const message =
+                                             typeof e?.message === "string"
+                                                  ? e.message
+                                                  : JSON.stringify(e);
+                                        return path ? `• ${path}: ${message}` : `• ${message}`;
+                                   })
+                                   .join("\n");
                               return fail(
-                                   JOB_MESSAGE.validation_failed(validation.errors?.join("\n") || "Unknown validation errors", schemaShape(ContainerExecutionTemplate))
+                                   JOB_MESSAGE.validation_failed(
+                                        formattedErrors || "Unknown validation errors",
+                                        schemaShape(ContainerExecutionTemplate),
+                                   )
                               );
                          }
 
@@ -156,7 +177,7 @@ export const createJob = tool({
                     const extract_jobdef: ExtractedJobDefinition = await chatJSON(
                          extract_jobdef_prompt,
                          JobDefinitionSchema,
-                         "qwen3:0.6b"
+                         plannerModel
                     );
 
                     try {
@@ -267,8 +288,16 @@ export const getModels = tool({
 
      execute: async ({ prompt }) => {
           console.log(prompt);
+          const plannerModel =
+               getPlannerModel() ||
+               process.env.DEPLOYER_PLANNER_MODEL ||
+               "qwen3:0.6b";
           const resolvedPrompt = getResolvedPrompt(prompt, model_families);
-          const query = await chatJSON(resolvedPrompt, ModelQuerySchema, "qwen3:0.6b");
+          const query = await chatJSON(
+               resolvedPrompt,
+               ModelQuerySchema,
+               plannerModel,
+          );
           const models = await getModelData();
 
           console.log(query);

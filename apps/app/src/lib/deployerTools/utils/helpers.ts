@@ -8,12 +8,22 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { generateObject } from "ai";
 import { ZodType } from "zod";
 import { Pipeline, TResult } from "./schema";
+import { getPlannerModel } from "./plannerContext";
 
 
 const openai = createOpenAI({
   apiKey: process.env.INFERIA_LLM_API_KEY,
   baseURL: process.env.INFERIA_LLM_URL,
 });
+
+function resolvePlannerModel(model?: string): string {
+  return (
+    model ||
+    getPlannerModel() ||
+    process.env.DEPLOYER_PLANNER_MODEL ||
+    "qwen3:0.6b"
+  );
+}
 
 
 export function assertImagePresent(spec: ModelSpec): void {
@@ -159,9 +169,13 @@ export function buildJobTable(jobs: JobsResponse["jobs"]) {
 }
 
 
-export async function chatJSON<T>(prompt: string, schema: ZodType<T> , model: string = "qwen3:0.6b"): Promise<T> {
+export async function chatJSON<T>(
+  prompt: string,
+  schema: ZodType<T>,
+  model?: string,
+): Promise<T> {
   const { object } = await generateObject({
-    model: openai(model),
+    model: openai.chat(resolvePlannerModel(model)),
     prompt,
     schema,
   });

@@ -1,4 +1,8 @@
 import { JSX, useEffect, useMemo, useState } from "react";
+import {
+  getDeployedChatModels,
+  onDeployedModelsUpdated,
+} from "@/lib/nosana/deployedModels";
 
 export interface ModelItem {
   label: string;
@@ -14,6 +18,7 @@ export interface ModelGroup {
 
 export const useModelGroups = () => {
   const [localModels, setLocalModels] = useState<ModelItem[]>([]);
+  const [deployedModels, setDeployedModels] = useState<ModelItem[]>([]);
 
   useEffect(() => {
     const fetchModels = async () => {
@@ -37,14 +42,35 @@ export const useModelGroups = () => {
     fetchModels();
   }, []);
 
+  useEffect(() => {
+    const sync = () => {
+      const items: ModelItem[] = getDeployedChatModels().map((m) => ({
+        label: m.label,
+        value: m.value,
+      }));
+      setDeployedModels(items);
+    };
+
+    sync();
+    return onDeployedModelsUpdated(sync);
+  }, []);
+
   const groups = useMemo(
     () => [
+      ...(deployedModels.length > 0
+        ? [
+            {
+              label: "Deployed Models",
+              models: deployedModels,
+            },
+          ]
+        : []),
       {
         label: "Available Models",
         models: localModels,
       },
     ],
-    [localModels],
+    [deployedModels, localModels],
   );
 
   const filteredGroups: ModelGroup[] = useMemo(() => {

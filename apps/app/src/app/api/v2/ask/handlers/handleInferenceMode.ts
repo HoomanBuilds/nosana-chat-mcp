@@ -9,7 +9,7 @@ export const handleInferenceMode = async (
   payload: Payload,
   send: (event: string, data: string) => void,
 ) => {
-  const modelName = payload.model;
+  const modelName = payload.deployedModel?.model || payload.model;
 
   let contextChat;
   if (payload.chats) {
@@ -84,14 +84,17 @@ export const handleInferenceMode = async (
 
   const messages = buildMessages(payload, systemInstruction, contextChat);
 
-  if (!process.env.INFERIA_LLM_URL || !process.env.INFERIA_LLM_API_KEY) {
+  const baseURL = payload.deployedModel?.baseURL || process.env.INFERIA_LLM_URL;
+  const apiKey =
+    payload.deployedModel?.apiKey ||
+    process.env.INFERIA_LLM_API_KEY ||
+    "nosana-local";
+
+  if (!baseURL) {
     throw new Error(
-      "Missing INFERIA_LLM_URL or INFERIA_LLM_API_KEY environment variables",
+      "Missing INFERIA_LLM_URL or deployed model baseURL",
     );
   }
-
-  const baseURL = process.env.INFERIA_LLM_URL;
-  const apiKey = process.env.INFERIA_LLM_API_KEY;
 
   console.log(`🚀 [Inference] Calling ${baseURL} with model ${modelName}`);
 

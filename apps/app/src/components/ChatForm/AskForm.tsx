@@ -71,22 +71,18 @@ export const AskForm: React.FC<AskFormProps> = ({
       />
 
       <div className="flex justify-between items-center pb-2 px-2">
+        <div className="flex items-center gap-2">
+          <ModelSelector
+            value={model || selectedModel}
+            onValueChange={handleModelChange}
+            className="border-muted-foreground/10 bg-muted/5"
+            mcp={mcp}
+          />
 
-        {
-          !mcp && (
-            <ModelSelector
-              value={model || selectedModel}
-              onValueChange={handleModelChange}
-              className="border-muted-foreground/10 bg-muted/5"
-              mcp={mcp}
-            />
-          )
-        }
-
-        {
-          mcp && (
-            <PhantomConnect className="bg-purple-600 px-4 py-2 h-8 text-white rounded-none border cursor-pointer hover:bg-purple-500" />)
-        }
+          {mcp && (
+            <PhantomConnect className="bg-purple-600 px-4 py-2 h-8 text-white rounded-none border cursor-pointer hover:bg-purple-500" />
+          )}
+        </div>
 
 
         <div className="flex  items-center gap-2">

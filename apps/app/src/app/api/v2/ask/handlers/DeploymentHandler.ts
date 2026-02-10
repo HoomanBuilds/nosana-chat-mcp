@@ -9,6 +9,7 @@ import { getModels, createJob } from "@/lib/deployerTools/tool.createJob"
 
 import { estimateJobCost, extendJobRuntime, getMarket, getJob, getWalletBalance, listGpuMarkets, getAllJobs, stopJob, suggest_model_market } from "@/lib/deployerTools/deployer.tools";
 import { streamThrottle } from './utils';
+import { runWithPlannerModel } from "@/lib/deployerTools/utils/plannerContext";
 
 const openai = createOpenAI({
   apiKey: process.env.INFERIA_LLM_API_KEY,
@@ -23,27 +24,33 @@ export const handleDeployment = async (
   payload: Payload,
   send: (event: string, data: string) => void
 ) => {
-  const tools = await getTools();
+  const plannerModel =
+    payload.model ||
+    process.env.DEPLOYER_PLANNER_MODEL ||
+    "qwen3:0.6b";
 
-  const normalizeChats = (chats: any[] = []): any[] =>
-    chats
-      .filter((m) => m && m.content)
-      .map((m) => ({
-        role:
-          m.role === "model"
-            ? "assistant"
-            : ["user", "assistant", "system"].includes(m.role)
-              ? m.role
-              : "user",
-        content: String(m.content),
-      }));
+  return runWithPlannerModel(plannerModel, async () => {
+    const tools = await getTools();
 
-  const userWallet = payload.walletPublicKey;
+    const normalizeChats = (chats: any[] = []): any[] =>
+      chats
+        .filter((m) => m && m.content)
+        .map((m) => ({
+          role:
+            m.role === "model"
+              ? "assistant"
+              : ["user", "assistant", "system"].includes(m.role)
+                ? m.role
+                : "user",
+          content: String(m.content),
+        }));
 
-  const messages = [
-    {
-      role: "system",
-      content: `
+    const userWallet = payload.walletPublicKey;
+
+    const messages = [
+      {
+        role: "system",
+        content: `
 You are **NosanaDeploy**, a deployment agent for Nosana's decentralized GPU network.
 
 ${userWallet
@@ -76,97 +83,113 @@ If errors occur, try recovery twice before stopping. Always inform user of what�
 -In in response from tool add your human tone rather then just pasting tool output as it is
 ${payload.customPrompt || ""}
 `.trim()
-    }
-    ,
-    ...normalizeChats(payload.chats?.slice(-10) || []),
-    { role: "user", content: payload.query || "" },
-  ];
-
-  const llmStart = performance.now();
-
-  let stream;
-  try {
-    stream = streamText({
-      model: openai("qwen3:0.6b"),
-      messages,
-      tools,
-      toolChoice: "auto",
-      stopWhen: stepCountIs(6),
-      abortSignal: payload.signal,
-      temperature: 0.9,
-      maxRetries: 0
-    });
-  } catch (error) {
-    console.error("Failed to initialize LLM stream:", error);
-    send("error", llmErr(error));
-    send("finalResult", "Sorry, there was an error connecting to the AI service. Please try again later.");
-    return;
-  }
-
-  console.log(`🚀 LLM stream initialized [${(performance.now() - llmStart).toFixed(1)}ms]`);
-
-  let finalText = "";
-  const usedTools = new Set<string>();
-  let pendingTool: any = null;
-
-  try {
-    for await (const chunk of stream.fullStream) {
-      if (chunk.type === "error") {
-        send("error", llmErr((chunk as any).error || chunk));
-        return;
       }
+      ,
+      ...normalizeChats(payload.chats?.slice(-10) || []),
+      { role: "user", content: payload.query || "" },
+    ];
 
-      switch (chunk.type) {
-        case "text-delta":
-          send("event", "streaming");
-          await streamThrottle(chunk.text, send, payload.signal, {
-            chunkSize: 20,
-            minDelay: 2,
-            maxDelay: 40,
-          });
-          finalText += chunk.text;
-          break;
+    const llmStart = performance.now();
 
-        case "tool-input-start":
-          usedTools.add(chunk.toolName);
-          send("event", `executing: ${chunk.toolName}`);
-          console.log(`🧰 Tool started: ${chunk.toolName}`);
-          break;
-
-        case "tool-result":
-          if (
-            Boolean(chunk.output?.tool_execute) &&
-            ["createJob", "extendJobRuntime", "stopJob"].includes(chunk.toolName)
-          ) {
-            pendingTool = {
-              toolname: chunk.toolName,
-              args: chunk.output.args,
-              prompt: chunk.output.prompt || chunk.output.meta?.prompt,
-            };
-            console.log(`🚀 toolExecute event sent for ${chunk.toolName}`);
-          }
-          break;
-      }
+    let stream;
+    try {
+      stream = streamText({
+        model: openai.chat(plannerModel),
+        messages,
+        tools,
+        toolChoice: "auto",
+        stopWhen: stepCountIs(6),
+        abortSignal: payload.signal,
+        // Some reasoning/tool models reject temperature; omit for broader compatibility.
+        maxRetries: 1
+      });
+    } catch (error) {
+      console.error("Failed to initialize LLM stream:", error);
+      send("error", llmErr(error));
+      send("finalResult", "Sorry, there was an error connecting to the AI service. Please try again later.");
+      return;
     }
-  } catch (e) {
-    send("error", llmErr(e));
-    return;
-  }
 
-  send("toolsUsed", JSON.stringify([...usedTools]));
-  send("finalResult", finalText.trim());
+    console.log(`🚀 LLM stream initialized [${(performance.now() - llmStart).toFixed(1)}ms]`);
 
-  if (pendingTool) {
-    send("toolExecute", JSON.stringify(pendingTool));
-    console.log(`🚀 toolExecute sent post-stream for ${pendingTool.toolname}`);
-  }
+    let finalText = "";
+    const usedTools = new Set<string>();
+    let pendingTool: any = null;
+
+    try {
+      for await (const chunk of stream.fullStream) {
+        if (chunk.type === "error") {
+          send("error", llmErr((chunk as any).error || chunk));
+          return;
+        }
+
+        switch (chunk.type) {
+          case "text-delta":
+            send("event", "streaming");
+            await streamThrottle(chunk.text, send, payload.signal, {
+              chunkSize: 20,
+              minDelay: 2,
+              maxDelay: 40,
+            });
+            finalText += chunk.text;
+            break;
+
+          case "tool-input-start":
+            usedTools.add(chunk.toolName);
+            send("event", `executing: ${chunk.toolName}`);
+            console.log(`🧰 Tool started: ${chunk.toolName}`);
+            break;
+
+          case "tool-result":
+            if (
+              Boolean(chunk.output?.tool_execute) &&
+              ["createJob", "extendJobRuntime", "stopJob"].includes(chunk.toolName)
+            ) {
+              pendingTool = {
+                toolname: chunk.toolName,
+                args: chunk.output.args,
+                prompt: chunk.output.prompt || chunk.output.meta?.prompt,
+              };
+              console.log(`🚀 toolExecute event sent for ${chunk.toolName}`);
+            }
+            break;
+        }
+      }
+    } catch (e) {
+      send("error", llmErr(e));
+      return;
+    }
+
+    send("toolsUsed", JSON.stringify([...usedTools]));
+    send("finalResult", finalText.trim());
+
+    if (pendingTool) {
+      send("toolExecute", JSON.stringify(pendingTool));
+      console.log(`🚀 toolExecute sent post-stream for ${pendingTool.toolname}`);
+    }
+  });
 };
 
 
 function llmErr(e: unknown): string {
   const msg = (e as any)?.message || String(e);
+  const url = (e as any)?.url || "";
+  const statusCode = (e as any)?.statusCode;
+  const responseBody = (e as any)?.responseBody || "";
 
   console.error("🔴 LLM error:", msg);
+
+  if (statusCode === 404 && typeof url === "string" && url.includes("/responses")) {
+    return "Model endpoint does not support /v1/responses. Configure deployer planner to use /v1/chat/completions-compatible backend.";
+  }
+
+  if (/tool_use_failed|Failed to parse tool call arguments as JSON/i.test(msg + " " + responseBody)) {
+    return "Planner model generated invalid tool-call JSON. Switch DEPLOYER_PLANNER_MODEL to a tool-calling capable chat model and retry.";
+  }
+
+  if (statusCode === 500 && /Prompt processing failed/i.test(responseBody || msg)) {
+    return "Planner model backend failed while processing the prompt. Retry once; if persistent, switch DEPLOYER_PLANNER_MODEL.";
+  }
 
   if (/aborted|AbortError|SIGINT/i.test(msg))
     return "Request was cancelled before completion.";
@@ -175,7 +198,9 @@ function llmErr(e: unknown): string {
     return "The AI request took too long and timed out. Please try again.";
 
   if (/unauthorized|permission|key|quota/i.test(msg))
-    return "Server error: the AI service quota or key limit has been reached. Try again later.";
+    return responseBody
+      ? `Authorization failed for deployer model call. Details: ${responseBody}`
+      : "Server error: the AI service quota or key limit has been reached. Try again later.";
 
   if (/network|fetch|ECONN|ENOTFOUND|TLS/i.test(msg))
     return "Network issue: unable to reach the AI service. Check connection and retry.";
