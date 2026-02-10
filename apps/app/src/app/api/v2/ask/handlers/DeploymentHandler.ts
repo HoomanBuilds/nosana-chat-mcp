@@ -20,6 +20,46 @@ async function getTools(): Promise<ToolSet> {
   return { estimateJobCost, extendJobRuntime, getMarket, getJob, getWalletBalance, createJob, getModels, listGpuMarkets, getAllJobs, stopJob, suggest_model_market };
 }
 
+function resolveToolName(
+  rawName: unknown,
+  knownTools: Set<string>,
+): { valid: boolean; name: string; raw: string; sanitized: boolean } {
+  if (typeof rawName !== "string") {
+    return { valid: false, name: "", raw: "", sanitized: false };
+  }
+
+  const raw = rawName.trim();
+  if (!raw) {
+    return { valid: false, name: "", raw: "", sanitized: false };
+  }
+
+  if (knownTools.has(raw)) {
+    return { valid: true, name: raw, raw, sanitized: false };
+  }
+
+  const strippedChannelToken = raw.replace(/<\|[^|>]+?\|>.*$/g, "").trim();
+  if (knownTools.has(strippedChannelToken)) {
+    return {
+      valid: true,
+      name: strippedChannelToken,
+      raw,
+      sanitized: strippedChannelToken !== raw,
+    };
+  }
+
+  const beforeAngle = strippedChannelToken.split("<")[0]?.trim() || "";
+  if (knownTools.has(beforeAngle)) {
+    return {
+      valid: true,
+      name: beforeAngle,
+      raw,
+      sanitized: beforeAngle !== raw,
+    };
+  }
+
+  return { valid: false, name: "", raw, sanitized: false };
+}
+
 export const handleDeployment = async (
   payload: Payload,
   send: (event: string, data: string) => void
@@ -31,6 +71,9 @@ export const handleDeployment = async (
 
   return runWithPlannerModel(plannerModel, async () => {
     const tools = await getTools();
+    const knownToolNames = new Set(Object.keys(tools));
+    const actionableToolNames = new Set(["createJob", "extendJobRuntime", "stopJob"]);
+    const seenSanitizedToolStarts = new Set<string>();
 
     const normalizeChats = (chats: any[] = []): any[] =>
       chats
@@ -135,22 +178,49 @@ ${payload.customPrompt || ""}
             break;
 
           case "tool-input-start":
-            usedTools.add(chunk.toolName);
-            send("event", `executing: ${chunk.toolName}`);
-            console.log(`🧰 Tool started: ${chunk.toolName}`);
+            {
+              const tool = resolveToolName(chunk.toolName, knownToolNames);
+              if (!tool.valid) {
+                console.warn("⚠️ Ignoring unknown tool name from model:", chunk.toolName);
+                break;
+              }
+
+              // Some model backends leak channel control tokens into tool names.
+              // Skip duplicate "sanitized" starts for the same canonical tool.
+              if (tool.sanitized && seenSanitizedToolStarts.has(tool.name)) {
+                console.warn(`⚠️ Skipping duplicate sanitized tool start: ${tool.raw} -> ${tool.name}`);
+                break;
+              }
+              if (tool.sanitized) {
+                seenSanitizedToolStarts.add(tool.name);
+                console.warn(`⚠️ Sanitized malformed tool name: ${tool.raw} -> ${tool.name}`);
+              }
+
+              usedTools.add(tool.name);
+              send("event", `executing: ${tool.name}`);
+              console.log(`🧰 Tool started: ${tool.name}`);
+            }
             break;
 
           case "tool-result":
+            {
+              const tool = resolveToolName(chunk.toolName, knownToolNames);
+              if (!tool.valid) {
+                console.warn("⚠️ Ignoring tool-result with unknown tool name:", chunk.toolName);
+                break;
+              }
+
             if (
               Boolean(chunk.output?.tool_execute) &&
-              ["createJob", "extendJobRuntime", "stopJob"].includes(chunk.toolName)
+              actionableToolNames.has(tool.name)
             ) {
               pendingTool = {
-                toolname: chunk.toolName,
+                toolname: tool.name,
                 args: chunk.output.args,
                 prompt: chunk.output.prompt || chunk.output.meta?.prompt,
               };
-              console.log(`🚀 toolExecute event sent for ${chunk.toolName}`);
+              console.log(`🚀 toolExecute event sent for ${tool.name}`);
+            }
             }
             break;
         }
@@ -158,6 +228,12 @@ ${payload.customPrompt || ""}
     } catch (e) {
       send("error", llmErr(e));
       return;
+    }
+
+    if (!finalText.trim() && pendingTool) {
+      const fallbackText = `Prepared ${pendingTool.toolname} request. Review the generated configuration and approve to continue.`;
+      send("llmResult", fallbackText);
+      finalText = fallbackText;
     }
 
     send("toolsUsed", JSON.stringify([...usedTools]));
