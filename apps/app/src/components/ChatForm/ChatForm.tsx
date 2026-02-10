@@ -7,9 +7,8 @@ import { ChatInput } from "./ChatInput";
 import { ModelSelector } from "./Modelselector";
 import { FeatureToggle } from "./FeatureToggle";
 import { SubmitButton } from "./ui/submit-button";
-import { Brain, Wallet } from "lucide-react";
+import { Brain } from "lucide-react";
 import { useChatStore } from "@/store/chat.store";
-import { useWalletStore } from "@/store/wallet.store";
 import PhantomConnect from "../PhantomConnect";
 
 interface ChatFormProps {
@@ -56,7 +55,6 @@ export const ChatForm: React.FC<ChatFormProps> = ({
     const currentConfig = Modes.ChatModeConfig[selectedModel?.split("/")[1] as keyof typeof Modes.ChatModeConfig] || {};
 
     const { tool } = useChatStore()
-    const { wallet } = useWalletStore()
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         const isMobile = /Mobi|Android/i.test(navigator.userAgent);
 
@@ -99,13 +97,7 @@ export const ChatForm: React.FC<ChatFormProps> = ({
                     />
 
                     {tool && (
-                        wallet ? (
-                            <div onClick={() => navigator.clipboard.writeText(wallet)}>
-                                <Wallet className="text-purple-500" />
-                            </div>
-                        ) : (
-                            <PhantomConnect />
-                        )
+                        <PhantomConnect />
                     )}
 
                     {currentConfig.search && !tool && (

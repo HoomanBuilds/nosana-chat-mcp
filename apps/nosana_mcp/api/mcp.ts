@@ -1,5 +1,6 @@
 import { createMcpHandler, withMcpAuth } from "mcp-handler";
 import { registerTools } from "../deployer/registerTools.js";
+import { detectAuthMode } from "../deployer/utils/types.js";
 
 const allowedOrigins = [
   "https://nosanachat.inferia.ai",
@@ -24,11 +25,11 @@ function checkOrigin(req: Request) {
 
 function ensureJwt(req: any) {
   const authHeader = req.headers?.get?.("authorization");
-  const publicKey = authHeader?.startsWith("Bearer ")
+  const credential = authHeader?.startsWith("Bearer ")
     ? authHeader.slice(7)
     : undefined;
   try {
-    return { publicKey };
+    return { credential };
   } catch (err) {
     console.warn("Invalid token, regenerating...", err);
   }
@@ -36,12 +37,19 @@ function ensureJwt(req: any) {
 
 async function verifyJwt(req: any) {
   const result = ensureJwt(req);
-  const publicKey = result?.publicKey;
+  const credential = result?.credential;
+
+  // Detect auth mode: API key (nos_xxx_...) or wallet public key
+  const authMode = credential ? detectAuthMode(credential) : 'wallet';
+
   return {
-    token: publicKey || "",
-    clientId: publicKey || "",
+    token: credential || "",
+    clientId: credential || "",
     scopes: ["nosana:deployer"],
-    extra: { publicKey },
+    extra: {
+      publicKey: credential,
+      authMode,
+    },
   };
 }
 
@@ -50,14 +58,18 @@ const handler = createMcpHandler(
   {
     capabilities: {
       tools: {
-        create_job: { description: "Deploy a new Nosana job (host model on a decentralized GPU)" },
+        create_job: { description: "Deploy a new Nosana job (host model on a decentralized GPU) — wallet or API key" },
+        create_deployment: { description: "Create a deployment via Nosana API (API key mode only)" },
+        list_deployments: { description: "List all deployments (API key mode)" },
+        get_deployment: { description: "Get deployment details (API key mode)" },
+        stop_deployment: { description: "Stop a deployment (API key mode)" },
         update_job: { description: "Update an existing Nosana job" },
-        stop_job: { description: "Stop a running Nosana job" },
-        extend_job_runtime: { description: "Extend a job runtime" },
-        get_job: { description: "Fetch job details" },
+        stop_job: { description: "Stop a running Nosana job — wallet or API key" },
+        extend_job_runtime: { description: "Extend a job runtime — wallet or API key" },
+        get_job: { description: "Fetch job details — wallet or API key" },
         get_all_jobs: { description: "List all jobs for a user" },
-        get_wallet_balance: { description: "Get wallet balance" },
-        get_credit_balance: { description: "Get credit balance on nosana platform" },
+        get_wallet_balance: { description: "Get wallet balance (wallet mode)" },
+        get_credit_balance: { description: "Get credit balance on nosana platform — wallet or API key" },
         estimate_job_cost: { description: "Estimate cost for a Nosana job" },
       },
     },
@@ -81,11 +93,14 @@ export async function GET(req: Request) {
   if (forbidden) return forbidden;
 
   const result = ensureJwt(req);
-  const publicKey = result?.publicKey;
-  const pk = req.headers.get("authorization")
+  const credential = result?.credential;
+  const authMode = credential ? detectAuthMode(credential) : 'unknown';
 
-
-  return new Response(JSON.stringify({ ok: true, publicKey : pk }), {
+  return new Response(JSON.stringify({
+    ok: true,
+    authMode,
+    credential: credential ? `${credential.slice(0, 8)}...` : null,
+  }), {
     headers: {
       "Access-Control-Allow-Origin": req.headers.get("origin")!,
       "Access-Control-Allow-Credentials": "true",
@@ -97,7 +112,7 @@ export async function POST(req: any) {
   const forbidden = checkOrigin(req);
   if (forbidden) return forbidden;
 
-   const res = await authHandler(req.clone ? req.clone() : req);
+  const res = await authHandler(req.clone ? req.clone() : req);
   res.headers.append(
     "Access-Control-Allow-Origin",
     req.headers.get("origin")!

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import deployerInstance from "./NosanaDeployer.js";
 import { MARKETS } from "./utils/supportingModel.js";
-import { DEFAULT_MARKETS, GpuMarketSlug, SELF_MODEL_AVAILABLE } from "./utils/types.js";
+import { DEFAULT_MARKETS, GpuMarketSlug, SELF_MODEL_AVAILABLE, AuthContext, detectAuthMode } from "./utils/types.js";
 import { Job, validateJobDefinition } from "@nosana/sdk";
 import {
     buildJobDefinition,
@@ -15,10 +15,32 @@ const ensureDeployer = () => {
     return deployerInstance;
 };
 
+/** Extract auth context from MCP ctx */
+function getAuthContext(ctx: any, explicitKey?: string | null): AuthContext {
+    const credential =
+        explicitKey ||
+        ctx.authInfo?.extra?.publicKey ||
+        ctx.authInfo?.clientId ||
+        ctx.authInfo?.token as string;
+
+    if (!credential) {
+        return { mode: 'wallet', credential: '' };
+    }
+
+    return {
+        mode: detectAuthMode(credential),
+        credential,
+    };
+}
+
 export function registerTools(server: McpServer) {
+
+    // ────────────────────────────────
+    // create_job_definition
+    // ────────────────────────────────
     server.tool(
         "create_job_defination",
-        "create Job defination which can be used in nosana dashboard to deploy job/decentralized gpu's",
+        "create Job defination which can be used in nosana dashboard to deploy job/decentralized gpu's. Works with both wallet and API key authentication.",
         {
             params: z.object({
                 modelName: z.enum(SELF_MODEL_AVAILABLE),
@@ -28,18 +50,18 @@ export function registerTools(server: McpServer) {
                 env: z.record(z.string(), z.string()).default({}),
                 exposePort: z.number().default(8080),
                 userPublicKey: z.string().optional().nullable(),
+                nosanaApiKey: z.string().optional().nullable().describe("Nosana API key (nos_xxx_...) for API key mode. If provided, uses credits-based API instead of wallet."),
             }),
         },
         async ({ params }, ctx) => {
             try {
+                const auth = getAuthContext(ctx, params.nosanaApiKey);
                 const market_public_key = MARKETS[params.gpuMarket].address;
-                const userPubKey = params.userPublicKey || ctx.authInfo?.clientId || ctx.authInfo?.token as string
-                if (!userPubKey) return fail("Missing or invalid user public key.");
+                const userPubKey = params.userPublicKey || ctx.authInfo?.clientId || ctx.authInfo?.token as string;
 
-                const validator = await checkCreateJob(params);
-                if (validator?.content[0].type === "text") {
-                    return fail(`❌ Failed to create job: ${validator.content[0].text}`);
-                };
+                if (auth.mode === 'wallet' && !userPubKey) {
+                    return fail("Missing or invalid user public key. Connect a wallet or provide a Nosana API key.");
+                }
 
                 const jobDef = buildJobDefinition({
                     model: params.modelName,
@@ -50,6 +72,34 @@ export function registerTools(server: McpServer) {
                     requiredVramGB: 8,
                 });
                 validateJobDefinition(jobDef);
+
+                // For API key mode, show credits info; for wallet mode, show wallet balance
+                let costInfo = '';
+                if (auth.mode === 'api_key') {
+                    try {
+                        const deployer = ensureDeployer();
+                        const credits = await deployer.getCreditBalance(auth);
+                        const available = credits.assignedCredits - credits.reservedCredits - credits.settledCredits;
+                        costInfo = `
+| Auth Mode | API Key (Credits) |
+| Available Credits | ${available.toFixed(2)} |
+| Assigned Credits | ${credits.assignedCredits.toFixed(2)} |
+| Reserved Credits | ${credits.reservedCredits.toFixed(2)} |
+| Settled Credits | ${credits.settledCredits.toFixed(2)} |`;
+                    } catch {
+                        costInfo = '| Auth Mode | API Key (Credits) |\n| Credits | Could not fetch |';
+                    }
+                } else {
+                    const validator = await checkCreateJob({ ...params, userPublicKey: userPubKey });
+                    if (validator?.content[0].type === "text") {
+                        return fail(`❌ Failed to create job: ${validator.content[0].text}`);
+                    }
+                    costInfo = `
+| Auth Mode | Wallet (On-chain) |
+| Estimated price | ${validator?.content[0].text} |
+| Balance | ${validator?.content[1].text} |
+| USD price | ${validator?.content[2].text} |`;
+                }
 
                 return {
                     tool_execute: true,
@@ -75,15 +125,16 @@ TABLE
 | GPU Market | ${params.gpuMarket} |
 | Port | ${params.exposePort ?? "8080"} |
 | Environment | ${JSON.stringify(params.env) ?? "Unset"} |
-| Wallet | ${ctx.authInfo?.clientId ?? params.userPublicKey} |
-| Estimated price | ${validator?.content[0].text} |
-| balance price | ${validator?.content[1].text} |
-| USD price | ${validator?.content[2].text} |
+| Wallet/Key | ${auth.mode === 'api_key' ? 'API Key (nos_...)' : (ctx.authInfo?.clientId ?? params.userPublicKey)} |
+${costInfo}
 | cmd | ${params.cmd ?? "Unset"} |
 | time | ${params.timeoutSeconds} seconds|
 | Action | Create Job (Model Deployment) |
 
-Note: one-time 0.00429 SOL per GPU session (fraction refunded if closed early).
+Note: ${auth.mode === 'api_key'
+                                    ? 'Using credits-based deployment. Credits will be deducted from your Nosana account.'
+                                    : 'One-time 0.00429 SOL per GPU session (fraction refunded if closed early).'
+                                }
 
 tell user to use that job defination in nosana dashboard to publish job
 `,
@@ -98,20 +149,250 @@ tell user to use that job defination in nosana dashboard to publish job
     );
 
     // ────────────────────────────────
-    // get_job
+    // create_deployment (API key mode)
+    // ────────────────────────────────
+    server.tool(
+        "create_deployment",
+        "Create and start a deployment on Nosana using the Deployments API. Requires a Nosana API key (nos_xxx_...). This uses credits instead of on-chain wallet transactions.",
+        {
+            params: z.object({
+                modelName: z.enum(SELF_MODEL_AVAILABLE),
+                gpuMarket: z.enum(DEFAULT_MARKETS),
+                nosanaApiKey: z.string().describe("Your Nosana API key (nos_xxx_...)"),
+                timeout: z.number().default(60).describe("Timeout in minutes"),
+                replicas: z.number().default(1).describe("Number of replicas"),
+                cmd: z.string().optional(),
+                env: z.record(z.string(), z.string()).default({}),
+                exposePort: z.number().default(8080),
+            }),
+        },
+        async ({ params }) => {
+            try {
+                const deployer = ensureDeployer();
+                const auth: AuthContext = { mode: 'api_key', credential: params.nosanaApiKey };
+
+                const jobDef = buildJobDefinition({
+                    model: params.modelName,
+                    market: params.gpuMarket,
+                    exposePort: params.exposePort,
+                    env: params.env,
+                    cmd: params.cmd,
+                    requiredVramGB: 8,
+                });
+
+                const result = await deployer.createJob(
+                    {
+                        modelName: params.modelName,
+                        gpuMarket: params.gpuMarket,
+                        cmd: params.cmd,
+                        exposePort: params.exposePort,
+                        env: params.env,
+                    },
+                    auth,
+                );
+
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `
+✅ **Deployment Created Successfully (API Key Mode)**
+
+| Field | Value |
+|--------|--------|
+| Deployment ID | ${result.jobId} |
+| Model | ${params.modelName} |
+| GPU Market | ${params.gpuMarket} |
+| Market Address | ${result.market} |
+| Timeout | ${params.timeout} min |
+| Replicas | ${params.replicas} |
+| Port | ${params.exposePort} |
+| IPFS/Ref | ${result.ipfsHash} |
+| Dashboard | https://dashboard.nosana.com/deployments/${result.jobId} |
+
+The deployment has been created and started using your Nosana credits.
+`,
+                        },
+                    ],
+                };
+            } catch (err: any) {
+                console.error("create_deployment error:", err);
+                return fail(`❌ Failed to create deployment: ${err.message}`);
+            }
+        }
+    );
+
+    // ────────────────────────────────
+    // list_deployments (API key mode)
+    // ────────────────────────────────
+    server.tool(
+        "list_deployments",
+        "List all deployments for the authenticated Nosana account. Requires a Nosana API key.",
+        {
+            params: z.object({
+                nosanaApiKey: z.string().describe("Your Nosana API key (nos_xxx_...)"),
+            }),
+        },
+        async ({ params }) => {
+            try {
+                const deployer = ensureDeployer();
+                const auth: AuthContext = { mode: 'api_key', credential: params.nosanaApiKey };
+
+                const deployments = await deployer.listDeployments(auth);
+
+                if (!deployments.length) {
+                    return { content: [{ type: "text", text: "📭 No deployments found for this account." }] };
+                }
+
+                const rows = deployments
+                    .map((d: any) =>
+                        `| ${d.id ?? 'N/A'} | ${d.name ?? 'N/A'} | ${d.status ?? 'unknown'} | ${d.market ?? 'N/A'} | ${d.replicas ?? 0} |`
+                    )
+                    .join("\n");
+
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `
+📊 **Your Deployments**
+
+| ID | Name | Status | Market | Replicas |
+|-----|------|--------|--------|----------|
+${rows}
+`,
+                        },
+                    ],
+                };
+            } catch (err: any) {
+                console.error("list_deployments error:", err);
+                return fail(`❌ Failed to list deployments: ${err.message}`);
+            }
+        }
+    );
+
+    // ────────────────────────────────
+    // get_deployment (API key mode)
+    // ────────────────────────────────
+    server.tool(
+        "get_deployment",
+        "Get details of a specific deployment. Requires a Nosana API key.",
+        {
+            params: z.object({
+                deploymentId: z.string().describe("The deployment ID"),
+                nosanaApiKey: z.string().describe("Your Nosana API key (nos_xxx_...)"),
+            }),
+        },
+        async ({ params }) => {
+            try {
+                const deployer = ensureDeployer();
+                const auth: AuthContext = { mode: 'api_key', credential: params.nosanaApiKey };
+
+                const deployment = await deployer.getDeployment(params.deploymentId, auth);
+
+                const formatted = Object.entries(deployment)
+                    .filter(([k]) => !['job_definition', 'revisions'].includes(k))
+                    .map(([k, v]) => `| ${k} | ${typeof v === 'object' ? JSON.stringify(v) : v} |`)
+                    .join("\n");
+
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `
+📄 **Deployment Details**
+
+| Field | Value |
+|--------|--------|
+${formatted}
+
+Dashboard: https://dashboard.nosana.com/deployments/${params.deploymentId}
+`,
+                        },
+                    ],
+                };
+            } catch (err: any) {
+                console.error("get_deployment error:", err);
+                return fail(`❌ Failed to get deployment: ${err.message}`);
+            }
+        }
+    );
+
+    // ────────────────────────────────
+    // stop_deployment (API key mode)
+    // ────────────────────────────────
+    server.tool(
+        "stop_deployment",
+        "Stop a running deployment. Requires a Nosana API key.",
+        {
+            params: z.object({
+                deploymentId: z.string().describe("The deployment ID to stop"),
+                nosanaApiKey: z.string().describe("Your Nosana API key (nos_xxx_...)"),
+            }),
+        },
+        async ({ params }) => {
+            try {
+                const deployer = ensureDeployer();
+                const auth: AuthContext = { mode: 'api_key', credential: params.nosanaApiKey };
+
+                const result = await deployer.stopDeployment(params.deploymentId, auth);
+
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `✅ ${result.note}\n\nDeployment ID: ${params.deploymentId}`,
+                        },
+                    ],
+                };
+            } catch (err: any) {
+                console.error("stop_deployment error:", err);
+                return fail(`❌ Failed to stop deployment: ${err.message}`);
+            }
+        }
+    );
+
+    // ────────────────────────────────
+    // get_job (dual mode)
     // ────────────────────────────────
     server.tool(
         "get_job",
-        "Fetches details about a Nosana job",
+        "Fetches details about a Nosana job. Works with both wallet (on-chain) and API key.",
         {
-            params: z.object({ jobId: z.string() }),
+            params: z.object({
+                jobId: z.string(),
+                nosanaApiKey: z.string().optional().nullable().describe("Optional Nosana API key for API key mode"),
+            }),
         },
-        async ({ params: { jobId } }, ctx) => {
+        async ({ params: { jobId, nosanaApiKey } }, ctx) => {
             try {
                 const deployer = ensureDeployer();
-                const job: Job | null = await deployer.getJob(jobId);
+                const auth = getAuthContext(ctx, nosanaApiKey);
+                const job = await deployer.getJob(jobId, auth);
                 if (!job) return fail(`⚠️ Job ${jobId} not found.`);
 
+                // Format depends on whether it's an on-chain Job or API response
+                if (auth.mode === 'api_key') {
+                    const formatted = Object.entries(job)
+                        .filter(([k]) => !['job_definition', 'ops'].includes(k))
+                        .map(([k, v]) => `| ${k} | ${typeof v === 'object' ? JSON.stringify(v) : v} |`)
+                        .join("\n");
+
+                    return {
+                        content: [{
+                            type: "text",
+                            text: `
+📄 **Job Info (API Mode)**
+
+| Field | Value |
+|--------|--------|
+${formatted}
+`,
+                        }],
+                    };
+                }
+
+                // Wallet mode format
                 const marketEntry = Object.entries(MARKETS).find(
                     ([_, m]) => m.address === job.market.toString()
                 );
@@ -201,7 +482,7 @@ ${rows}
     // ────────────────────────────────
     server.tool(
         "get_wallet_balance",
-        "Fetches Solana + NOS token balances",
+        "Fetches Solana + NOS token balances (wallet mode only)",
         {
             params: z.object({ userPubKey: z.string().optional().nullable() }),
         },
@@ -228,6 +509,51 @@ ${rows}
             } catch (err: any) {
                 console.error("get_wallet_balance error:", err);
                 return fail(`❌ Failed to fetch wallet: ${err.message}`);
+            }
+        }
+    );
+
+    // ────────────────────────────────
+    // get_credit_balance (dual mode)
+    // ────────────────────────────────
+    server.tool(
+        "get_credit_balance",
+        "Get credit balance on the Nosana platform. Works with both wallet and API key authentication.",
+        {
+            params: z.object({
+                nosanaApiKey: z.string().optional().nullable().describe("Nosana API key (nos_xxx_...) for API mode. If not provided, uses server-side API key."),
+            }),
+        },
+        async ({ params }, ctx) => {
+            try {
+                const deployer = ensureDeployer();
+                const auth = getAuthContext(ctx, params.nosanaApiKey);
+                const credits = await deployer.getCreditBalance(auth);
+                const available = credits.assignedCredits - credits.reservedCredits - credits.settledCredits;
+
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `
+💳 **Nosana Credit Balance**
+
+| Field | Value |
+|--------|--------|
+| Auth Mode | ${auth.mode === 'api_key' ? 'API Key' : 'Wallet'} |
+| Assigned Credits | ${credits.assignedCredits.toFixed(2)} |
+| Reserved Credits | ${credits.reservedCredits.toFixed(2)} |
+| Settled Credits | ${credits.settledCredits.toFixed(2)} |
+| **Available Credits** | **${available.toFixed(2)}** |
+
+${available <= 0 ? '⚠️ You have no available credits. Top up at https://deploy.nosana.com' : ''}
+`,
+                        },
+                    ],
+                };
+            } catch (err: any) {
+                console.error("get_credit_balance error:", err);
+                return fail(`❌ Failed to fetch credit balance: ${err.message}`);
             }
         }
     );
@@ -328,7 +654,9 @@ Total (${durationSeconds}s): ${cost.estimatedCost}
         }
     );
 
-
+    // ────────────────────────────────
+    // get_exact_value
+    // ────────────────────────────────
     server.tool(
         "get_exact_value",
         "Calculates the exact value of a Nosana GPU job — returning SOL, NOS, and USD estimates for a given duration.",
@@ -369,6 +697,96 @@ Total (${durationSeconds}s): ${cost.estimatedCost}
             } catch (err: any) {
                 console.error("get_exact_value error:", err);
                 return fail(`❌ Failed to calculate exact value: ${err.message}`);
+            }
+        }
+    );
+
+    // ────────────────────────────────
+    // stop_job (dual mode)
+    // ────────────────────────────────
+    server.tool(
+        "stop_job",
+        "Stop a running Nosana job. Works with both wallet (on-chain) and API key mode.",
+        {
+            params: z.object({
+                jobId: z.string().describe("The job ID or address to stop"),
+                nosanaApiKey: z.string().optional().nullable().describe("Optional Nosana API key for API key mode"),
+            }),
+        },
+        async ({ params }, ctx) => {
+            try {
+                const deployer = ensureDeployer();
+                const auth = getAuthContext(ctx, params.nosanaApiKey);
+
+                const result = await deployer.stopJob(params.jobId, auth);
+
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `
+${result.ok ? '✅' : '❌'} **Stop Job Result**
+
+| Field | Value |
+|--------|--------|
+| Job ID | ${params.jobId} |
+| Status | ${result.ok ? 'Stopped' : 'Failed'} |
+| Mode | ${auth.mode === 'api_key' ? 'API Key' : 'Wallet'} |
+${result.tx ? `| Transaction | ${result.tx} |` : ''}
+${result.note ? `| Note | ${result.note} |` : ''}
+`,
+                        },
+                    ],
+                };
+            } catch (err: any) {
+                console.error("stop_job error:", err);
+                return fail(`❌ Failed to stop job: ${err.message}`);
+            }
+        }
+    );
+
+    // ────────────────────────────────
+    // extend_job_runtime (dual mode)
+    // ────────────────────────────────
+    server.tool(
+        "extend_job_runtime",
+        "Extend a running job's runtime. Works with both wallet (on-chain) and API key mode.",
+        {
+            params: z.object({
+                jobId: z.string().describe("The job ID or address"),
+                extensionSeconds: z.number().min(60).max(86400).describe("Extension time in seconds"),
+                nosanaApiKey: z.string().optional().nullable().describe("Optional Nosana API key for API key mode"),
+            }),
+        },
+        async ({ params }, ctx) => {
+            try {
+                const deployer = ensureDeployer();
+                const auth = getAuthContext(ctx, params.nosanaApiKey);
+
+                const result = await deployer.extendJobRuntime(params.jobId, params.extensionSeconds, auth);
+
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `
+${result.ok ? '✅' : '❌'} **Extend Job Runtime Result**
+
+| Field | Value |
+|--------|--------|
+| Job ID | ${params.jobId} |
+| Extension | ${params.extensionSeconds}s (${(params.extensionSeconds / 60).toFixed(1)} min) |
+| Status | ${result.ok ? 'Extended' : 'Failed'} |
+| Mode | ${auth.mode === 'api_key' ? 'API Key' : 'Wallet'} |
+${result.txId ? `| Transaction | ${result.txId} |` : ''}
+| Note | ${result.note} |
+`,
+                        },
+                    ],
+                };
+            } catch (err: any) {
+                console.error("extend_job_runtime error:", err);
+                return fail(`❌ Failed to extend job: ${err.message}`);
             }
         }
     );

@@ -36,7 +36,7 @@ export const createJob = tool({
                .describe(
                     "Complete user request context. Must include model name, family, GPU needs, env vars (like API_KEY), ports, commands, and all custom parameters provided by the user. Used to dynamically build the full job definition."
                ),
-          userPublicKey: z.string(),
+          userPublicKey: z.string().optional().describe("User's Solana wallet address. Optional in API key mode."),
           market: z
                .enum(DEFAULT_MARKETS)
                .optional()
@@ -57,6 +57,9 @@ export const createJob = tool({
                "qwen3:0.6b";
           let market_public_key: string = "";
           let Job_cost: number | null = null;
+
+          // Default userPublicKey if missing (API key mode)
+          const effectiveUserPubKey = params.userPublicKey || "api-key-user";
 
           console.log("params", params);
           try {
@@ -136,6 +139,7 @@ export const createJob = tool({
                               tool_execute: true,
                               args: {
                                    ...params,
+                                   userPublicKey: effectiveUserPubKey,
                                    marketPubKey: market_public_key,
                               },
                               prompt: params.directJobDef,
@@ -203,7 +207,7 @@ export const createJob = tool({
                     let jobdef: any;
                     try {
                          jobdef = createJobDefination(extract_jobdef, {
-                              userPubKey: params.userPublicKey,
+                              userPubKey: effectiveUserPubKey,
                               market: params.market || market_public_key,
                               timeoutSeconds: params.timeoutSeconds,
                               family: family + "/"

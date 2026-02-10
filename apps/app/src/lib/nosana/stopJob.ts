@@ -2,7 +2,11 @@ import { Client } from "@nosana/sdk";
 import { PublicKey } from "@solana/web3.js";
 import { useWalletStore } from "@/store/wallet.store";
 
-export async function stopJob(jobAddress: PublicKey | string): Promise<{ txSig: string; result: { result: string } }> {
+const NOSANA_API_BASE = "https://dashboard.k8s.prd.nos.ci/api";
+
+// ── Wallet mode ──
+
+async function stopJobViaWallet(jobAddress: PublicKey | string): Promise<{ txSig: string; result: { result: string } }> {
     const { wallet, provider } = useWalletStore.getState();
     if (!provider || !wallet) throw new Error("Wallet not connected");
 
@@ -43,7 +47,7 @@ export async function stopJob(jobAddress: PublicKey | string): Promise<{ txSig: 
 
     console.log(`Job stopped. Tx: ${txSig}`);
     const does_job_exist = await nosana.jobs.get(jobPublicKey);
-    
+
     if (does_job_exist.state !== "COMPLETED") {
         console.warn("Job not stopped, something went wrong.");
         return {
@@ -53,4 +57,66 @@ export async function stopJob(jobAddress: PublicKey | string): Promise<{ txSig: 
         };
     }
     return { txSig, result: { result: `the job stopped successfully with result: tx: ${txSig}` } };
+}
+
+// ── API key mode ──
+
+async function stopJobViaApiKey(jobAddress: string): Promise<{ txSig: string; result: { result: string } }> {
+    const { nosanaApiKey } = useWalletStore.getState();
+    if (!nosanaApiKey) throw new Error("Nosana API key not set");
+
+    // Try stop endpoint
+    const res = await fetch(`${NOSANA_API_BASE}/jobs/stop`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${nosanaApiKey}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ address: jobAddress }),
+    });
+
+    if (!res.ok) {
+        // Fallback to stop-with-credits
+        const res2 = await fetch(`${NOSANA_API_BASE}/jobs/stop-with-credits`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${nosanaApiKey}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ jobAddress }),
+        });
+
+        if (!res2.ok) {
+            const errText = await res2.text();
+            throw new Error(`Failed to stop job via API: ${res2.status} ${errText}`);
+        }
+
+        const data = await res2.json();
+        return {
+            txSig: data.tx ?? '',
+            result: { result: `Job stopped via API (credits). ${data.tx ? `Tx: ${data.tx}` : ''}` },
+        };
+    }
+
+    const data = await res.json();
+    return {
+        txSig: data.transactionId ?? data.tx ?? '',
+        result: { result: `Job stopped via Nosana API. ${data.transactionId ?? ''}` },
+    };
+}
+
+// ── Main entry point ──
+
+export async function stopJob(jobAddress: PublicKey | string): Promise<{ txSig: string; result: { result: string } }> {
+    const { authMode, wallet, nosanaApiKey } = useWalletStore.getState();
+
+    if (authMode === 'api_key' && nosanaApiKey) {
+        return stopJobViaApiKey(jobAddress.toString());
+    }
+
+    if (wallet) {
+        return stopJobViaWallet(jobAddress);
+    }
+
+    throw new Error("Not connected. Please connect a wallet or provide a Nosana API key.");
 }

@@ -1,5 +1,49 @@
 import { PublicKey } from "@solana/web3.js";
 
+// ── Auth Mode ──────────────────────────────────────────────
+export type AuthMode = 'wallet' | 'api_key';
+
+export interface AuthContext {
+  mode: AuthMode;
+  /** Wallet public key (wallet mode) or API key (api_key mode) */
+  credential: string;
+}
+
+/** Detect auth mode from the credential string */
+export function detectAuthMode(credential: string): AuthMode {
+  // Nosana API keys start with 'nos_'
+  if (credential.startsWith('nos_')) return 'api_key';
+  return 'wallet';
+}
+
+// ── Nosana HTTP API Config ─────────────────────────────────
+export const NOSANA_API_BASE = {
+  mainnet: 'https://dashboard.k8s.prd.nos.ci/api',
+  devnet: 'https://dashboard.k8s.dev.nos.ci/api',
+} as const;
+
+// ── Deployment API Types ───────────────────────────────────
+export interface DeploymentCreateParams {
+  name: string;
+  market: string;
+  timeout: number;
+  replicas: number;
+  strategy: 'SIMPLE' | 'SCHEDULED';
+  job_definition: Record<string, any>;
+}
+
+export interface DeploymentResponse {
+  id: string;
+  name: string;
+  status: string;
+  market: string;
+  replicas: number;
+  strategy: string;
+  created_at: string;
+  updated_at: string;
+  [key: string]: any;
+}
+
 export interface WalletBalance {
   sol: number;
   nos: number;
@@ -104,3 +148,27 @@ export type UpdateJobInput =
   | { type: 'update_gpu'; jobAddress: string; market: GpuMarketSlug };
 
 export type Network = 'mainnet' | 'devnet';
+
+// ── API-mode Job Types ─────────────────────────────────────
+export interface ApiJobPostParams {
+  ipfsHash: string;
+  market: string;
+  timeout?: number;
+  node?: string;
+}
+
+export interface ApiJobResponse {
+  address?: string;
+  job?: string;
+  state?: string;
+  credits?: {
+    creditsUsed?: number;
+  };
+  [key: string]: any;
+}
+
+export interface ApiCreditBalance {
+  assignedCredits: number;
+  reservedCredits: number;
+  settledCredits: number;
+}

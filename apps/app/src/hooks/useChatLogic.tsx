@@ -60,8 +60,8 @@ export function useChatLogic() {
   const handledRef = useRef(false);
   const controllerRef = useRef<AbortController | null>(null);
 
-  // --- Wallet ---
-  const { wallet, connectWallet, isConnected, checkPhantom, verifyConnection } =
+  // --- Wallet / Auth ---
+  const { wallet, connectWallet, isConnected, checkPhantom, verifyConnection, authMode, nosanaApiKey, isApiKeyConnected, getCredential } =
     useWalletStore();
 
   // --- Effects ---
@@ -122,30 +122,37 @@ export function useChatLogic() {
 
   async function ensureWallet() {
     try {
-      if (!wallet || !isConnected) {
+      const currentState = useWalletStore.getState();
+      // If API key is connected, no wallet needed
+      if (currentState.isApiKeyConnected && currentState.nosanaApiKey) {
+        console.log("✅ Using API key mode — no wallet needed");
+        return;
+      }
+
+      if (!currentState.wallet || !currentState.isConnected) {
         console.log("🔄 Wallet not connected, attempting to connect...");
         await connectWallet();
 
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
-        const currentState = useWalletStore.getState();
-        if (!currentState.wallet) {
-          throw new Error("Wallet connection failed or was rejected");
+        const updatedState = useWalletStore.getState();
+        if (!updatedState.wallet && !updatedState.isApiKeyConnected) {
+          throw new Error("No connection available. Please connect a wallet or set a Nosana API key.");
         }
 
         console.log("✅ Wallet connected successfully");
       }
     } catch (err: any) {
-      console.error("Wallet connection failed:", err);
-      throw new Error(`Wallet connection failed: ${err.message}`);
+      console.error("Auth connection failed:", err);
+      throw new Error(`Connection failed: ${err.message}`);
     }
   }
 
   const customConfig = useMemo(() => getCustomConfig(), []);
 
   const walletCondition = useMemo(
-    () => tool === "deployer" && isConnected && wallet,
-    [tool, isConnected, wallet]
+    () => tool === "deployer" && (isConnected && wallet || isApiKeyConnected && nosanaApiKey),
+    [tool, isConnected, wallet, isApiKeyConnected, nosanaApiKey]
   );
 
   const handleAskChunk = useCallback(async (
@@ -214,7 +221,7 @@ export function useChatLogic() {
           model: modelToSend,
           mode: tool ? tool : undefined,
           customConfig: customConfig,
-          walletPublicKey: walletCondition ? wallet : undefined,
+          walletPublicKey: walletCondition ? getCredential() : undefined,
           chats: conversations.slice(-50).map((c) => ({
             role: c.role,
             content: c.content,
@@ -235,10 +242,10 @@ export function useChatLogic() {
           chatId: userMessageId,
           deployedModel: deployedModelConfig
             ? {
-                baseURL: deployedModelConfig.baseURL,
-                model: deployedModelConfig.model,
-                apiKey: deployedModelConfig.apiKey,
-              }
+              baseURL: deployedModelConfig.baseURL,
+              model: deployedModelConfig.model,
+              apiKey: deployedModelConfig.apiKey,
+            }
             : undefined,
         }),
         signal,
@@ -719,6 +726,8 @@ export function useChatLogic() {
     tool,
     isConnected,
     wallet,
+    isApiKeyConnected,
+    nosanaApiKey,
     customConfig,
     conversations,
     search,

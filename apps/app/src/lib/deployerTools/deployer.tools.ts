@@ -45,7 +45,7 @@ export const createJob = tool({
     if (params.directJobDef) {
       try {
         const validation = validateJobDefinition(params.directJobDef);
-        
+
         if (!validation.success) {
           const errors = validation.errors?.map((e: any) => `  • ${e.path.join('.')}: ${e.message}`).join('\n') || 'Unknown validation errors';
           return fail(`Job definition validation failed:\n${errors}\n\nPlease fix these issues and try again.`);
@@ -58,7 +58,7 @@ export const createJob = tool({
           /^ghcr\.io\/huggingface\/text-generation-inference/.test(jobImage) ||
           /^huggingface\/text-generation-inference/.test(jobImage);
         const vram = params.directJobDef.ops?.[0]?.args?.required_vram || params.directJobDef.meta?.system_requirements?.required_vram || 8;
-        
+
         // Try to find appropriate market
         if (!params.market) {
           const compatibleMarket = Object.entries(MARKETS).find(
@@ -79,7 +79,7 @@ export const createJob = tool({
             .slice(0, 3)
             .map(([name, info]) => `  • ${name}: ${info.vram_gb}GB`)
             .join('\n');
-          
+
           return fail(`❌ No compatible market found for VRAM requirement: ${vram}GB.
 
 **Maximum available VRAM:** ${maxVram}GB
@@ -188,7 +188,7 @@ Awaiting user confirmation before deployment.
 
     if (!params.market) {
       const gpuMatch = getGpuMarket(result.vRAM_required);
-      
+
       if (!gpuMatch) {
         const maxVram = Math.max(...Object.values(MARKETS).map(m => m.vram_gb));
         const topGpus = Object.entries(MARKETS)
@@ -196,7 +196,7 @@ Awaiting user confirmation before deployment.
           .slice(0, 5)
           .map(([name, info]) => `  • ${name}: ${info.vram_gb}GB VRAM ($${info.estimated_price_usd_per_hour}/hr)`)
           .join('\n');
-        
+
         // Calculate quantization options
         const quantOptions = [
           { name: 'INT4', factor: 0.25, desc: '~75% VRAM reduction' },
@@ -205,7 +205,7 @@ Awaiting user confirmation before deployment.
         ]
           .map(q => ({ ...q, vram: Math.ceil(result.vRAM_required * q.factor) }))
           .filter(q => q.vram <= maxVram);
-        
+
         return fail(`❌ Model requires ${result.vRAM_required}GB VRAM but maximum available GPU has ${maxVram}GB.
 
 **Model:** ${params.model}
@@ -215,10 +215,10 @@ Awaiting user confirmation before deployment.
 **💡 Suggested Solutions:**
 
 1. **Use Quantization** (reduces VRAM requirements):
-${quantOptions.length > 0 
-  ? quantOptions.map(q => `   • ${q.name}: ~${q.vram}GB VRAM (${q.desc}) Fits!`).join('\n')
-  : '   • Even with INT4 quantization, model is too large for available GPUs'
-}
+${quantOptions.length > 0
+            ? quantOptions.map(q => `   • ${q.name}: ~${q.vram}GB VRAM (${q.desc}) Fits!`).join('\n')
+            : '   • Even with INT4 quantization, model is too large for available GPUs'
+          }
 
 2. **Use Smaller Model Variant:**
    • Try a smaller version (e.g., if using 70B → try 7B/13B)
@@ -241,7 +241,7 @@ Try one of these approaches:
 - "Find a smaller variant of ${params.model}"
         `);
       }
-      
+
       params.market = gpuMatch.slug;
       market_public_key = gpuMatch.address;
       Model_vram = result.vRAM_required
@@ -700,6 +700,7 @@ export const getWalletBalance = tool({
 });
 
 
+
 export const estimateJobCost = tool({
   description: "Estimates the credit cost of a job on a given GPU market.",
   inputSchema: z.object({
@@ -936,10 +937,10 @@ export const validate_job_definition = tool({
     try {
       // Validate using Nosana SDK
       const validation = validateJobDefinition(jobDefinition);
-      
+
       if (!validation.success) {
         const errors = validation.errors?.map((e: any) => `  • ${e.path.join('.')}: ${e.message}`).join('\n') || 'Unknown validation errors';
-        
+
         return {
           content: [
             {
@@ -972,7 +973,7 @@ Would you like me to help fix these issues?
       // Additional checks
       const issues: string[] = [];
       const warnings: string[] = [];
-      
+
       // Check for common issues
       if (jobDefinition.ops?.[0]?.args?.image) {
         const image = jobDefinition.ops[0].args.image;
@@ -980,22 +981,22 @@ Would you like me to help fix these issues?
           warnings.push('Image name might be incomplete. Expected format: org/repo:tag or registry/org/repo:tag');
         }
       }
-      
+
       if (jobDefinition.ops?.[0]?.args?.env) {
         const env = jobDefinition.ops[0].args.env;
         const requiredEnvForTextGen = ['MODEL_ID', 'MAX_MODEL_LEN'];
         const hasTextGenKeys = requiredEnvForTextGen.some(key => key in env);
-        
+
         if (jobDefinition.ops[0].args.image?.includes('text-generation-inference') && !hasTextGenKeys) {
           warnings.push('Text generation image detected but missing common env vars like MODEL_ID or MAX_MODEL_LEN');
         }
       }
-      
+
       const vram = jobDefinition.ops?.[0]?.args?.required_vram || jobDefinition.meta?.system_requirements?.required_vram;
       if (!vram) {
         warnings.push('No VRAM requirement specified. Consider adding required_vram field.');
       }
-      
+
       if (!jobDefinition.ops?.[0]?.args?.expose) {
         warnings.push('No port exposed. Service might not be accessible externally.');
       }

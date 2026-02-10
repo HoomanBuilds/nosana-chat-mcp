@@ -8,6 +8,7 @@ import { Payload } from "@/lib/utils/validation";
 import { getModels, createJob } from "@/lib/deployerTools/tool.createJob"
 
 import { estimateJobCost, extendJobRuntime, getMarket, getJob, getWalletBalance, listGpuMarkets, getAllJobs, stopJob, suggest_model_market } from "@/lib/deployerTools/deployer.tools";
+import { buildApiKeyToolSet } from "@/lib/deployerTools/apikey.tools";
 import { streamThrottle } from './utils';
 import { runWithPlannerModel } from "@/lib/deployerTools/utils/plannerContext";
 
@@ -16,8 +17,22 @@ const openai = createOpenAI({
   baseURL: process.env.INFERIA_LLM_URL,
 });
 
-async function getTools(): Promise<ToolSet> {
+/** Wallet mode tools — on-chain via SDK */
+function getWalletTools(): ToolSet {
   return { estimateJobCost, extendJobRuntime, getMarket, getJob, getWalletBalance, createJob, getModels, listGpuMarkets, getAllJobs, stopJob, suggest_model_market };
+}
+
+/** API key mode tools — REST API via bearer token, no wallet params exposed */
+function getApiKeyTools(apiKey: string): ToolSet {
+  const apiTools = buildApiKeyToolSet(apiKey);
+  return {
+    ...apiTools,
+    // Shared tools that work in both modes
+    createJob,
+    getModels,
+    getMarket,
+    getJob,
+  };
 }
 
 function resolveToolName(
@@ -70,9 +85,16 @@ export const handleDeployment = async (
     "qwen3:0.6b";
 
   return runWithPlannerModel(plannerModel, async () => {
-    const tools = await getTools();
+    const userWallet = payload.walletPublicKey;
+    const isApiKeyMode = userWallet?.startsWith('nos_');
+
+    // ── Pick the right tool set based on auth mode ──
+    const tools = isApiKeyMode
+      ? getApiKeyTools(userWallet!)
+      : getWalletTools();
+
     const knownToolNames = new Set(Object.keys(tools));
-    const actionableToolNames = new Set(["createJob", "extendJobRuntime", "stopJob"]);
+    const actionableToolNames = new Set(["createJob", "extendJobRuntime", "stopJob", "stopDeployment"]);
     const seenSanitizedToolStarts = new Set<string>();
 
     const normalizeChats = (chats: any[] = []): any[] =>
@@ -88,7 +110,43 @@ export const handleDeployment = async (
           content: String(m.content),
         }));
 
-    const userWallet = payload.walletPublicKey;
+    // ── System prompt — clean, mode-specific ──
+    const authPrompt = isApiKeyMode
+      ? `**Auth Mode:** API Key (Credits-based). The user is connected via their Nosana API key.
+You do NOT have access to any wallet. Do not ask for a wallet address.
+
+**Available Tools:**
+- getCreditBalance → check credit balance
+- listDeployments → list all deployments (jobs)
+- getDeployment → get details of a specific deployment
+- stopDeployment → stop a running deployment
+- createJob → create a new deployment
+- getModels → search for models
+- getMarket → get GPU market info
+- getJob → get job info by ID
+- listGpuMarkets → list all GPU markets
+- estimateJobCost → estimate deployment cost
+- suggest_model_market → get recommendations
+
+All tools are pre-authenticated. Just call them directly — no credentials needed in parameters.`
+      : userWallet
+        ? `**Auth Mode:** Wallet (On-chain)
+**Wallet:** ${userWallet}
+Use this as userPublicKey / UsersPublicKey / job_owners_pubKey / userPubKey in all tool calls.
+
+**Available Tools:**
+- createJob → create a new job (userPublicKey="${userWallet}")
+- getWalletBalance → check SOL + NOS balances (UsersPublicKey="${userWallet}")
+- getAllJobs → list all jobs (userPubKey="${userWallet}")
+- getJob → get job details by ID
+- stopJob → stop a running job (job_owners_pubKey="${userWallet}")
+- extendJobRuntime → extend a running job (job_owners_pubKey="${userWallet}")
+- getMarket → get GPU market info
+- listGpuMarkets → list all GPU markets
+- estimateJobCost → estimate job cost
+- suggest_model_market → get recommendations
+- getModels → search for models`
+        : "**No wallet connected.** Ask the user to connect their wallet or provide a Nosana API key first.";
 
     const messages = [
       {
@@ -96,19 +154,13 @@ export const handleDeployment = async (
         content: `
 You are **NosanaDeploy**, a deployment agent for Nosana's decentralized GPU network.
 
-${userWallet
-          ? `**Wallet:** ${userWallet}\nUse this as userPublicKey in all Nosana ops.`
-          : "**No wallet connected.** Require wallet for deploy ops."}
-
-Core Ops:
-- Tools: createJob, extendJobRuntime, stopJob, getWalletBalance, getJob, getAllJobs, validate_job_definition.
-- Always include userPublicKey="${userWallet || 'WALLET_REQUIRED'}" where needed.
+${authPrompt}
 
 Handling User JSON:
 1. If JSON has 'type', 'ops', 'meta' → first run createJob.
    - On pass + deploy request → createJob(directJobDef={...json...})
    - Never alter JSON unless asked.
-2. If user says “deploy X” → createJob(model="X", requirements="deploy X with defaults").
+2. If user says "deploy X" → createJob(model="X", requirements="deploy X with defaults").
 3. For custom services (e.g., Jupyter) → createJob with detailed requirements.
 
 Behavior:
@@ -121,13 +173,12 @@ Behavior:
 - Use past tool results as context for next action.
 - Respond cleanly; no filler, no repetition.
 
-If errors occur, try recovery twice before stopping. Always inform user of what’s done and what’s next.
+If errors occur, try recovery twice before stopping. Always inform user of what's done and what's next.
 
 -In in response from tool add your human tone rather then just pasting tool output as it is
 ${payload.customPrompt || ""}
 `.trim()
-      }
-      ,
+      },
       ...normalizeChats(payload.chats?.slice(-10) || []),
       { role: "user", content: payload.query || "" },
     ];
@@ -143,7 +194,6 @@ ${payload.customPrompt || ""}
         toolChoice: "auto",
         stopWhen: stepCountIs(6),
         abortSignal: payload.signal,
-        // Some reasoning/tool models reject temperature; omit for broader compatibility.
         maxRetries: 1
       });
     } catch (error) {
@@ -185,8 +235,6 @@ ${payload.customPrompt || ""}
                 break;
               }
 
-              // Some model backends leak channel control tokens into tool names.
-              // Skip duplicate "sanitized" starts for the same canonical tool.
               if (tool.sanitized && seenSanitizedToolStarts.has(tool.name)) {
                 console.warn(`⚠️ Skipping duplicate sanitized tool start: ${tool.raw} -> ${tool.name}`);
                 break;
@@ -210,17 +258,17 @@ ${payload.customPrompt || ""}
                 break;
               }
 
-            if (
-              Boolean(chunk.output?.tool_execute) &&
-              actionableToolNames.has(tool.name)
-            ) {
-              pendingTool = {
-                toolname: tool.name,
-                args: chunk.output.args,
-                prompt: chunk.output.prompt || chunk.output.meta?.prompt,
-              };
-              console.log(`🚀 toolExecute event sent for ${tool.name}`);
-            }
+              if (
+                Boolean(chunk.output?.tool_execute) &&
+                actionableToolNames.has(tool.name)
+              ) {
+                pendingTool = {
+                  toolname: tool.name,
+                  args: chunk.output.args,
+                  prompt: chunk.output.prompt || chunk.output.meta?.prompt,
+                };
+                console.log(`🚀 toolExecute event sent for ${tool.name}`);
+              }
             }
             break;
         }

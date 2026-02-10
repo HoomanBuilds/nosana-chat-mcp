@@ -96,8 +96,8 @@ function ApiKeyDialog({ api }: { api: ApiConfig }) {
 
 export function LoginDropDown({ barOpen, router }: { barOpen?: boolean, router: any }) {
     const { settingsOpen, openSettings, closeSettings } = useSettingsStore();
-    const { exportAllThreads, importThreads, clearAll , tool} = useChatStore()
-    const { wallet, isConnected } = useWalletStore();
+    const { exportAllThreads, importThreads, clearAll, tool } = useChatStore()
+    const { wallet, isConnected, isApiKeyConnected, getCredential } = useWalletStore();
     const [creditView, setCreditView] = useState(() => ({
         remaining: getRemainingCredits(),
         limit: getCreditLimit(),
@@ -105,8 +105,8 @@ export function LoginDropDown({ barOpen, router }: { barOpen?: boolean, router: 
 
     useEffect(() => {
         const syncCredits = async () => {
-            const walletKey = isConnected ? (wallet || undefined) : undefined;
-            const synced = await refreshCreditsFromServer(walletKey);
+            const credential = (isConnected || isApiKeyConnected) ? (getCredential() || undefined) : undefined;
+            const synced = await refreshCreditsFromServer(credential);
             if (synced) {
                 setCreditView(synced);
                 return;
@@ -117,7 +117,7 @@ export function LoginDropDown({ barOpen, router }: { barOpen?: boolean, router: 
             });
         };
         syncCredits().catch(console.error);
-    }, [isConnected, wallet]);
+    }, [isConnected, wallet, isApiKeyConnected]);
 
     useEffect(() => {
         return onCreditsUpdated(() => {
