@@ -99,7 +99,9 @@ export function ToolExecDialog() {
               onClick={async () => {
                 try {
                   setLoading(true);
-                  pendingTool.onConfirm();
+                  await pendingTool.onConfirm();
+                } catch (err) {
+                  console.error("Tool execution failed:", err);
                 } finally {
                   setLoading(false);
                 }

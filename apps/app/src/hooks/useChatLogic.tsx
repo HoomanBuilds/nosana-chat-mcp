@@ -422,14 +422,14 @@ export function useChatLogic() {
                         prompt,
                         heading: "JOB defination confirmation",
                         onConfirm: async () => {
-                          const r = validateJobDefinition(
-                            pendingTool?.prompt || parsed.prompt
-                          );
-                          if (!r.success) throw new Error();
-
                           try {
                             console.log(`▶ Executing ${funcName}`);
                             const approvedJobDef = pendingTool?.prompt || parsed.prompt;
+                            const r = validateJobDefinition(approvedJobDef);
+                            if (!r.success) {
+                              const validationErrors = JSON.stringify(r.errors || []);
+                              throw new Error(`Invalid job definition: ${validationErrors}`);
+                            }
                             const result = await createJob(
                               approvedJobDef,
                               parsed.args.marketPubKey,
@@ -481,16 +481,18 @@ export function useChatLogic() {
                             );
                             // alert("✅ Job created successfully");
                           } catch (err) {
+                            const errorMessage =
+                              err instanceof Error ? err.message : String(err);
                             alert(
                               "❌ " +
-                              ((err as Error).message || "Error creating job")
+                              (errorMessage || "Error creating job")
                             );
                             await handleAskChunk(
                               undefined,
                               getFollowBackPrompt({
                                 funcName: funcName,
                                 status: "approved",
-                                result: `The tool failed with error: ${(err as Error).message}`,
+                                result: `The tool failed with error: ${errorMessage}`,
                               }),
                               undefined,
                               true
