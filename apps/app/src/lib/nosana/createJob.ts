@@ -113,7 +113,6 @@ async function createJobViaWallet(
     marketUrl: `https://dashboard.nosana.com/markets/${marketPublicKey.toString()}`,
     serviceUrl,
     explorerUrl: `https://dashboard.nosana.com/jobs/${jobId}`,
-    chatUrl: `https://www.inferia.ai/chat/${firstService?.hash || jobId}.${nodeDomain}?jobId=${jobId}`,
     jobDetails: job,
   };
 
@@ -195,7 +194,6 @@ async function createJobViaApiKey(
     marketUrl: `https://dashboard.nosana.com/markets/${marketAddress}`,
     serviceUrl: `https://${jobId}.${nodeDomain}`,
     explorerUrl: `https://dashboard.nosana.com/jobs/${jobId}`,
-    chatUrl: `https://www.inferia.ai/chat/${jobId}.${nodeDomain}?jobId=${jobId}`,
     jobDetails: result,
   };
 
@@ -241,6 +239,5 @@ export type NosanaJobLog = {
   marketUrl: string;
   serviceUrl: string;
   explorerUrl: string;
-  chatUrl: string;
   jobDetails: any | null;
 };

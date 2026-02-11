@@ -46,7 +46,7 @@ The Deployer mode simplifies GPU deployment through an intuitive workflow:
 
 - **One-Click Deployment**: Deploy configured jobs directly to the decentralized GPU network without manual setup.
 
-- **Comprehensive Monitoring**: Track deployments using Job ID for identification, Service URL for model access, and Deployment ID for management reference.
+- **Comprehensive Monitoring**: Track deployments using Job ID for identification and Service URL for model access.
 
 - **Full SDK Integration**: Leverages complete Nosana SDK capabilities for advanced deployment control.
 
@@ -80,7 +80,7 @@ AI will:
 3. Create optimized job definition
 4. Estimate costs (SOL/NOS/USD)
 5. Deploy with one click
-6. Return: Job ID, Service URL, Deployment ID, Chat Interface link using inferia.ai
+6. Return: Job ID, Service URL, Deployment ID.
 ```
 
 **One-Click Deployment:**
