@@ -7,6 +7,10 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const NOSANA_API_BASE = "https://dashboard.k8s.prd.nos.ci/api";
 
 function getErrorMessage(err: unknown): string {
+  const message = err instanceof Error ? err.message : String(err);
+  if (message.includes("0xbc4")) {
+    return "Nosana account not initialized (0xbc4). Please initialize your profile at https://dashboard.nosana.com";
+  }
   if (err instanceof Error) return err.message;
   try {
     return JSON.stringify(err);
