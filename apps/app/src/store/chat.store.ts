@@ -90,7 +90,10 @@ export interface IChatStore {
 
   deletethread: (thread_id: string) => Promise<void>;
   updateThreadTitle: (thread_id: string, title: string) => Promise<void>;
-  updateThreadTool: (thread_id: string, tool: "deployer" | undefined) => Promise<void>;
+  updateThreadTool: (
+    thread_id: string,
+    tool: "deployer" | undefined,
+  ) => Promise<void>;
 
   deleteChat: (thread_id: string, chatid: string) => Promise<void>;
   deleteSingleChat: (thread_id: string, chatid: string) => Promise<void>;
@@ -101,7 +104,7 @@ export interface IChatStore {
 
   downloadMessage: (
     message_id: string,
-    type: "single" | "duo"
+    type: "single" | "duo",
   ) => Promise<void>;
   clearAll: () => Promise<void>;
 
@@ -161,7 +164,7 @@ export const useChatStore = create<IChatStore>((set, get) => ({
     if (!threadId) return;
     set({ currentChat: [...get().currentChat, ...messages] });
     await Promise.all(
-      messages.map((msg) => getChatDB().addChat(threadId, msg))
+      messages.map((msg) => getChatDB().addChat(threadId, msg)),
     );
   },
 
@@ -180,17 +183,27 @@ export const useChatStore = create<IChatStore>((set, get) => ({
 
   deletethread: async (thread_id: string) => {
     await getChatDB().deleteThread(thread_id);
-    await get().loadChatHistory();
+    set((state) => ({
+      chatHistory: state.chatHistory.filter((h) => h.thread_id !== thread_id),
+    }));
   },
 
   updateThreadTitle: async (thread_id: string, title: string) => {
     await getChatDB().updateThread(thread_id, title);
-    await get().loadChatHistory();
+    set((state) => ({
+      chatHistory: state.chatHistory.map((h) =>
+        h.thread_id === thread_id ? { ...h, thread_title: title } : h,
+      ),
+    }));
   },
 
   updateThreadTool: async (thread_id: string, tool: "deployer" | undefined) => {
     await getChatDB().updateThreadTool(thread_id, tool);
-    await get().loadChatHistory();
+    set((state) => ({
+      chatHistory: state.chatHistory.map((h) =>
+        h.thread_id === thread_id ? { ...h, tool } : h,
+      ),
+    }));
   },
 
   deleteChat: async (thread_id: string, chatid: string) => {

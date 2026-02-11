@@ -4,8 +4,10 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useChatStore } from "@/store/chat.store";
 import { useConversations } from "@/hooks/useConversation";
 import { useSettingsStore } from "@/store/setting.store";
-import { DEFAULT } from "@/lib/constants";
+import { DEFAULT, CONFIG } from "@/lib/constants";
 import { useWalletStore } from "@/store/wallet.store";
+import { SSEParser } from "@/lib/utils/SSEParser";
+import { getFollowBackPrompt } from "@/lib/utils/prompts";
 
 export function useChatLogic() {
   const [query, setQuery] = useState("");
@@ -18,6 +20,11 @@ export function useChatLogic() {
   const [llmChunks, setLLMChunks] = useState<string[]>([]);
   const [event, setEvent] = useState<string>("");
   const [mcp, setmcp] = useState(false);
+
+  // Buffer refs for throttling
+  const llmBufferRef = useRef<string[]>([]);
+  const reasoningBufferRef = useRef<string[]>([]);
+  const throttleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // --- Stores ---
   const {
@@ -299,38 +306,53 @@ export function useChatLogic() {
           throw new Error("Response body is empty.");
         }
 
+        // Throttled UI updates
+        const flushBuffers = () => {
+          if (llmBufferRef.current.length > 0) {
+            setLLMChunks((prev) => [...prev, ...llmBufferRef.current]);
+            llmBufferRef.current = [];
+          }
+          if (reasoningBufferRef.current.length > 0) {
+            setReasoningChunks((prev) => [
+              ...prev,
+              ...reasoningBufferRef.current,
+            ]);
+            reasoningBufferRef.current = [];
+          }
+          throttleTimeoutRef.current = null;
+        };
+
+        const queueUpdate = () => {
+          if (!throttleTimeoutRef.current) {
+            throttleTimeoutRef.current = setTimeout(flushBuffers, 80);
+          }
+        };
+
         //parsing the chunk
         const reader = res.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = "";
+        const parser = new SSEParser();
         let searchResult: { url: string; title: string; content?: string }[] =
           [];
 
         while (true) {
           const { value, done } = await reader.read();
-          if (done) break;
+          if (done) {
+            flushBuffers();
+            break;
+          }
 
-          buffer += decoder.decode(value, { stream: true });
-          const parts = buffer.split("\n\n");
-          buffer = parts.pop() || "";
+          const events = parser.processChunk(value);
 
-          for (const part of parts) {
-            const lines = part.split("\n");
-            const eventLine = lines.find((l) => l.startsWith("event:"));
-            const dataLine = lines.find((l) => l.startsWith("data:"));
-            if (!dataLine) continue;
-
-            const eventType = eventLine?.replace(/^event:\s*/, "").trim();
-            const dataRaw = dataLine.replace(/^data:\s*/, "").trim();
-
+          for (const { event: eventType, data: dataRaw } of events) {
             try {
               const data = JSON.parse(dataRaw);
               //handling various events
               switch (eventType) {
                 case "thinking": {
                   const text = data.toString();
-                  setReasoningChunks((prev) => [...prev, text]);
+                  reasoningBufferRef.current.push(text);
                   finalThinking += text;
+                  queueUpdate();
                   break;
                 }
 
@@ -340,8 +362,9 @@ export function useChatLogic() {
 
                 case "llmResult": {
                   const text = data.toString();
-                  setLLMChunks((prev) => [...prev, text]);
+                  llmBufferRef.current.push(text);
                   finalLLM += text;
+                  queueUpdate();
                   break;
                 }
 
@@ -431,7 +454,7 @@ export function useChatLogic() {
                               );
                               if (!result.jobId)
                                 alert(
-                                  "consider checking job manually on nosana dashboard something went wrong no jobId returned https://dashboard.nosana.com",
+                                  `consider checking job manually on nosana dashboard something went wrong no jobId returned ${CONFIG.EXPLORER_URL}`,
                                 );
 
                               const curlSnippet =
@@ -809,39 +832,4 @@ export function getCustomConfig(): AIConfig {
     followUp: storedLocalConfig.followUp ?? DEFAULT_AI_CONFIG.followUp,
     context: storedConfig.context ?? DEFAULT_AI_CONFIG.context,
   };
-}
-
-function getFollowBackPrompt({ funcName, status, result }: any): string {
-  const msg =
-    status === "approved"
-      ? `User approved and successfully executed **${funcName}**.`
-      : status === "cancelled"
-        ? `User cancelled execution of **${funcName}**.`
-        : `Tool **${funcName}** failed during execution.`;
-
-  const toolResult =
-    result && typeof result === "object"
-      ? "```json\n" + JSON.stringify(result, null, 2) + "\n```"
-      : result || "(no result)";
-
-  const query = `
-                ${msg}
-                ${
-                  status === "approved"
-                    ? `The tool returned the following result:\n${toolResult}
-
-                Please write a short, friendly confirmation for the user that summarizes this success.
-                Use natural language similar to:
-                 "Congratulations! The **${funcName}** tool ran successfully. Here’s what was done:"
-                 Then mention any key details you find in the result (URLs, IDs, times, etc.) in plain English(tabular format or related structured format).
-                 **CRITICAL: Do NOT include any "Chat Interface" links or mention inferia.ai chat URLs.**`
-                    : status === "cancelled"
-                      ? `Ask user what happen or if they want to make any update , also show them related tool suggestions. take previous chat reference and see if there is any mistake or something? "`
-                      : `Explain that the tool failed and, if possible, suggest what the user could check or try next. length of explaination shoudl be between brief to detailed based on error length.
-                based on this result , decide whether you want to handle another tools exection or directly responde to user , like if error is related to insufficient balance then check wallet balance and
-                notify the cause or something     
-                `
-                }`;
-
-  return query;
 }

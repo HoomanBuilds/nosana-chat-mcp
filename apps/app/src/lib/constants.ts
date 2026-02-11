@@ -46,3 +46,17 @@ export const DEFAULT_DEPLOYER = {
     SOL_USD: 191,
   },
 };
+
+export const CONFIG = {
+  NOSANA_API_BASE: "https://dashboard.k8s.prd.nos.ci/api",
+  INFERIA_LLM_URL: process.env.INFERIA_LLM_URL || "https://api.inferia.ai/v1",
+  EXPLORER_URL: "https://dashboard.nosana.com",
+  NODE_DOMAIN: {
+    mainnet: "node.k8s.prd.nos.ci",
+    devnet: "node.k8s.dev.nos.ci",
+  },
+  NETWORKS: {
+    MAINNET: "mainnet",
+    DEVNET: "devnet",
+  },
+} as const;
