@@ -122,7 +122,7 @@ async function stopJobViaApiKey(
   return {
     txSig: data.transactionId ?? data.tx ?? "",
     result: {
-      result: `Job stopped via Nosana API. ${data.transactionId ?? ""}`,
+      result: `Job stopped successfully. ${data.transactionId ? `Tx: ${data.transactionId}` : ""}`,
     },
   };
 }

@@ -270,7 +270,7 @@ export function createStopJob(apiKey: string) {
         const data = await res.json().catch(() => ({}));
 
         return {
-          tool_execute: true,
+          // tool_execute: true,
           args: { deploymentId },
           content: [
             {
