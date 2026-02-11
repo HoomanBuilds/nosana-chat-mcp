@@ -6,11 +6,6 @@ import { useConversations } from "@/hooks/useConversation";
 import { useSettingsStore } from "@/store/setting.store";
 import { DEFAULT } from "@/lib/constants";
 import { useWalletStore } from "@/store/wallet.store";
-import {
-  getDeployedChatModelByValue,
-  isDeployedChatModel,
-  saveDeployedChatModelFromJob,
-} from "@/lib/nosana/deployedModels";
 
 export function useChatLogic() {
   const [query, setQuery] = useState("");
@@ -223,10 +218,6 @@ export function useChatLogic() {
         if (tavilyKey) {
           headers["x-tavily-key"] = tavilyKey;
         }
-        const deployedModelConfig = isDeployedChatModel(modelToSend)
-          ? getDeployedChatModelByValue(modelToSend)
-          : undefined;
-
         //making backend ai request
         const res = await fetch(`/api/v2/ask`, {
           method: "POST",
@@ -255,13 +246,6 @@ export function useChatLogic() {
             thinking: thinking || false,
             threadId: params.id || selectedChatId,
             chatId: userMessageId,
-            deployedModel: deployedModelConfig
-              ? {
-                  baseURL: deployedModelConfig.baseURL,
-                  model: deployedModelConfig.model,
-                  apiKey: deployedModelConfig.apiKey,
-                }
-              : undefined,
           }),
           signal,
         });
@@ -449,26 +433,6 @@ export function useChatLogic() {
                                 alert(
                                   "consider checking job manually on nosana dashboard something went wrong no jobId returned https://dashboard.nosana.com",
                                 );
-                              else {
-                                const serviceUrl =
-                                  result?.result?.jobDetails?.serviceUrl;
-                                if (serviceUrl) {
-                                  const deployedModel =
-                                    saveDeployedChatModelFromJob({
-                                      jobId: result.jobId,
-                                      serviceUrl,
-                                      jobDef: approvedJobDef,
-                                    });
-                                  if (deployedModel) {
-                                    setSelectedModel(deployedModel.value);
-                                    setModel(deployedModel.value);
-                                    localStorage.setItem(
-                                      "llmmodel",
-                                      deployedModel.value,
-                                    );
-                                  }
-                                }
-                              }
 
                               const curlSnippet =
                                 parsed?.args?.provider === "huggingface" &&
