@@ -1,15 +1,21 @@
 import { createOpenAI } from "@ai-sdk/openai";
-import {
-  stepCountIs,
-  streamText,
-  ToolSet,
-} from "ai";
+import { stepCountIs, streamText, ToolSet } from "ai";
 import { Payload } from "@/lib/utils/validation";
-import { getModels, createJob } from "@/lib/deployerTools/tool.createJob"
+import { getModels, createJob } from "@/lib/deployerTools/tool.createJob";
 
-import { estimateJobCost, extendJobRuntime, getMarket, getJob, getWalletBalance, listGpuMarkets, getAllJobs, stopJob, suggest_model_market } from "@/lib/deployerTools/deployer.tools";
+import {
+  estimateJobCost,
+  extendJobRuntime,
+  getMarket,
+  getJob,
+  getWalletBalance,
+  listGpuMarkets,
+  getAllJobs,
+  stopJob,
+  suggest_model_market,
+} from "@/lib/deployerTools/deployer.tools";
 import { buildApiKeyToolSet } from "@/lib/deployerTools/apikey.tools";
-import { streamThrottle } from './utils';
+import { streamThrottle } from "./utils";
 import { runWithPlannerModel } from "@/lib/deployerTools/utils/plannerContext";
 
 const openai = createOpenAI({
@@ -19,7 +25,19 @@ const openai = createOpenAI({
 
 /** Wallet mode tools — on-chain via SDK */
 function getWalletTools(): ToolSet {
-  return { estimateJobCost, extendJobRuntime, getMarket, getJob, getWalletBalance, createJob, getModels, listGpuMarkets, getAllJobs, stopJob, suggest_model_market };
+  return {
+    estimateJobCost,
+    extendJobRuntime,
+    getMarket,
+    getJob,
+    getWalletBalance,
+    createJob,
+    getModels,
+    listGpuMarkets,
+    getAllJobs,
+    stopJob,
+    suggest_model_market,
+  };
 }
 
 /** API key mode tools — REST API via bearer token, no wallet params exposed */
@@ -77,24 +95,24 @@ function resolveToolName(
 
 export const handleDeployment = async (
   payload: Payload,
-  send: (event: string, data: string) => void
+  send: (event: string, data: string) => void,
 ) => {
   const plannerModel =
-    process.env.DEPLOYER_PLANNER_MODEL ||
-    payload.model ||
-    "qwen3:0.6b";
+    process.env.DEPLOYER_PLANNER_MODEL || payload.model || "qwen3:0.6b";
 
   return runWithPlannerModel(plannerModel, async () => {
     const userWallet = payload.walletPublicKey;
-    const isApiKeyMode = userWallet?.startsWith('nos_');
+    const isApiKeyMode = userWallet?.startsWith("nos_");
 
     // ── Pick the right tool set based on auth mode ──
-    const tools = isApiKeyMode
-      ? getApiKeyTools(userWallet!)
-      : getWalletTools();
+    const tools = isApiKeyMode ? getApiKeyTools(userWallet!) : getWalletTools();
 
     const knownToolNames = new Set(Object.keys(tools));
-    const actionableToolNames = new Set(["createJob", "extendJobRuntime", "stopJob", "stopDeployment"]);
+    const actionableToolNames = new Set([
+      "createJob",
+      "extendJobRuntime",
+      "stopJob",
+    ]);
     const seenSanitizedToolStarts = new Set<string>();
 
     const normalizeChats = (chats: any[] = []): any[] =>
@@ -117,15 +135,15 @@ You do NOT have access to any wallet. Do not ask for a wallet address.
 
 **Available Tools:**
 - getCreditBalance → check credit balance
-- listDeployments → list all deployments (jobs)
-- getDeployment → get details of a specific deployment
-- stopDeployment → stop a running deployment
-- createJob → create a new deployment
+- listJobs → list all jobs
+- getJob → get details of a specific job
+- stopJob → stop a running job
+- createJob → create a new job
 - getModels → search for models
 - getMarket → get GPU market info
 - getJob → get job info by ID
 - listGpuMarkets → list all GPU markets
-- estimateJobCost → estimate deployment cost
+- estimateJobCost → estimate job cost
 - suggest_model_market → get recommendations
 
 All tools are pre-authenticated. Just call them directly — no credentials needed in parameters.`
@@ -177,7 +195,7 @@ If errors occur, try recovery twice before stopping. Always inform user of what'
 
 -In in response from tool add your human tone rather then just pasting tool output as it is
 ${payload.customPrompt || ""}
-`.trim()
+`.trim(),
       },
       ...normalizeChats(payload.chats?.slice(-10) || []),
       { role: "user", content: payload.query || "" },
@@ -194,16 +212,21 @@ ${payload.customPrompt || ""}
         toolChoice: "auto",
         stopWhen: stepCountIs(6),
         abortSignal: payload.signal,
-        maxRetries: 1
+        maxRetries: 1,
       });
     } catch (error) {
       console.error("Failed to initialize LLM stream:", error);
       send("error", llmErr(error));
-      send("finalResult", "Sorry, there was an error connecting to the AI service. Please try again later.");
+      send(
+        "finalResult",
+        "Sorry, there was an error connecting to the AI service. Please try again later.",
+      );
       return;
     }
 
-    console.log(`🚀 LLM stream initialized [${(performance.now() - llmStart).toFixed(1)}ms]`);
+    console.log(
+      `🚀 LLM stream initialized [${(performance.now() - llmStart).toFixed(1)}ms]`,
+    );
 
     let finalText = "";
     const usedTools = new Set<string>();
@@ -231,17 +254,24 @@ ${payload.customPrompt || ""}
             {
               const tool = resolveToolName(chunk.toolName, knownToolNames);
               if (!tool.valid) {
-                console.warn("⚠️ Ignoring unknown tool name from model:", chunk.toolName);
+                console.warn(
+                  "⚠️ Ignoring unknown tool name from model:",
+                  chunk.toolName,
+                );
                 break;
               }
 
               if (tool.sanitized && seenSanitizedToolStarts.has(tool.name)) {
-                console.warn(`⚠️ Skipping duplicate sanitized tool start: ${tool.raw} -> ${tool.name}`);
+                console.warn(
+                  `⚠️ Skipping duplicate sanitized tool start: ${tool.raw} -> ${tool.name}`,
+                );
                 break;
               }
               if (tool.sanitized) {
                 seenSanitizedToolStarts.add(tool.name);
-                console.warn(`⚠️ Sanitized malformed tool name: ${tool.raw} -> ${tool.name}`);
+                console.warn(
+                  `⚠️ Sanitized malformed tool name: ${tool.raw} -> ${tool.name}`,
+                );
               }
 
               usedTools.add(tool.name);
@@ -254,7 +284,10 @@ ${payload.customPrompt || ""}
             {
               const tool = resolveToolName(chunk.toolName, knownToolNames);
               if (!tool.valid) {
-                console.warn("⚠️ Ignoring tool-result with unknown tool name:", chunk.toolName);
+                console.warn(
+                  "⚠️ Ignoring tool-result with unknown tool name:",
+                  chunk.toolName,
+                );
                 break;
               }
 
@@ -289,11 +322,12 @@ ${payload.customPrompt || ""}
 
     if (pendingTool) {
       send("toolExecute", JSON.stringify(pendingTool));
-      console.log(`🚀 toolExecute sent post-stream for ${pendingTool.toolname}`);
+      console.log(
+        `🚀 toolExecute sent post-stream for ${pendingTool.toolname}`,
+      );
     }
   });
 };
-
 
 function llmErr(e: unknown): string {
   const msg = (e as any)?.message || String(e);
@@ -303,15 +337,26 @@ function llmErr(e: unknown): string {
 
   console.error("🔴 LLM error:", msg);
 
-  if (statusCode === 404 && typeof url === "string" && url.includes("/responses")) {
+  if (
+    statusCode === 404 &&
+    typeof url === "string" &&
+    url.includes("/responses")
+  ) {
     return "Model endpoint does not support /v1/responses. Configure deployer planner to use /v1/chat/completions-compatible backend.";
   }
 
-  if (/tool_use_failed|Failed to parse tool call arguments as JSON/i.test(msg + " " + responseBody)) {
+  if (
+    /tool_use_failed|Failed to parse tool call arguments as JSON/i.test(
+      msg + " " + responseBody,
+    )
+  ) {
     return "Planner model generated invalid tool-call JSON. Switch DEPLOYER_PLANNER_MODEL to a tool-calling capable chat model and retry.";
   }
 
-  if (statusCode === 500 && /Prompt processing failed/i.test(responseBody || msg)) {
+  if (
+    statusCode === 500 &&
+    /Prompt processing failed/i.test(responseBody || msg)
+  ) {
     return "Planner model backend failed while processing the prompt. Retry once; if persistent, switch DEPLOYER_PLANNER_MODEL.";
   }
 

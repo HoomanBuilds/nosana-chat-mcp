@@ -29,7 +29,7 @@ function extractJobId(res: unknown): string | null {
 async function createJobViaWallet(
   jobDef: object,
   userSelectedMarketKey: PublicKey | string,
-  minutes: number,
+  minutes: number = 60,
 ) {
   const { wallet, provider } = useWalletStore.getState();
   if (!provider || !wallet) throw new Error("Wallet not connected");
@@ -53,14 +53,16 @@ async function createJobViaWallet(
     },
   });
 
+  const timeoutToUse = (minutes || 60) * 60;
+
   const ipfsHash = await nosana.ipfs.pin(jobDef);
   console.log("Job pinned to IPFS:", ipfsHash);
 
-  const res = await nosana.jobs.list(ipfsHash, minutes * 60, marketPublicKey);
+  const res = await nosana.jobs.list(ipfsHash, timeoutToUse, marketPublicKey);
   const jobId = extractJobId(res);
   if (!jobId) {
     throw new Error(
-      `Nosana jobs.list did not return a job id. Response: ${JSON.stringify(res)}`
+      `Nosana jobs.list did not return a job id. Response: ${JSON.stringify(res)}`,
     );
   }
 
@@ -83,7 +85,8 @@ async function createJobViaWallet(
   let firstService: { hash: string } | null = null;
   try {
     const services = getJobExposedServices(jobDef as any, jobId);
-    firstService = services.length > 0 ? (services[0] as { hash: string }) : null;
+    firstService =
+      services.length > 0 ? (services[0] as { hash: string }) : null;
   } catch (err) {
     console.warn("Could not resolve exposed service from job definition:", err);
   }
@@ -96,10 +99,10 @@ async function createJobViaWallet(
 
   const log: NosanaJobLog = {
     wallet,
-    authMode: 'wallet',
+    authMode: "wallet",
     ipfsHash,
     market: marketPublicKey.toBase58(),
-    timeOut: minutes * 60,
+    timeOut: timeoutToUse,
     jobResponse: res,
     jobId,
     ipfsUrl: nosana.ipfs.config.gateway + ipfsHash,
@@ -120,80 +123,83 @@ async function createJobViaWallet(
 async function createJobViaApiKey(
   jobDef: object,
   userSelectedMarketKey: PublicKey | string,
-  minutes: number,
+  minutes: number = 60,
 ) {
   const { nosanaApiKey } = useWalletStore.getState();
   if (!nosanaApiKey) throw new Error("Nosana API key not set");
 
   const marketAddress = userSelectedMarketKey.toString();
 
-  // Create deployment via REST API
-  const deploymentPayload = {
-    name: `deployment-${Date.now()}`,
+  const NETWORK = (process.env.NEXT_PUBLIC_SOLANA_NETWORK ?? "devnet") as
+    | "devnet"
+    | "mainnet";
+
+  const timeoutToUse = (minutes || 60) * 60;
+
+  // Step 1: Pin job definition to IPFS
+  const nosana = new Client(NETWORK);
+  const ipfsHash = await nosana.ipfs.pin(jobDef);
+  console.log("Job pinned to IPFS (API mode):", ipfsHash);
+
+  // Step 2: Post job via Jobs API using credits
+  const jobPayload = {
+    ipfsHash,
     market: marketAddress,
-    timeout: minutes,
-    replicas: 1,
-    strategy: 'SIMPLE',
-    job_definition: {
-      ...(jobDef as any),
-      meta: {
-        ...(jobDef as any).meta,
-        trigger: 'api',
-      },
-    },
+    timeout: timeoutToUse,
+    timeoutSeconds: timeoutToUse,
   };
 
-  const createRes = await fetch(`${NOSANA_API_BASE}/deployments`, {
-    method: 'POST',
+  console.log("Job payload (API mode):", JSON.stringify(jobPayload, null, 2));
+
+  const createRes = await fetch(`${NOSANA_API_BASE}/jobs/list`, {
+    method: "POST",
     headers: {
-      'Authorization': `Bearer ${nosanaApiKey}`,
-      'Content-Type': 'application/json',
+      Authorization: `Bearer ${nosanaApiKey}`,
+      "Content-Type": "application/json",
     },
-    body: JSON.stringify(deploymentPayload),
+    body: JSON.stringify(jobPayload),
   });
 
   if (!createRes.ok) {
     const errText = await createRes.text();
-    throw new Error(`Failed to create deployment: ${createRes.status} ${errText}`);
+    throw new Error(
+      `Failed to create job via API: ${createRes.status} ${errText}`,
+    );
   }
 
-  const deployment = await createRes.json();
-  const deploymentId = deployment.id;
+  const result = await createRes.json();
+  const jobId = result.job || result.address || result.id;
 
-  // Start the deployment
-  try {
-    await fetch(`${NOSANA_API_BASE}/deployments/${deploymentId}/start`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${nosanaApiKey}`,
-        'Content-Type': 'application/json',
-      },
-    });
-  } catch (startErr) {
-    console.warn('Auto-start might have failed:', startErr);
+  if (!jobId) {
+    throw new Error(
+      `API did not return a job ID. Response: ${JSON.stringify(result)}`,
+    );
   }
 
-  const NETWORK = (process.env.NEXT_PUBLIC_SOLANA_NETWORK ?? "devnet") as "devnet" | "mainnet";
-  const nodeDomain = NETWORK === "mainnet" ? "node.k8s.prd.nos.ci" : "node.k8s.dev.nos.ci";
+  const nodeDomain =
+    NETWORK === "mainnet" ? "node.k8s.prd.nos.ci" : "node.k8s.dev.nos.ci";
 
   const log: NosanaJobLog = {
     wallet: null,
-    authMode: 'api_key',
-    ipfsHash: `api-deployment-${deploymentId}`,
+    authMode: "api_key",
+    ipfsHash,
     market: marketAddress,
-    timeOut: minutes * 60,
-    jobResponse: deployment,
-    jobId: deploymentId,
-    ipfsUrl: '',
+    timeOut: timeoutToUse,
+    jobResponse: result,
+    jobId,
+    ipfsUrl: nosana.ipfs.config.gateway + ipfsHash,
     marketUrl: `https://dashboard.nosana.com/markets/${marketAddress}`,
-    serviceUrl: `https://${deploymentId}.${nodeDomain}`,
-    explorerUrl: `https://dashboard.nosana.com/deployments/${deploymentId}`,
-    chatUrl: `https://www.inferia.ai/chat/${deploymentId}.${nodeDomain}?jobId=${deploymentId}`,
-    jobDetails: deployment,
+    serviceUrl: `https://${jobId}.${nodeDomain}`,
+    explorerUrl: `https://dashboard.nosana.com/jobs/${jobId}`,
+    chatUrl: `https://www.inferia.ai/chat/${jobId}.${nodeDomain}?jobId=${jobId}`,
+    jobDetails: result,
   };
 
-  console.log("Deployment created (API key mode):", { deploymentId });
-  return { jobId: deploymentId, result: { jobDetails: { ...deployment, ...log } } };
+  console.log("Job created (API key mode):", { jobId });
+  return {
+    jobId,
+    result: { jobDetails: { ...result, ...log } },
+  };
 }
 
 // ── Main entry point ──────────────────────────────────────────────────────
@@ -201,12 +207,12 @@ async function createJobViaApiKey(
 export async function createJob(
   jobDef: object,
   userSelectedMarketKey: PublicKey | string,
-  minutes: number
+  minutes: number = 60,
 ) {
   const { authMode, wallet, nosanaApiKey } = useWalletStore.getState();
 
   // Determine which mode to use
-  if (authMode === 'api_key' && nosanaApiKey) {
+  if (authMode === "api_key" && nosanaApiKey) {
     return createJobViaApiKey(jobDef, userSelectedMarketKey, minutes);
   }
 
@@ -214,12 +220,14 @@ export async function createJob(
     return createJobViaWallet(jobDef, userSelectedMarketKey, minutes);
   }
 
-  throw new Error("Not connected. Please connect a wallet or provide a Nosana API key.");
+  throw new Error(
+    "Not connected. Please connect a wallet or provide a Nosana API key.",
+  );
 }
 
 export type NosanaJobLog = {
   wallet: string | null;
-  authMode: 'wallet' | 'api_key';
+  authMode: "wallet" | "api_key";
   ipfsHash: string;
   market: string;
   timeOut: number;

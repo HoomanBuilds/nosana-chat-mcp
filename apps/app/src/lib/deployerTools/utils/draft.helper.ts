@@ -237,11 +237,10 @@ export async function chatJSONRetry<T>(
         getPlannerModel() ||
         process.env.DEPLOYER_PLANNER_MODEL ||
         "qwen3:0.6b";
-    const fallbackModels = ["llama-3.8b", "mistral-7b"];
-    const modelsToTry = [preferredModel, ...fallbackModels].filter(
+    const modelsToTry = [preferredModel].filter(
         (m, i, arr) => m && arr.indexOf(m) === i,
     );
-    const maxRetries = 1;
+    const maxRetries = 3;
 
     for (const model of modelsToTry) {
         for (let attempt = 1; attempt <= maxRetries; attempt++) {
