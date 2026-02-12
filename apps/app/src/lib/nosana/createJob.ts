@@ -181,6 +181,20 @@ async function createJobViaApiKey(
 
   const nodeDomain =
     NETWORK === "mainnet" ? "node.k8s.prd.nos.ci" : "node.k8s.dev.nos.ci";
+  let serviceUrl = `https://${jobId}.${nodeDomain}`;
+  try {
+    const services = getJobExposedServices(jobDef as any, jobId);
+    const firstService =
+      services.length > 0 ? (services[0] as { hash: string }) : null;
+    if (firstService?.hash) {
+      serviceUrl = `https://${firstService.hash}.${nodeDomain}`;
+    }
+  } catch (err) {
+    console.warn(
+      "Could not resolve exposed service from API mode job definition:",
+      err,
+    );
+  }
 
   const log: NosanaJobLog = {
     wallet: null,
@@ -192,7 +206,7 @@ async function createJobViaApiKey(
     jobId,
     ipfsUrl: nosana.ipfs.config.gateway + ipfsHash,
     marketUrl: `https://dashboard.nosana.com/markets/${marketAddress}`,
-    serviceUrl: `https://${jobId}.${nodeDomain}`,
+    serviceUrl,
     explorerUrl: `https://dashboard.nosana.com/jobs/${jobId}`,
     jobDetails: result,
   };

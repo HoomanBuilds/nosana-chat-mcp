@@ -9,6 +9,28 @@ import { useWalletStore } from "@/store/wallet.store";
 import { SSEParser } from "@/lib/utils/SSEParser";
 import { getFollowBackPrompt } from "@/lib/utils/prompts";
 
+const CUSTOM_SERVICE_PARAM_KEYS = [
+  "custom-service_url",
+  "custom_service_url",
+  "service_url",
+] as const;
+const CUSTOM_MODEL_PARAM_KEYS = [
+  "custom-model",
+  "custom_model",
+  "service_model",
+] as const;
+
+function readFirstParam(
+  params: { get: (key: string) => string | null },
+  keys: readonly string[],
+): string | null {
+  for (const key of keys) {
+    const value = params.get(key)?.trim();
+    if (value) return value;
+  }
+  return null;
+}
+
 export function useChatLogic() {
   const [query, setQuery] = useState("");
   const [model, setModel] = useState<string>(() => {
@@ -58,6 +80,15 @@ export function useChatLogic() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const customServiceUrl = useMemo(
+    () => readFirstParam(searchParams, CUSTOM_SERVICE_PARAM_KEYS),
+    [searchParams],
+  );
+  const customServiceModel = useMemo(
+    () => readFirstParam(searchParams, CUSTOM_MODEL_PARAM_KEYS),
+    [searchParams],
+  );
+  const routeThreadId = Array.isArray(params.id) ? params.id[0] : params.id;
   const handledRef = useRef(false);
   const controllerRef = useRef<AbortController | null>(null);
 
@@ -84,7 +115,10 @@ export function useChatLogic() {
     const init = async () => {
       const modelParam = searchParams.get("model");
       const modelToUse =
-        modelParam || localStorage.getItem("llmmodel") || DEFAULT.MODEL;
+        customServiceModel ||
+        modelParam ||
+        localStorage.getItem("llmmodel") ||
+        DEFAULT.MODEL;
 
       const mcpParams = searchParams.get("tool");
       if (mcpParams && mcpParams === "deployer") {
@@ -103,13 +137,13 @@ export function useChatLogic() {
         localStorage.setItem("llmmodel", modelToUse);
       }
 
-      setSelectedChatId(String(params.id) || "");
+      setSelectedChatId(routeThreadId || null);
       await loadChatHistory();
 
       // Set tool for this thread
-      if (params.id) {
+      if (routeThreadId) {
         await updateThreadTool(
-          String(params.id),
+          routeThreadId,
           mcpParams === "deployer" ? "deployer" : undefined,
         );
       }
@@ -126,12 +160,25 @@ export function useChatLogic() {
           clearPendingQuery();
         }
 
-        router.replace(`/ask/${params.id}${tool ? `?tool=${tool}` : ""}`);
+        if (routeThreadId) {
+          const nextParams = new URLSearchParams();
+          if (mcpParams === "deployer") nextParams.set("tool", "deployer");
+          if (customServiceUrl) {
+            nextParams.set("custom-service_url", customServiceUrl);
+          }
+          if (customServiceModel) {
+            nextParams.set("custom-model", customServiceModel);
+          }
+          const nextQuery = nextParams.toString();
+          router.replace(
+            `/ask/${routeThreadId}${nextQuery ? `?${nextQuery}` : ""}`,
+          );
+        }
       }
     };
     init();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+  }, [searchParams, customServiceModel, customServiceUrl]);
 
   async function ensureWallet() {
     try {
@@ -211,6 +258,7 @@ export function useChatLogic() {
       let finalThinking = "";
       let responseTime = 0;
       let followUpQuestions: { question: string }[] = [];
+      let fallbackLLM = "";
 
       //model configured
       const DEFAULT_MODEL = DEFAULT.MODEL;
@@ -225,6 +273,13 @@ export function useChatLogic() {
         if (tavilyKey) {
           headers["x-tavily-key"] = tavilyKey;
         }
+        const deployedModelPayload = customServiceUrl
+          ? {
+              baseURL: customServiceUrl,
+              model: customServiceModel || modelToSend,
+            }
+          : undefined;
+
         //making backend ai request
         const res = await fetch(`/api/v2/ask`, {
           method: "POST",
@@ -251,8 +306,9 @@ export function useChatLogic() {
                 : null,
             websearch: search || false,
             thinking: thinking || false,
-            threadId: params.id || selectedChatId,
+            threadId: routeThreadId || selectedChatId || undefined,
             chatId: userMessageId,
+            deployedModel: deployedModelPayload,
           }),
           signal,
         });
@@ -371,7 +427,7 @@ export function useChatLogic() {
                 case "threadTitle":
                   if (selectedChatId)
                     updateThreadTitle(
-                      String(params.id || selectedChatId),
+                      String(routeThreadId || selectedChatId),
                       data.toString(),
                     ).catch(console.error);
                   break;
@@ -469,14 +525,79 @@ export function useChatLogic() {
                                 `
                                   : "";
 
+                              const jobDetails = (result?.result?.jobDetails ||
+                                {}) as Record<string, any>;
+                              const jobId = result?.jobId || "";
+                              const serviceUrl =
+                                (typeof jobDetails.serviceUrl === "string" &&
+                                  jobDetails.serviceUrl) ||
+                                (typeof jobDetails.service_url === "string" &&
+                                  jobDetails.service_url) ||
+                                (typeof jobDetails?.jobResponse?.serviceUrl ===
+                                  "string" &&
+                                  jobDetails.jobResponse.serviceUrl) ||
+                                (typeof jobDetails?.jobResponse?.service_url ===
+                                  "string" &&
+                                  jobDetails.jobResponse.service_url) ||
+                                "";
+
+                              let nosanaChatUrl: string | null = null;
+                              let deployedModelName: string | null = null;
+                              let deployedModelBaseURL: string | null = null;
+
+                              if (jobId && serviceUrl && typeof window !== "undefined") {
+                                const {
+                                  saveDeployedChatModelFromJob,
+                                  inferModelNameFromJobDef,
+                                } =
+                                  await import("@/lib/nosana/deployedModels");
+                                const saved = saveDeployedChatModelFromJob({
+                                  jobId,
+                                  serviceUrl,
+                                  jobDef: approvedJobDef,
+                                });
+
+                                const extractedModel = inferModelNameFromJobDef(
+                                  approvedJobDef,
+                                );
+                                const savedModel =
+                                  saved?.model && saved.model !== "local-model"
+                                    ? saved.model
+                                    : null;
+
+                                deployedModelName =
+                                  savedModel ||
+                                  extractedModel ||
+                                  null;
+                                deployedModelBaseURL = saved?.baseURL || serviceUrl;
+
+                                const chatParams = new URLSearchParams();
+                                chatParams.set("custom-service_url", serviceUrl);
+                                if (deployedModelName) {
+                                  chatParams.set("model", deployedModelName);
+                                  chatParams.set("custom-model", deployedModelName);
+                                }
+                                nosanaChatUrl = `${window.location.origin}/ask?${chatParams.toString()}`;
+                              }
+
                               await handleAskChunk(
                                 undefined,
                                 getFollowBackPrompt({
                                   funcName: funcName,
                                   status: "approved",
-                                  result: `Job created successfully with jobId: ${result.jobId} and result: ${JSON.stringify(result.result.jobDetails)}
-                                \n ${curlSnippet}
-                                `,
+                                  result: {
+                                    jobId: jobId || null,
+                                    serviceUrl: serviceUrl || null,
+                                    nosanaChatUrl,
+                                    deployedModel: deployedModelName,
+                                    inferenceBaseURL: deployedModelBaseURL,
+                                    explorerUrl:
+                                      jobDetails.explorerUrl ||
+                                      (jobId
+                                        ? `${CONFIG.EXPLORER_URL}/jobs/${jobId}`
+                                        : CONFIG.EXPLORER_URL),
+                                    testGenerationCurl: curlSnippet.trim() || null,
+                                  },
                                 }),
                                 undefined,
                                 true,
@@ -644,17 +765,26 @@ export function useChatLogic() {
                   break;
               }
             } catch (err) {
+              if (eventType === "llmResult" && typeof dataRaw === "string") {
+                const rawText = dataRaw.trim();
+                if (rawText) {
+                  llmBufferRef.current.push(rawText);
+                  fallbackLLM += rawText;
+                  queueUpdate();
+                }
+              }
               console.error("Failed to parse SSE chunk:", err, dataRaw);
             }
           }
         }
 
         //wrapping UP
-        if (finalLLM.trim() !== "" || finalThinking.trim() !== "") {
+        const finalContent = (finalLLM + fallbackLLM).trim();
+        if (finalContent !== "" || finalThinking.trim() !== "") {
           addMessage({
             role: "model",
             query: query || undefined,
-            content: finalLLM,
+            content: finalContent,
             collapsed: true,
             reasoning: finalThinking.trim() ? finalThinking : undefined,
             model: modelToSend,
@@ -730,7 +860,9 @@ export function useChatLogic() {
       conversations,
       search,
       thinking,
-      params.id,
+      customServiceUrl,
+      customServiceModel,
+      routeThreadId,
       selectedChatId,
       walletCondition,
     ],

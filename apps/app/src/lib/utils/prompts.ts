@@ -32,7 +32,7 @@ ${toolResult}
                 Use natural language similar to:
                 "Congratulations! The **${funcName}** tool ran successfully. Here’s what was done:"
                 Then mention any key details you find in the result (URLs, IDs, times, etc.) in plain English (tabular format or related structured format).
-                **CRITICAL: Do NOT include any "Chat Interface" links or mention inferia.ai chat URLs.**`
+                If the result includes "nosanaChatUrl", you MUST include that URL exactly and label it as the Nosana Chat URL. Mention that it opens chat using the deployed service URL as inference endpoint.`
                     : status === "cancelled"
                       ? `Ask user what happen or if they want to make any update, also show them related tool suggestions. take previous chat reference and see if there is any mistake or something? "`
                       : `Explain that the tool failed and, if possible, suggest what the user could check or try next. length of explanation should be between brief to detailed based on error length.

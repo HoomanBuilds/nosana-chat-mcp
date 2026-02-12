@@ -1,5 +1,6 @@
 "use client";
-import React from "react";
+import React, { useEffect, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DEFAULT } from "@/lib/constants";
 import { useModelGroups } from "@/hooks/useModel";
@@ -18,10 +19,35 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
   className,
   mcp
 }) => {
-  const modelGroups = useModelGroups();
+  const searchParams = useSearchParams();
+  const customServiceUrl =
+    searchParams.get("custom-service_url") ||
+    searchParams.get("custom_service_url") ||
+    searchParams.get("service_url");
+  const customModelFromUrl =
+    searchParams.get("custom-model") ||
+    searchParams.get("custom_model") ||
+    searchParams.get("service_model") ||
+    searchParams.get("model");
+
+  const lockedModel = useMemo(() => {
+    if (!customServiceUrl) return undefined;
+    return customModelFromUrl || value || DEFAULT.MODEL;
+  }, [customServiceUrl, customModelFromUrl, value]);
+
+  const modelGroups = useModelGroups({ onlyModel: lockedModel });
+
+  useEffect(() => {
+    if (!lockedModel) return;
+    if (value !== lockedModel) {
+      onValueChange(lockedModel);
+    }
+  }, [lockedModel, onValueChange, value]);
+
+  const selectedValue = lockedModel || value || DEFAULT.MODEL;
 
   return (
-    <Select value={value || DEFAULT.MODEL} onValueChange={onValueChange}>
+    <Select value={selectedValue} onValueChange={onValueChange}>
       <SelectTrigger 
         className={cn(
           "text-xs border-muted-foreground/20 font-normal text-muted-foreground/80 h-6 rounded-sm bg-black/5", 

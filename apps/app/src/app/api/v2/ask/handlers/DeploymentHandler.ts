@@ -97,8 +97,14 @@ export const handleDeployment = async (
   payload: Payload,
   send: (event: string, data: string) => void,
 ) => {
-  const plannerModel =
-    process.env.DEPLOYER_PLANNER_MODEL || payload.model || "qwen3:0.6b";
+  const plannerModel = payload.model?.trim();
+  if (!plannerModel) {
+    send(
+      "error",
+      "No model selected. Please choose a model from the model selector and retry.",
+    );
+    return;
+  }
 
   return runWithPlannerModel(plannerModel, async () => {
     const userWallet = payload.walletPublicKey;
@@ -350,14 +356,14 @@ function llmErr(e: unknown): string {
       msg + " " + responseBody,
     )
   ) {
-    return "Planner model generated invalid tool-call JSON. Switch DEPLOYER_PLANNER_MODEL to a tool-calling capable chat model and retry.";
+    return "Selected model generated invalid tool-call JSON. Choose a tool-calling capable model in the selector and retry.";
   }
 
   if (
     statusCode === 500 &&
     /Prompt processing failed/i.test(responseBody || msg)
   ) {
-    return "Planner model backend failed while processing the prompt. Retry once; if persistent, switch DEPLOYER_PLANNER_MODEL.";
+    return "Selected model backend failed while processing the prompt. Retry once; if persistent, choose a different model in the selector.";
   }
 
   if (/aborted|AbortError|SIGINT/i.test(msg))

@@ -36,6 +36,82 @@ function normalizeBaseUrl(serviceUrl: string, chatPath?: string): string {
   return `${root}/v1`;
 }
 
+function extractOllamaModelFromCmd(cmd: unknown): string | null {
+  if (!Array.isArray(cmd)) return null;
+
+  for (const part of cmd) {
+    if (typeof part !== "string") continue;
+
+    const pullMatch = part.match(/ollama\s+pull\s+([^\s;|&]+)/i);
+    if (pullMatch?.[1]) return pullMatch[1];
+
+    const runMatch = part.match(/ollama\s+run\s+([^\s;|&]+)/i);
+    if (runMatch?.[1]) return runMatch[1];
+  }
+
+  return null;
+}
+
+function getEnvValue(env: unknown, key: string): string | null {
+  if (!env) return null;
+
+  if (typeof env === "object" && !Array.isArray(env)) {
+    const obj = env as Record<string, unknown>;
+    const value = obj[key];
+    return typeof value === "string" && value.trim() ? value.trim() : null;
+  }
+
+  if (Array.isArray(env)) {
+    for (const item of env) {
+      if (!item || typeof item !== "object") continue;
+      const row = item as Record<string, unknown>;
+      const rowKey =
+        (typeof row.key === "string" && row.key) ||
+        (typeof row.name === "string" && row.name) ||
+        "";
+      if (rowKey !== key) continue;
+
+      const rowValue = row.value;
+      if (typeof rowValue === "string" && rowValue.trim()) {
+        return rowValue.trim();
+      }
+    }
+  }
+
+  return null;
+}
+
+function getGlobalVar(jobDef: any, key: string): string | null {
+  const variables = jobDef?.global?.variables;
+  if (!variables || typeof variables !== "object") return null;
+
+  const value = (variables as Record<string, unknown>)[key];
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function resolveTemplateGlobalVar(value: string, jobDef: any): string {
+  const match = value.match(/^%%global\.variables\.([A-Za-z0-9_]+)%%$/);
+  if (!match) return value;
+
+  const resolved = getGlobalVar(jobDef, match[1]);
+  return resolved || value;
+}
+
+function extractModelFromResources(jobDef: any): string | null {
+  const resources = jobDef?.ops?.[0]?.args?.resources;
+  if (!Array.isArray(resources)) return null;
+
+  for (const resource of resources) {
+    if (!resource || typeof resource !== "object") continue;
+    const candidate = (resource as Record<string, unknown>).model;
+    if (typeof candidate !== "string" || !candidate.trim()) continue;
+
+    return resolveTemplateGlobalVar(candidate.trim(), jobDef);
+  }
+
+  return null;
+}
+
 function extractModelName(jobDef: any): string {
   const cmd = jobDef?.ops?.[0]?.args?.cmd;
   if (Array.isArray(cmd)) {
@@ -44,25 +120,49 @@ function extractModelName(jobDef: any): string {
 
     const modelIdx = cmd.indexOf("--model");
     if (modelIdx >= 0 && cmd[modelIdx + 1]) return String(cmd[modelIdx + 1]);
+
+    const ollamaModel = extractOllamaModelFromCmd(cmd);
+    if (ollamaModel) return ollamaModel;
   }
 
   const env = jobDef?.ops?.[0]?.args?.env;
-  if (env && typeof env === "object") {
-    if (typeof env.SERVED_MODEL_NAME === "string") return env.SERVED_MODEL_NAME;
-    if (typeof env.MODEL_NAME === "string") return env.MODEL_NAME;
+  for (const key of ["MODEL", "SERVED_MODEL_NAME", "MODEL_NAME", "MODEL_ID"]) {
+    const envValue = getEnvValue(env, key);
+    if (envValue) return resolveTemplateGlobalVar(envValue, jobDef);
+  }
+
+  const modelFromResources = extractModelFromResources(jobDef);
+  if (modelFromResources) return modelFromResources;
+
+  for (const key of ["MODEL", "SERVED_MODEL_NAME", "MODEL_NAME", "MODEL_ID"]) {
+    const globalValue = getGlobalVar(jobDef, key);
+    if (globalValue) return globalValue;
   }
 
   return "local-model";
+}
+
+export function inferModelNameFromJobDef(jobDef: any): string | null {
+  const model = extractModelName(jobDef);
+  if (!model || model === "local-model") return null;
+  return model;
 }
 
 function isLikelyChatDeployment(jobDef: any, chatPath?: string): boolean {
   if (chatPath?.includes("/v1/chat/completions")) return true;
 
   const image = String(jobDef?.ops?.[0]?.args?.image || "").toLowerCase();
-  if (image.includes("vllm-openai") || image.includes("oneclickllm")) return true;
+  if (
+    image.includes("vllm-openai") ||
+    image.includes("oneclickllm") ||
+    image.includes("ollama")
+  ) {
+    return true;
+  }
 
   const env = jobDef?.ops?.[0]?.args?.env;
   if (env && typeof env === "object") {
+    if (typeof env.MODEL === "string") return true;
     if (typeof env.SERVED_MODEL_NAME === "string") return true;
     if (typeof env.MODEL_NAME === "string") return true;
   }
@@ -124,7 +224,7 @@ export function saveDeployedChatModelFromJob(args: {
   jobDef: any;
 }): DeployedChatModel | null {
   const { jobId, serviceUrl, jobDef } = args;
-  const model = extractModelName(jobDef);
+  const model = inferModelNameFromJobDef(jobDef) || "local-model";
   const chatPath = extractChatPath(jobDef);
   if (!isLikelyChatDeployment(jobDef, chatPath)) return null;
   const baseURL = normalizeBaseUrl(serviceUrl, chatPath);

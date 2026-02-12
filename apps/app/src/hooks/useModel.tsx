@@ -12,10 +12,24 @@ export interface ModelGroup {
   models: ModelItem[];
 }
 
-export const useModelGroups = () => {
+interface UseModelGroupsOptions {
+  onlyModel?: string;
+}
+
+export const useModelGroups = ({ onlyModel }: UseModelGroupsOptions = {}) => {
   const [localModels, setLocalModels] = useState<ModelItem[]>([]);
 
   useEffect(() => {
+    if (onlyModel) {
+      setLocalModels([
+        {
+          label: onlyModel,
+          value: onlyModel,
+        },
+      ]);
+      return;
+    }
+
     const fetchModels = async () => {
       try {
         const res = await fetch("/api/v1/models", { cache: "no-store" });
@@ -35,7 +49,7 @@ export const useModelGroups = () => {
       }
     };
     fetchModels();
-  }, []);
+  }, [onlyModel]);
 
   const groups = useMemo(
     () => [

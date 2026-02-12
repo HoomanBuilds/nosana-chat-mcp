@@ -39,10 +39,12 @@ export function createSSEStream(payload?: Payload) {
       })();
 
       const providerPromise = orchestrateProvider(payload as Payload, send);
+      const isCustomServiceInference = Boolean(payload.deployedModel?.baseURL);
 
       const followUpPromise =
         payload.mode != "deployer" &&
-        (payload?.customConfig ? payload?.customConfig?.followUp : true)
+        (payload?.customConfig ? payload?.customConfig?.followUp : true) &&
+        !isCustomServiceInference
           ? getFollowUpFromPayload(payload, send)
           : Promise.resolve();
 
