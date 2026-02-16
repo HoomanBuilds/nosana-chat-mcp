@@ -63,7 +63,7 @@ export const createJob = tool({
   execute: async (params) => {
     const deployer = ensureDeployer();
     const plannerModel =
-      getPlannerModel() || process.env.DEPLOYER_PLANNER_MODEL || "qwen3:0.6b";
+      getPlannerModel() || "qwen3:0.6b";
     let market_public_key: string = "";
     let Job_cost: number | null = null;
 
@@ -328,7 +328,7 @@ export const getModels = tool({
   execute: async ({ prompt }) => {
     console.log(prompt);
     const plannerModel =
-      getPlannerModel() || process.env.DEPLOYER_PLANNER_MODEL || "qwen3:0.6b";
+      getPlannerModel() || "qwen3:0.6b";
     const resolvedPrompt = getResolvedPrompt(prompt, model_families);
     const query = await chatJSON(
       resolvedPrompt,
@@ -359,11 +359,11 @@ export const getModels = tool({
 
           Models:
           ${results
-            .map(
-              (m, i) =>
-                `${i + 1}. ${m.family} → ${m.name} (${m.recommendedGPU?.parameters || "?"} GPU, score: ${m.score.toFixed(2)})`,
-            )
-            .join("\n")}
+        .map(
+          (m, i) =>
+            `${i + 1}. ${m.family} → ${m.name} (${m.recommendedGPU?.parameters || "?"} GPU, score: ${m.score.toFixed(2)})`,
+        )
+        .join("\n")}
           `.trim();
 
     return {

@@ -181,17 +181,16 @@ Please adjust your configuration or specify a compatible market manually.`);
 | Timeout | ${(params.timeoutSeconds / 3600).toFixed(2)} hours |
 
 💰 **Cost:**
-${
-  !Job_cost
-    ? "Failed to get cost, check it from wallet interface"
-    : `
+${!Job_cost
+                  ? "Failed to get cost, check it from wallet interface"
+                  : `
 GPU COST : ${Job_cost?.NOS} NOS ($${Job_cost?.NOS_USD}) 
 SOL GAS FEE : ${Job_cost?.SOL} SOL($${Job_cost?.SOL_USD})
 NETWORK FEE : ${Job_cost?.NETWORK} SOL ($${Job_cost?.NETWORK_USD})
 ---
 TOTAL : ${Job_cost?.TOTAL_USD}
 `
-}
+                }
 
 **Your Job Definition:**
 \`\`\`json
@@ -290,13 +289,12 @@ Awaiting user confirmation before deployment.
 **💡 Suggested Solutions:**
 
 1. **Use Quantization** (reduces VRAM requirements):
-${
-  quantOptions.length > 0
-    ? quantOptions
-        .map((q) => `   • ${q.name}: ~${q.vram}GB VRAM (${q.desc}) Fits!`)
-        .join("\n")
-    : "   • Even with INT4 quantization, model is too large for available GPUs"
-}
+${quantOptions.length > 0
+            ? quantOptions
+              .map((q) => `   • ${q.name}: ~${q.vram}GB VRAM (${q.desc}) Fits!`)
+              .join("\n")
+            : "   • Even with INT4 quantization, model is too large for available GPUs"
+          }
 
 2. **Use Smaller Model Variant:**
    • Try a smaller version (e.g., if using 70B → try 7B/13B)
@@ -1191,14 +1189,13 @@ Would you like me to help fix these issues?
             text: `
 ✅ **Job Definition is Valid!**
 
-${
-  warnings.length > 0
-    ? `
+${warnings.length > 0
+                ? `
 ⚠️ **Warnings (non-critical):**
 ${warnings.map((w) => `  • ${w}`).join("\n")}
 `
-    : ""
-}
+                : ""
+              }
 
 **Validated JSON:**
 \`\`\`json
@@ -1217,14 +1214,13 @@ ${JSON.stringify(jobDefinition, null, 2)}
 1. Copy this JSON to Nosana Dashboard: https://dashboard.nosana.com/deploy
 2. Or use createJob tool to deploy it with your wallet
 
-${
-  issues.length > 0
-    ? `
+${issues.length > 0
+                ? `
 **Critical Issues to Fix:**
 ${issues.map((i) => `  • ${i}`).join("\n")}
 `
-    : ""
-}
+                : ""
+              }
 `,
           },
         ],

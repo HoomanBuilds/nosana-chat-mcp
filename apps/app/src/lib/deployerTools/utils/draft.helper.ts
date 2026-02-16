@@ -235,7 +235,6 @@ export async function chatJSONRetry<T>(
     const preferredModel =
         primaryModel ||
         getPlannerModel() ||
-        process.env.DEPLOYER_PLANNER_MODEL ||
         "qwen3:0.6b";
     const modelsToTry = [preferredModel].filter(
         (m, i, arr) => m && arr.indexOf(m) === i,

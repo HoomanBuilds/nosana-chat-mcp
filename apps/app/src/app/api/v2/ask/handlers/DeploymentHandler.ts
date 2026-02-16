@@ -20,7 +20,7 @@ import { runWithPlannerModel } from "@/lib/deployerTools/utils/plannerContext";
 
 const openai = createOpenAI({
   apiKey: process.env.INFERIA_LLM_API_KEY,
-  baseURL: process.env.INFERIA_LLM_URL,
+  baseURL: process.env.NEXT_PUBLIC_INFERIA_LLM_URL,
 });
 
 /** Wallet mode tools — on-chain via SDK */

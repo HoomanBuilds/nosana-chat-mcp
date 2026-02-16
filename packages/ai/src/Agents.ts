@@ -15,7 +15,7 @@ export default class Agents {
     model?: string;
   }) {
     const resolvedApiKey = apiKey || process.env.INFERIA_LLM_API_KEY;
-    const resolvedBaseURL = baseURL || process.env.INFERIA_LLM_URL;
+    const resolvedBaseURL = baseURL || process.env.INFERIA_LLM_URL || process.env.NEXT_PUBLIC_INFERIA_LLM_URL;
 
     if (!resolvedApiKey) {
       throw new Error(
@@ -24,7 +24,7 @@ export default class Agents {
     }
     if (!resolvedBaseURL) {
       throw new Error(
-        "INFERIA_LLM_URL is required. Provide it as an argument or set the environment variable.",
+        "INFERIA_LLM_URL or NEXT_PUBLIC_INFERIA_LLM_URL is required. Provide it as an argument or set the environment variable.",
       );
     }
 

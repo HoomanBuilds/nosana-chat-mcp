@@ -6,14 +6,14 @@ function joinModelUrl(baseUrl: string) {
 }
 
 export async function GET() {
-  const baseUrl = process.env.INFERIA_LLM_URL;
+  const baseUrl = process.env.NEXT_PUBLIC_INFERIA_LLM_URL;
   const apiKey = process.env.INFERIA_LLM_API_KEY;
 
   if (!baseUrl || !apiKey) {
     return NextResponse.json(
       {
         error:
-          "Missing INFERIA_LLM_URL or INFERIA_LLM_API_KEY environment variables",
+          "Missing NEXT_PUBLIC_INFERIA_LLM_URL or INFERIA_LLM_API_KEY environment variables",
       },
       { status: 500 },
     );

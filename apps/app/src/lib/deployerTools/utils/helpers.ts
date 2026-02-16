@@ -13,15 +13,12 @@ import { SolanaService } from "../../services/SolanaService";
 
 const openai = createOpenAI({
   apiKey: process.env.INFERIA_LLM_API_KEY,
-  baseURL: process.env.INFERIA_LLM_URL,
+  baseURL: process.env.NEXT_PUBLIC_INFERIA_LLM_URL,
 });
 
 function resolvePlannerModel(model?: string): string {
   return (
-    model ||
-    getPlannerModel() ||
-    process.env.DEPLOYER_PLANNER_MODEL ||
-    "qwen3:0.6b"
+    model || getPlannerModel() || "qwen3:0.6b"
   );
 }
 
@@ -270,11 +267,11 @@ export function createJobDefination(
 
   let derivedCmd: any = isHF
     ? categoryConfig.cmd({
-        model: result.modelName,
-        port: result.exposedPorts || 8080,
-        host: "0.0.0.0",
-        api_key: result.apiKey,
-      })
+      model: result.modelName,
+      port: result.exposedPorts || 8080,
+      host: "0.0.0.0",
+      api_key: result.apiKey,
+    })
     : result.commands;
 
   if (isOllama) {
@@ -300,23 +297,23 @@ export function createJobDefination(
       : {}),
     ...(isOneClickLLM
       ? (() => {
-          const tag = normalizeOllamaTag(
-            result.modelName || "",
-            result.vRAM_required,
-          );
-          return {
-            MODEL_NAME: tag,
-            SERVED_MODEL_NAME: tag,
-            PORT: String(result.exposedPorts || 8000),
-            MAX_MODEL_LEN: "8192",
-            PARAMETER_SIZE:
-              (result.params || "").toUpperCase() ||
-              (tag.includes("3b") ? "3B" : "7B"),
-            TENSOR_PARALLEL_SIZE: "1",
-            ENABLE_STREAMING: "false",
-            API_KEY: result.apiKey || "",
-          };
-        })()
+        const tag = normalizeOllamaTag(
+          result.modelName || "",
+          result.vRAM_required,
+        );
+        return {
+          MODEL_NAME: tag,
+          SERVED_MODEL_NAME: tag,
+          PORT: String(result.exposedPorts || 8000),
+          MAX_MODEL_LEN: "8192",
+          PARAMETER_SIZE:
+            (result.params || "").toUpperCase() ||
+            (tag.includes("3b") ? "3B" : "7B"),
+          TENSOR_PARALLEL_SIZE: "1",
+          ENABLE_STREAMING: "false",
+          API_KEY: result.apiKey || "",
+        };
+      })()
       : {}),
   };
 

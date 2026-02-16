@@ -27,7 +27,7 @@ export const getFollowUpQuestions = async (
 
   const client = new OpenAI({
     apiKey: process.env.INFERIA_LLM_API_KEY,
-    baseURL: process.env.INFERIA_LLM_URL,
+    baseURL: process.env.NEXT_PUBLIC_INFERIA_LLM_URL,
   });
 
   try {

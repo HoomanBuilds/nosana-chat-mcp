@@ -118,7 +118,7 @@ export const handleInferenceMode = async (
   const messages = buildMessages(payload, systemInstruction, contextChat);
 
   const rawBaseUrl =
-    payload.deployedModel?.baseURL || process.env.INFERIA_LLM_URL || "";
+    payload.deployedModel?.baseURL || process.env.NEXT_PUBLIC_INFERIA_LLM_URL || "";
   const baseURL = normalizeInferenceBaseURL(rawBaseUrl);
   const apiKey =
     payload.deployedModel?.apiKey ||
@@ -127,7 +127,7 @@ export const handleInferenceMode = async (
 
   if (!baseURL) {
     throw new Error(
-      "Missing INFERIA_LLM_URL or deployed/custom service baseURL",
+      "Missing NEXT_PUBLIC_INFERIA_LLM_URL or deployed/custom service baseURL",
     );
   }
 
