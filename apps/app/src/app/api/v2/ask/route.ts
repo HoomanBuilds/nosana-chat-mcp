@@ -3,11 +3,12 @@ import { SSE_HEADERS } from "@/lib/types";
 import { chatRequestSchema, Payload } from "@/lib/utils/validation";
 import { createSSEStream } from "./sse";
 import { registerApiKeys } from "./handlers/utils";
-import { deductCredits } from "@/lib/credits";
 
 export async function POST(req: NextRequest) {
-  if (req.method === "OPTIONS") return new Response(null, { headers: SSE_HEADERS });
-  if (req.method !== "POST") return new Response("Method not allowed", { status: 405 });
+  if (req.method === "OPTIONS")
+    return new Response(null, { headers: SSE_HEADERS });
+  if (req.method !== "POST")
+    return new Response("Method not allowed", { status: 405 });
 
   const controller = new AbortController();
   const { signal } = controller;
@@ -40,38 +41,27 @@ export async function POST(req: NextRequest) {
       }
     : undefined;
 
+  const ipAddress =
+    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
+    req.headers.get("x-real-ip") ||
+    req.headers.get("x-vercel-forwarded-for")?.split(",")[0].trim() ||
+    undefined;
+
   const PayloadPro: Payload = {
     ...data,
     ...(geo ? { geo } : {}),
+    ...(ipAddress ? { ipAddress } : {}),
     signal,
     apiKeys: data.apiKeys ?? {},
   };
 
   registerApiKeys(PayloadPro, req.headers);
 
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "unknown-ip";
-
-  let remainingCredits = 0;
-  try {
-    remainingCredits = await deductCredits(ip, data.model, data.walletPublicKey);
-    console.log(
-      `💳 [${data.walletPublicKey ? "wallet" : "ip"}:${
-        data.walletPublicKey || ip
-      }] used ${data.model} → remaining: ${remainingCredits}`
-    );
-  } catch (err) {
-    return new Response(JSON.stringify({ error: (err as Error).message }), {
-      status: 403,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-
   try {
     const stream = createSSEStream(PayloadPro);
     return new Response(stream, {
       headers: {
         ...SSE_HEADERS,
-        "x-remaining-credits": String(remainingCredits),
       },
     });
   } catch (err) {

@@ -301,10 +301,8 @@ const AdditionalSettingsTab = () => {
     {
       id: "followUp",
       label: "Want follow up?",
-      checked: localStorage.getItem("geminiApiKey")
-        ? localConfig.followUp ?? DEFAULT_LOCAL_SETTINGS.follow_up
-        : false,
-      disabled: !localStorage.getItem("geminiApiKey") && process.env.NODE_ENV !== "development"
+      checked: localConfig.followUp ?? DEFAULT_LOCAL_SETTINGS.follow_up,
+      disabled: false
     },
     {
       id: "showErrorMessages",
@@ -353,15 +351,8 @@ const ApiKeysTab = () => (
       placeholder="Enter your Tavily API key"
       pingModel="tavilydefault"
     />
-    <ApiKeyField
-      label="Gemini"
-      storageKey="geminiApiKey"
-      placeholder="Enter your Gemini API key"
-      pingModel="gemini-2.0-flash"
-    />
   </div>
 );
-
 const ApiKeyField = ({ label, storageKey, placeholder, pingModel }: ApiKeyFieldProps) => {
   const [value, setValue] = useState("");
 

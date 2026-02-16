@@ -12,15 +12,13 @@ Nosana Chat is a unified AI platform that combines conversational AI capabilitie
 
 ## Overview
 
-Inferia Chat operates through two integrated modes:
+Nosana Chat operates through two integrated modes:
 
-- **Chat Mode** provides access to multiple language models including LLlaMA, Qwen3, and custom models through the [Inferia.ai](https://inferia.ai) platform. Users benefit from a streamlined chat interface with real-time responses, customizable model parameters, and web search integration.
+- **Chat Mode** provides access to multiple language models including DeepSeek, Llama, Qwen, and custom models through the [Inferia.ai](https://inferia.ai) platform. Users benefit from a streamlined chat interface with real-time streaming, reasoning (thinking) process, and web search integration.
 
-- **Nosana Deployer** streamlines GPU deployment by converting natural language descriptions into optimized job configurations. Users can deploy AI models to decentralized infrastructure with one click, paying with NOS tokens on the Solana blockchain.
+- **Nosana Deployer** streamlines GPU deployment by converting natural language descriptions into optimized job configurations. Users can deploy AI models to decentralized infrastructure with one click, using either on-chain wallet transactions (SOL/NOS) or credits-based API keys.
 
 ---
-
-## DEMO VIDEO
 
 ## Features
 
@@ -28,105 +26,95 @@ Inferia Chat operates through two integrated modes:
 
 The Chat Mode provides a flexible conversational interface with the following capabilities:
 
-- **Model Access**: Interact with multiple AI models including Google Gemini, Qwen3, and custom implementations powered by Inferia.ai.
-
-- **Customizable Parameters**: Fine-tune model behavior through temperature control (randomness), max tokens (response length), nucleus sampling (Top P), and custom system prompts.
-
-- **Web Search Integration**: Enable Tavily API to incorporate real-time web information into model responses.
-
-- **Real-time Streaming**: Receive responses as they are generated for improved user experience.
-
-- **Local Privacy**: All data is stored locally using IndexedDB, ensuring privacy and reducing server dependency.
+- **Multi-Model Access**: Interact with various AI models including Google Gemini, Qwen3, DeepSeek, and Llama powered by Inferia.ai.
+- **Reasoning Process**: Real-time visualization of the model's "thinking" process (reasoning) before delivering the final answer.
+- **Web Search Integration**: Integrated Tavily API to incorporate real-time web information into model responses with source citations.
+- **Local Privacy**: All conversations and settings are stored locally using IndexedDB, ensuring privacy and fast access.
+- **Advanced Context Management**: Intelligent context cutting ensures long conversations remain efficient and within model token limits.
 
 ### 2. Nosana Deployer
 
-The Deployer mode simplifies GPU deployment through an intuitive workflow:
+The Deployer mode simplifies GPU deployment through an agentic workflow:
 
-- **Natural Language Configuration**: Describe your deployment requirements in plain language or select from pre-built templates. The system automatically generates optimized Nosana job configurations.
-
-- **One-Click Deployment**: Deploy configured jobs directly to the decentralized GPU network without manual setup.
-
-- **Comprehensive Monitoring**: Track deployments using Job ID for identification, Service URL for model access, and Deployment ID for management reference.
-
-- **Full SDK Integration**: Leverages complete Nosana SDK capabilities for advanced deployment control.
+- **Dual Authentication**:
+  - **Wallet Mode**: Deploy using Solana/Nosana tokens directly from your connected wallet.
+  - **API Key Mode**: Use Nosana API keys (credits-based) for a seamless, transaction-free deployment experience.
+- **Natural Language Configuration**: Describe your deployment requirements (e.g., "Deploy a Llama 3 instance for 2 hours") and the AI will handle the market selection and job definition.
+- **One-Click Deployment**: Approve and deploy configured jobs directly from the chat interface.
+- **Management Tools**: List, monitor, extend, or stop your deployments using simple commands.
+- **Cost Estimation**: Get precise job costs in SOL, NOS, and USD before deploying.
 
 ---
 
 ## Nosana Deployer MCP Tools
 
-The Deployer mode includes **8 powerful Nosana MCP tools** for intelligent deployments:
+The platform includes a suite of **powerful Nosana MCP tools** for intelligent deployments:
 
-| Tool                      | Purpose                                                     |
-| ------------------------- | ----------------------------------------------------------- |
-| **create_job_defination** | Generate optimized Nosana job definitions from user prompts |
-| **get_market**            | Fetch GPU market details, pricing, and queue status         |
-| **list_gpu_markets**      | Discover available GPU markets with specifications          |
-| **estimate_job_cost**     | Calculate precise job costs in multiple currencies          |
-| **get_exact_value**       | Get exact SOL/NOS/USD pricing for any duration              |
-| **get_job**               | Monitor deployed job status and details                     |
-| **get_all_jobs**          | View all your Nosana deployments                            |
-| **get_wallet_balance**    | Check SOL and NOS token balances                            |
+| Category        | Tools                                                                              | Purpose                                                          |
+| --------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| **Deployment**  | `create_job`, `create_job_api`, `validate_job_definition`                          | Create, start, or validate Nosana jobs across different modes.   |
+| **Monitoring**  | `get_job`, `get_all_jobs`, `list_jobs`, `get_job_api`                              | Track deployment status, details, and history.                   |
+| **Market Info** | `list_gpu_markets`, `get_market`, `suggest_model_market`, `get_models_from_tags`   | Discover available GPUs, pricing, and get model recommendations. |
+| **Financials**  | `estimate_job_cost`, `get_exact_value`, `get_wallet_balance`, `get_credit_balance` | Calculate costs and check balances (Wallet/Credits).             |
+| **Operations**  | `stop_job`, `stop_job_api`, `extend_job_runtime`                                   | Manage active deployments by stopping or extending them.         |
+
+---
 
 ### How It Works
 
-**Chat Mode Example:**
+**Deployment Example:**
 
-> User: "I want to deploy Llama 2 on GPU for 1 hour"
+> User: "I want to deploy DeepSeek R1 on a GPU for 1 hour"
 
 ```
 AI will:
-1. Analyze your requirements
-2. Browse available GPU markets
-3. Create optimized job definition
-4. Estimate costs (SOL/NOS/USD)
-5. Deploy with one click
-6. Return: Job ID, Service URL, Deployment ID, Chat Interface link using inferia.ai
+1. Analyze requirements & suggest the best GPU market
+2. Check your wallet or credit balance
+3. Create an optimized job definition
+4. Provide a cost estimate (USD/NOS/SOL)
+5. Generate a "Deploy" button for one-click execution
+6. Return: Job ID, Service URL, and Monitoring links
 ```
-
-**One-Click Deployment:**
-After the AI generates the deployment config, click "Deploy" to:
-
-- Pay with your NOS tokens (small amount SOL required for transaction fees)
-- Publish job to Nosana network
-- Get instant Job ID & Service URL
 
 ---
 
 ## Architecture
 
 ```
-inferia-chat/
+nosana-chat-mcp/
 ├── apps/
-│   ├── app/              # Next.js chat interface
-│   └── nosana_mcp/       # Nosana MCP server with 7 deployment tools
-└── packages/
-    ├── ai/               # LLM integration & orchestration
-    └── indexDb/          # Local storage layer
+│   ├── app/              # Next.js 15 chat interface & orchestrator
+│   └── nosana_mcp/       # Nosana MCP server with 15 deployment tools
+├── packages/
+│   ├── ai/               # LLM integration, agents & orchestration logic
+│   ├── indexDb/          # Local browser storage layer
+│   └── typescript-config/# Shared TS configurations
 ```
 
-**Tech Stack:** Next.js 15 • TypeScript • Tailwind CSS • Zustand • Solana Web3.js • Nosana SDK
+**Tech Stack:**
+
+- **Frontend:** Next.js 15, TypeScript, Tailwind CSS, Zustand, Shadcn/UI
+- **AI/LLM:** Vercel AI SDK, OpenAI, Tavily (Search)
+- **Blockchain:** Nosana SDK, Solana Web3.js
+- **Protocol:** Model Context Protocol (MCP)
 
 ---
 
 ## Use Cases
 
-Inferia Chat supports diverse AI deployment scenarios:
-
-Deploy machine learning models to decentralized infrastructure without managing physical servers or data center resources. Run compute-intensive workloads such as batch processing, data analysis, or model training on demand. Test and prototype language model applications before production deployment. Provision temporary compute resources for game servers and other performance-critical applications. Deploy specialized AI models such as Stable Diffusion for image generation or other domain-specific implementations.
+- **Decentralized Inference:** Deploy ML models without managing physical servers.
+- **On-Demand Compute:** Run compute-intensive workloads like batch processing or data analysis.
+- **Prototyping:** Quickly test and prototype AI applications on real GPU hardware.
+- **Cost Optimization:** Leverage decentralized markets for more affordable GPU access compared to traditional cloud providers.
 
 ---
 
 ## Core Technologies
 
-[Inferia.ai](https://inferia.ai) provides AI intelligence and model orchestration.
-
-[Nosana](https://nosana.io) offers decentralized GPU infrastructure and resource management.
-
-[Solana](https://solana.com) serves as the underlying blockchain for secure transactions.
-
-[Next.js](https://nextjs.org) powers the frontend application framework.
-
-[Shadcn/UI](https://ui.shadcn.com) provides the component library for user interface design.
+- **[Inferia.ai](https://inferia.ai)**: AI intelligence and model orchestration.
+- **[Nosana](https://nosana.io)**: Decentralized GPU infrastructure and resource management.
+- **[Solana](https://solana.com)**: Secure, high-speed blockchain for transactions.
+- **[Model Context Protocol](https://modelcontextprotocol.io)**: Standardized tool integration for AI models.
 
 ---
 

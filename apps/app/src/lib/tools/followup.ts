@@ -1,19 +1,16 @@
-import { Gemini } from "@nosana-chat/ai";
 import { z } from "zod";
+import OpenAI from "openai";
 
 interface FollowUpQuestion {
-    question: string;
+  question: string;
 }
 
 export const getFollowUpQuestions = async (
-    userQuery: string,
-    send: (event: string, data: string) => void,
-    apiKey?: Record<string, string>
+  userQuery: string,
+  send: (event: string, data: string) => void,
+  model: string,
 ) => {
-    const promptMessages = [
-        {
-            role: "user" as const,
-            content: `Based on the user's past query, generate 3–4 smart follow-up questions that expand or clarify the topic.  
+  const prompt = `Based on the user's past query, generate 3–4 smart follow-up questions that expand or clarify the topic.  
                 Return only a JSON array of objects, each with a single key "question".  
 
                 Guidelines:
@@ -26,27 +23,31 @@ export const getFollowUpQuestions = async (
 
                 Note : ignore follow up if questino if you fine irrelavancy in chats
                      : give short follow ups 6-12 words
-            `
-        }
-    ];
+            `;
 
-    const followUpSchema: z.ZodType<FollowUpQuestion[]> = z.array(
-        z.object({
-            question: z.string(),
-        })
-    );
+  const client = new OpenAI({
+    apiKey: process.env.INFERIA_LLM_API_KEY,
+    baseURL: process.env.NEXT_PUBLIC_INFERIA_LLM_URL,
+  });
 
+  try {
+    const response = await client.chat.completions.create({
+      model: model,
+      messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" },
+    });
 
-    const instance = Gemini.GeminiModel("gemini-2.0-flash-lite", apiKey?.gemini);
-    try {
-        const followUps = await instance.generateObjectGemini<FollowUpQuestion[]>(
-            promptMessages,
-            followUpSchema as any
-        );
-        send("followUp", JSON.stringify(followUps));
-    } catch {
-        send("followUp", JSON.stringify([]));
-        console.error("error generating follow up question");
+    const content = response.choices[0]?.message?.content || "[]";
+    let followUps = JSON.parse(content);
+
+    // Handle cases where the model returns { "questions": [...] } or just the array
+    if (!Array.isArray(followUps) && followUps.questions) {
+      followUps = followUps.questions;
     }
 
+    send("followUp", JSON.stringify(followUps));
+  } catch (err) {
+    send("followUp", JSON.stringify([]));
+    console.error("error generating follow up question", err);
+  }
 };

@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import { Suspense, useEffect, useMemo, useRef, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowRightFromLine, LucideLoader2 } from "lucide-react";
 import { Footer } from "@/components/Footer";
 import { useChatLogic } from "@/hooks/useChatLogic";
@@ -31,15 +31,38 @@ function AskPage() {
     null
   ) as React.RefObject<HTMLTextAreaElement>;
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const customServiceUrl =
+    searchParams.get("custom-service_url") ||
+    searchParams.get("custom_service_url") ||
+    searchParams.get("service_url");
+  const customServiceModel =
+    searchParams.get("custom-model") ||
+    searchParams.get("custom_model") ||
+    searchParams.get("service_model");
 
   useEffect(() => {
+    const modelFromUrl = customServiceModel || searchParams.get("model");
     const saved = localStorage.getItem("llmmodel");
-    setModel(saved || DEFAULT.MODEL);
+    setModel(modelFromUrl || saved || DEFAULT.MODEL);
     setTimeout(() => textref.current?.focus(), 50);
 
     const picked = [...questions].sort(() => Math.random() - 0.5).slice(0, 3);
     setRandomQuestions(picked);
-  }, []);
+  }, [searchParams, customServiceModel, setModel]);
+
+  const buildStartChatUrl = useCallback(
+    (chatId: number, modelToSend: string) => {
+      const params = new URLSearchParams();
+      params.set("model", modelToSend);
+      params.set("chatid", String(chatId));
+      if (mcp) params.set("tool", "deployer");
+      if (customServiceUrl) params.set("custom-service_url", customServiceUrl);
+      if (customServiceModel) params.set("custom-model", customServiceModel);
+      return `/ask/${chatId}?${params.toString()}`;
+    },
+    [mcp, customServiceUrl, customServiceModel],
+  );
 
   const handleStartChat = useCallback((e: React.FormEvent) => {
     e.preventDefault();
@@ -50,10 +73,8 @@ function AskPage() {
 
     setPendingQuery(input);
 
-    router.push(
-      `/ask/${chatId}?model=${modelToSend}&chatid=${chatId}${mcp ? `&tool=deployer` : ""}`
-    );
-  }, [input, model, mcp, setPendingQuery, router]);
+    router.push(buildStartChatUrl(chatId, modelToSend));
+  }, [input, model, setPendingQuery, router, buildStartChatUrl]);
 
   const handleTemplateSelect = useCallback((jobDefinition: Record<string, any>) => {
     const jsonString = JSON.stringify(jobDefinition, null, 2);
@@ -66,11 +87,9 @@ function AskPage() {
 
       setPendingQuery(jsonString);
 
-      router.push(
-        `/ask/${chatId}?model=${modelToSend}&chatid=${chatId}${mcp ? `&tool=deployer` : ""}`
-      );
+      router.push(buildStartChatUrl(chatId, modelToSend));
     }, 100);
-  }, [model, mcp, setPendingQuery, router]);
+  }, [model, setPendingQuery, router, buildStartChatUrl]);
 
   const formProps = useMemo(() => ({
     input,
@@ -123,7 +142,8 @@ function AskPage() {
           <div className="sm:translate-y-6 w-full -translate-y-12 flex flex-col items-center">
             <div
               className={cn(
-                "text-center text-2xl sm:text-3xl font-sans mb-6 font-extralight bg-gradient-to-r text-transparent bg-clip-text"
+                "text-center text-2xl sm:text-3xl font-sans mb-6 font-extralight",
+                !mcp && "bg-gradient-to-r text-transparent bg-clip-text"
               )}
             >
               <div className="text-center text-2xl sm:text-3xl font-sans font-extralight">
@@ -135,7 +155,7 @@ function AskPage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="bg-gradient-to-r from-muted-foreground to-muted text-transparent bg-clip-text">
+                  <div className="text-muted-foreground">
                     <span className="font-bold">Hey</span>, How May I assist you
                     Today?
                   </div>

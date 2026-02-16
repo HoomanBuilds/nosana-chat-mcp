@@ -12,46 +12,63 @@ export interface ModelGroup {
   models: ModelItem[];
 }
 
-export const useModelGroups = () => {
-  const [geminiKeyExists, setGeminiKeyExists] = useState(false);
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setGeminiKeyExists(!!localStorage.getItem("geminiApiKey"));
-    }
-  }, []);
+interface UseModelGroupsOptions {
+  onlyModel?: string;
+}
 
+export const useModelGroups = ({ onlyModel }: UseModelGroupsOptions = {}) => {
+  const [localModels, setLocalModels] = useState<ModelItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (onlyModel) {
+      setLocalModels([
+        {
+          label: onlyModel,
+          value: onlyModel,
+        },
+      ]);
+      setIsLoading(false);
+      return;
+    }
+
+    const fetchModels = async () => {
+      setIsLoading(true);
+      try {
+        const res = await fetch("/api/v1/models", { cache: "no-store" });
+        if (!res.ok) {
+          throw new Error(`Failed to fetch models: ${res.status}`);
+        }
+        const json = await res.json();
+        if (json.data && Array.isArray(json.data)) {
+          const items: ModelItem[] = json.data.map((m: any) => ({
+            label: m.id,
+            value: m.id,
+          }));
+          setLocalModels(items);
+        }
+      } catch (err) {
+        console.error("Failed to fetch models from endpoint:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchModels();
+  }, [onlyModel]);
 
   const groups = useMemo(
     () => [
       {
-        label: "Models",
-        models: [
-          { label: "Qwen3 4B", value: "self/qwen3:4b" },
-          { label: "DeepSeek-R1 7B", value: "self/deepseek-r1:7b" },
-          { label: "Qwen3 0.6B", value: "self/qwen3:0.6b" },
-          { label: "LLaMA 3.8B", value: "self/llama-3.8b" },
-          { label: "Mistral 7B", value: "self/mistral-7b", disabled: true },
-        ],
-      },
-      {
-        label: "Popular Models",
-        models: [
-          { label: "gemini-2.0-flash", value: "gemini/gemini-2.0-flash" },
-          { label: "gemini-2.5-flash", value: "gemini/gemini-2.5-flash" },
-          { label: "gemini-2.5-pro", value: "gemini/gemini-2.5-pro", disabled: !geminiKeyExists },
-          { label: "gemini-2.0-flash-lite", value: "gemini/gemini-2.0-flash-lite"},
-        ],
+        label: "Available Models",
+        models: localModels,
       },
     ],
-    [geminiKeyExists]
+    [localModels],
   );
 
   const filteredGroups: ModelGroup[] = useMemo(() => {
-    return groups.map(group => ({
-      ...group,
-      models: group.models,
-    }));
+    return groups;
   }, [groups]);
 
-  return filteredGroups;
+  return { groups: filteredGroups, isLoading };
 };

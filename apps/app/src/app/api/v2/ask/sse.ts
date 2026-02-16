@@ -13,12 +13,15 @@ export function createSSEStream(payload?: Payload) {
       const encoder = new TextEncoder();
       const send = (event: string, data: string) => {
         controller.enqueue(
-          encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`)
+          encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`),
         );
       };
 
-
-      if (payload.signal && payload.signal instanceof AbortSignal && typeof payload.signal.addEventListener === "function") {
+      if (
+        payload.signal &&
+        payload.signal instanceof AbortSignal &&
+        typeof payload.signal.addEventListener === "function"
+      ) {
         payload.signal.addEventListener("abort", () => {
           send("error", "stream aborted by user");
           controller.close();
@@ -26,27 +29,35 @@ export function createSSEStream(payload?: Payload) {
       }
 
       const threadCheckPromise = (async () => {
-        if (payload.chats && payload.chats.length === 0 && payload.query && process.env.GOOGLE_API_KEY) {
-          const threadTitle = await getThreadTitle(payload.query, payload.apiKeys?.["gemini"] || process.env.GOOGLE_API_KEY);
+        if (payload.chats && payload.chats.length === 0 && payload.query) {
+          const threadTitle = await getThreadTitle(
+            payload.query,
+            payload.model,
+          );
           send("threadTitle", threadTitle);
         }
       })();
 
       const providerPromise = orchestrateProvider(payload as Payload, send);
+      const isCustomServiceInference = Boolean(payload.deployedModel?.baseURL);
 
-      const apiKey = payload.apiKeys?.["gemini"] || process.env.GOOGLE_API_KEY;
-      const followUpPromise = (payload.mode != "deployer" && apiKey && (payload?.customConfig ? payload?.customConfig?.followUp : true))
-        ? getFollowUpFromPayload(payload, send)
-        : Promise.resolve();
+      const followUpPromise =
+        payload.mode != "deployer" &&
+        (payload?.customConfig ? payload?.customConfig?.followUp : true) &&
+        !isCustomServiceInference
+          ? getFollowUpFromPayload(payload, send)
+          : Promise.resolve();
 
       try {
         let followUpResolved = false;
-        followUpPromise.then(() => { followUpResolved = true; });
+        followUpPromise.then(() => {
+          followUpResolved = true;
+        });
 
         await Promise.all([providerPromise, threadCheckPromise]);
 
         await followUpPromise;
-        if (!followUpResolved && payload.customConfig?.followUp && apiKey) {
+        if (!followUpResolved && payload.customConfig?.followUp) {
           send("event", "generating follow-up");
         }
       } catch (err) {
@@ -59,8 +70,10 @@ export function createSSEStream(payload?: Payload) {
   });
 }
 
-
-function getFollowUpFromPayload(payload: Payload, send: (event: string, data: string) => void) {
+function getFollowUpFromPayload(
+  payload: Payload,
+  send: (event: string, data: string) => void,
+) {
   const MAX_LENGTH = 2000;
 
   const userMessages = (payload.chats || [])
@@ -78,9 +91,11 @@ function getFollowUpFromPayload(payload: Payload, send: (event: string, data: st
   }
 
   return combinedQuery
-    ? getFollowUpQuestions(combinedQuery, send, payload.apiKeys).catch((err: Error) => {
-      console.error("Follow-up error:", err);
-      return;
-    })
+    ? getFollowUpQuestions(combinedQuery, send, payload.model).catch(
+        (err: Error) => {
+          console.error("Follow-up error:", err);
+          return;
+        },
+      )
     : Promise.resolve();
 }

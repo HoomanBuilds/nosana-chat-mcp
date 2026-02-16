@@ -1,8 +1,5 @@
-import {
-  Client,
-  Market,
-} from '@nosana/sdk';
-import { PublicKey } from '@solana/web3.js';
+import { Client, Market } from "@nosana/sdk";
+import { PublicKey } from "@solana/web3.js";
 import {
   WalletBalance,
   CreditBalance,
@@ -11,41 +8,46 @@ import {
   Network,
   JobsResponse,
   HFModel,
-  ModelQuery
+  ModelQuery,
 } from "./utils/types";
-import { MARKETS } from './utils/supportingModel';
-import { DEFAULT_DEPLOYER } from '../constants';
-
+import { MARKETS, MARKET_ADDRESS_TO_SLUG } from "./utils/supportingModel";
+import { DEFAULT_DEPLOYER } from "../constants";
 
 export class NosanaDeployer {
   private nosana: Client;
   private network: Network;
   private apiKey?: string;
 
-  constructor(network: Network = 'mainnet') {
+  constructor(network: Network = "mainnet") {
     this.network = network;
     this.nosana = new Client(network);
     this.apiKey = process.env.NOSANA_API_KEY;
   }
 
-
-
-  async getAllJobs(userPubKey: string, { limit, state }: { limit: number, state: string }): Promise<JobsResponse> {
-    if (!userPubKey) throw new Error('userPubKey required');
-    const { status, body } = await this.fetchJobsTemp(userPubKey, { limit, state });
+  async getAllJobs(
+    userPubKey: string,
+    { limit, state }: { limit: number; state: string },
+  ): Promise<JobsResponse> {
+    if (!userPubKey) throw new Error("userPubKey required");
+    const { status, body } = await this.fetchJobsTemp(userPubKey, {
+      limit,
+      state,
+    });
     if (status !== 200) throw new Error(`fetchJobs failed: ${status}`);
 
     for (const job of body.jobs) delete job.jobDefinition;
     return body;
   }
 
-
-
   async getWalletBalance(publicKey?: string): Promise<WalletBalance> {
-    const pk = new PublicKey(publicKey as string)
-    const sol = (await this.nosana.solana.getSolBalance(pk ? pk : undefined)) / 1e9;
-    let nos = (await this.nosana.solana.getNosBalance(pk ? pk : undefined))?.amount ?? 0;
-    nos = Number(nos) / 1000000;
+    const pk = new PublicKey(publicKey as string);
+    // Parallelize balance fetching for better performance
+    const [solBalance, nosBalance] = await Promise.all([
+      this.nosana.solana.getSolBalance(pk ? pk : undefined),
+      this.nosana.solana.getNosBalance(pk ? pk : undefined),
+    ]);
+    const sol = solBalance / 1e9;
+    const nos = Number(nosBalance?.amount ?? 0) / 1000000;
     return { sol, nos };
   }
 
@@ -60,16 +62,16 @@ export class NosanaDeployer {
         };
       }
     } catch (sdkErr) {
-      console.warn('SDK balance fetch failed, using REST fallback:', sdkErr);
+      console.warn("SDK balance fetch failed, using REST fallback:", sdkErr);
     }
 
     if (!this.apiKey)
-      throw new Error('NOSANA_API_KEY environment variable not set.');
+      throw new Error("NOSANA_API_KEY environment variable not set.");
 
     const endpoint =
-      this.network === 'mainnet'
-        ? 'https://dashboard.k8s.prd.nos.ci/api/credits/balance'
-        : 'https://dashboard.k8s.dev.nos.ci/api/credits/balance';
+      this.network === "mainnet"
+        ? "https://dashboard.k8s.prd.nos.ci/api/credits/balance"
+        : "https://dashboard.k8s.dev.nos.ci/api/credits/balance";
 
     const res = await fetch(endpoint, {
       headers: { Authorization: `Bearer ${this.apiKey}` },
@@ -87,8 +89,13 @@ export class NosanaDeployer {
 
   async get_market(
     gpuMarket_slug?: GpuMarketSlug,
-    gpuMarket_address?: string
-  ): Promise<{ market: Market; nos: number; gpu_usd: number; marketName?: string }> {
+    gpuMarket_address?: string,
+  ): Promise<{
+    market: Market;
+    nos: number;
+    gpu_usd: number;
+    marketName?: string;
+  }> {
     if (!this.nosana || !this.nosana.jobs) {
       throw new Error("Nosana SDK not initialized (nosana.jobs missing)");
     }
@@ -105,38 +112,50 @@ export class NosanaDeployer {
       nos_usd = DEFAULT_DEPLOYER.VALUES.NOS_USD;
     }
 
-    const hasAddr = typeof gpuMarket_address === "string" && gpuMarket_address.length > 20;
-    const hasSlug = typeof gpuMarket_slug === "string" && gpuMarket_slug.length > 0;
+    const hasAddr =
+      typeof gpuMarket_address === "string" && gpuMarket_address.length > 20;
+    const hasSlug =
+      typeof gpuMarket_slug === "string" && gpuMarket_slug.length > 0;
 
     if (!(hasAddr || hasSlug)) {
-      throw new Error("Either gpuMarket_slug or gpuMarket_address must be provided");
+      throw new Error(
+        "Either gpuMarket_slug or gpuMarket_address must be provided",
+      );
     }
 
     if (hasAddr) {
       const address = new PublicKey(gpuMarket_address!);
-      const slug = Object.keys(MARKETS)
-        .find(m => MARKETS[m as GpuMarketSlug].address === address.toString());
+      // Use O(1) lookup instead of O(n) search
+      const slug = MARKET_ADDRESS_TO_SLUG[address.toString()];
 
       const gpu_usd = slug
-        ? MARKETS[slug as GpuMarketSlug].estimated_price_usd_per_hour
+        ? MARKETS[slug].estimated_price_usd_per_hour
         : undefined;
-      if (gpu_usd == null) throw new Error(`No pricing info for ${gpuMarket_address}`);
+      if (gpu_usd == null)
+        throw new Error(`No pricing info for ${gpuMarket_address}`);
 
       const marketInfo: Market = await this.nosana.jobs.getMarket(address);
-      if (!marketInfo) throw new Error(`Unknown GPU market: ${gpuMarket_address}`);
+      if (!marketInfo)
+        throw new Error(`Unknown GPU market: ${gpuMarket_address}`);
 
       return { market: marketInfo, nos: nos_usd, gpu_usd, marketName: slug };
     }
 
     const entry = MARKETS[gpuMarket_slug as GpuMarketSlug];
-    if (!entry?.address) throw new Error(`Unknown GPU market slug: ${gpuMarket_slug}`);
+    if (!entry?.address)
+      throw new Error(`Unknown GPU market slug: ${gpuMarket_slug}`);
 
     const address = new PublicKey(entry.address);
     const gpu_usd = entry.estimated_price_usd_per_hour;
     const marketInfo: Market = await this.nosana.jobs.getMarket(address);
     if (!marketInfo) throw new Error(`Unknown GPU market: ${entry.address}`);
 
-    return { market: marketInfo, nos: nos_usd, gpu_usd, marketName: gpuMarket_slug };
+    return {
+      market: marketInfo,
+      nos: nos_usd,
+      gpu_usd,
+      marketName: gpuMarket_slug,
+    };
   }
 
   async getAvailableGpuNodes(gpuMarket: GpuMarketSlug): Promise<number> {
@@ -150,16 +169,21 @@ export class NosanaDeployer {
 
   async estimateJobCost(
     gpuMarket: GpuMarketSlug,
-    durationSeconds: number
+    durationSeconds: number,
   ): Promise<{ pricePerSecond: number; estimatedCost: number }> {
     const marketInfo = MARKETS[gpuMarket];
-    if (!marketInfo?.address) throw new Error(`Invalid or missing market address for ${gpuMarket}`);
+    if (!marketInfo?.address)
+      throw new Error(`Invalid or missing market address for ${gpuMarket}`);
 
     let marketAddress;
     try {
       marketAddress = new PublicKey(marketInfo.address);
     } catch (err) {
-      console.error("Invalid address:", marketInfo.address, (err as Error).message);
+      console.error(
+        "Invalid address:",
+        marketInfo.address,
+        (err as Error).message,
+      );
       marketAddress = marketInfo.address;
     }
 
@@ -180,7 +204,7 @@ export class NosanaDeployer {
   async getJob(jobId: string): Promise<any | null> {
     try {
       const job = await this.nosana.jobs.get(new PublicKey(jobId));
-      const NOS_USD = this.nosana.jobs.getNosPrice()
+      const NOS_USD = this.nosana.jobs.getNosPrice();
 
       return { job, NOS_USD };
     } catch (error) {
@@ -190,7 +214,7 @@ export class NosanaDeployer {
   }
 
   async getAllMarket() {
-    const market: any[] = await this.nosana.jobs.allMarkets()
+    const market: any[] = await this.nosana.jobs.allMarkets();
 
     console.log(market);
   }
@@ -198,23 +222,31 @@ export class NosanaDeployer {
     const SOL = 0.00429;
     const NETWORK = 0.00002;
 
-    const marketSlug = Object.keys(MARKETS)
-      .find(slug => MARKETS[slug as GpuMarketSlug].address === marketPubKey);
-    if (!marketSlug) throw new Error(`Invalid market public key: ${marketPubKey}`);
+    // Convert PublicKey to string if needed
+    const addressStr =
+      typeof marketPubKey === "string" ? marketPubKey : marketPubKey.toString();
 
-    const pricePerHour = MARKETS[marketSlug as GpuMarketSlug].estimated_price_usd_per_hour;
+    // Use O(1) lookup instead of O(n) search
+    const marketSlug = MARKET_ADDRESS_TO_SLUG[addressStr];
+    if (!marketSlug)
+      throw new Error(`Invalid market public key: ${addressStr}`);
+
+    const pricePerHour = MARKETS[marketSlug].estimated_price_usd_per_hour;
     const totalUsd = (pricePerHour / 3600) * seconds;
     const hours = seconds / 3600;
 
-    const nosUsd = await this.get_nos_Usd();   // USD value of 1 NOS
-    const solUsd = await this.get_sol_Usd();   // USD value of 1 SOL
+    // Parallelize price fetching for better performance
+    const [nosUsd, solUsd] = await Promise.all([
+      this.get_nos_Usd(), // USD value of 1 NOS
+      this.get_sol_Usd(), // USD value of 1 SOL
+    ]);
 
-    const totalNos = Number(totalUsd / nosUsd); 
-    const NOS_USD = totalNos*nosUsd;                     
-    const SOL_USD = solUsd*SOL;                     
-    const NETWORK_USD = NETWORK * solUsd;       
+    const totalNos = Number(totalUsd / nosUsd);
+    const NOS_USD = totalNos * nosUsd;
+    const SOL_USD = solUsd * SOL;
+    const NETWORK_USD = NETWORK * solUsd;
 
-    const TOTAL_USD = totalUsd + (SOL * solUsd) + NETWORK_USD;
+    const TOTAL_USD = totalUsd + SOL * solUsd + NETWORK_USD;
 
     return {
       market: marketSlug,
@@ -230,32 +262,43 @@ export class NosanaDeployer {
     };
   }
 
-
-  async fetchJobsTemp(publicKey: string, opts: { limit: number, state?: string | undefined } = { limit: 20 }) {
-    const baseUrl = 'https://dashboard.k8s.prd.nos.ci/api/jobs';
+  async fetchJobsTemp(
+    publicKey: string,
+    opts: { limit: number; state?: string | undefined } = { limit: 20 },
+  ) {
+    const baseUrl = "https://dashboard.k8s.prd.nos.ci/api/jobs";
     const u = new URL(baseUrl);
-    u.searchParams.set('limit', String(opts.limit));
-    if (opts.state && opts.state.toLocaleLowerCase() != "all") u.searchParams.set("state", opts.state);
-    u.searchParams.set('poster', publicKey);
+    u.searchParams.set("limit", String(opts.limit));
+    if (opts.state && opts.state.toLocaleLowerCase() != "all")
+      u.searchParams.set("state", opts.state);
+    u.searchParams.set("poster", publicKey);
 
     const res = await fetch(u.toString(), {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Origin': 'https://dashboard.nosana.com',
-        'Referer': 'https://dashboard.nosana.com/',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36',
-        'sec-ch-ua': '"Google Chrome";v="141", "Not?A_Brand";v="8", "Chromium";v="141"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"Windows"',
-        'Accept': 'application/json, text/plain, */*',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Accept-Encoding': 'gzip, deflate, br'
-      }
+        Origin: "https://dashboard.nosana.com",
+        Referer: "https://dashboard.nosana.com/",
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "sec-ch-ua":
+          '"Google Chrome";v="141", "Not?A_Brand";v="8", "Chromium";v="141"',
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": '"Windows"',
+        Accept: "application/json, text/plain, */*",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Accept-Encoding": "gzip, deflate, br",
+      },
     });
 
-    const ct = res.headers.get('content-type') || '';
-    const body = ct.includes('application/json') ? await res.json() : await res.text();
-    return { status: res.status, headers: Object.fromEntries(res.headers), body };
+    const ct = res.headers.get("content-type") || "";
+    const body = ct.includes("application/json")
+      ? await res.json()
+      : await res.text();
+    return {
+      status: res.status,
+      headers: Object.fromEntries(res.headers),
+      body,
+    };
   }
 
   async get_nos_Usd(): Promise<number> {
@@ -263,31 +306,32 @@ export class NosanaDeployer {
       const price = await this.nosana.solana.getNosPrice();
       return Number(price?.usd ?? DEFAULT_DEPLOYER.VALUES.NOS_USD);
     } catch (err) {
-      console.error('getNosPrice failed:', err);
+      console.error("getNosPrice failed:", err);
       try {
         const res = await fetch(
-          "https://api.coingecko.com/api/v3/simple/price?ids=nosana&vs_currencies=usd"
+          "https://api.coingecko.com/api/v3/simple/price?ids=nosana&vs_currencies=usd",
         );
         const data = await res.json();
         return Number(data?.nosana?.usd ?? DEFAULT_DEPLOYER.VALUES.NOS_USD);
       } catch (err2) {
-        console.error('Coingecko fallback failed:', err2);
+        console.error("Coingecko fallback failed:", err2);
         return DEFAULT_DEPLOYER.VALUES.NOS_USD;
       }
     }
   }
 
-
   async get_sol_Usd() {
     try {
       const res = await fetch(
-        "https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd"
+        "https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd",
       );
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       if (res.status === 429) {
-        console.warn("Rate limited by CoinGecko, using last known or default price");
+        console.warn(
+          "Rate limited by CoinGecko, using last known or default price",
+        );
         return DEFAULT_DEPLOYER.VALUES.SOL_USD;
       }
       const data = await res.json();
@@ -306,43 +350,43 @@ export class NosanaDeployer {
     topK = 10,
   }: ModelQuery): Promise<HFModel[]> {
     console.log("getModels :", organization, pipeline, keywords);
-    const base = new URL("https://huggingface.co/api/models")
-    base.searchParams.set("author", organization)
+    const base = new URL("https://huggingface.co/api/models");
+    base.searchParams.set("author", organization);
     // base.searchParams.set("sort", "trending")
     // base.searchParams.set("inference_provider", "all")
-    base.searchParams.set("limit", limit.toString())
-    base.searchParams.set("pipeline_tag", pipeline)
+    base.searchParams.set("limit", limit.toString());
+    base.searchParams.set("pipeline_tag", pipeline);
     console.log(base);
 
-    const res = await fetch(base.href)
-    if (!res.ok) throw new Error(`HF fetch failed: ${res.statusText}`)
-    const models: any[] = await res.json()
+    const res = await fetch(base.href);
+    if (!res.ok) throw new Error(`HF fetch failed: ${res.statusText}`);
+    const models: any[] = await res.json();
 
-    const kws = keywords.map(k =>
-      k.toLowerCase().replace(/\s+/g, "").replace(/-/g, "")
-    )
+    const kws = keywords.map((k) =>
+      k.toLowerCase().replace(/\s+/g, "").replace(/-/g, ""),
+    );
 
-    const scored = models.map(m => {
-      const name = (m.modelId || m.id || "").toLowerCase()
-      const tags = (m.tags || []).join(" ").toLowerCase()
-      const pipe = (m.pipeline_tag || "").toLowerCase()
-      let score = 0
+    const scored = models.map((m) => {
+      const name = (m.modelId || m.id || "").toLowerCase();
+      const tags = (m.tags || []).join(" ").toLowerCase();
+      const pipe = (m.pipeline_tag || "").toLowerCase();
+      let score = 0;
 
       for (const kw of kws) {
-        if (name.includes(kw)) score += 3
-        if (tags.includes(kw)) score += 2
+        if (name.includes(kw)) score += 3;
+        if (tags.includes(kw)) score += 2;
       }
 
-      if (pipeline && pipe === pipeline.toLowerCase()) score += 2
-      if (name.includes(organization.toLowerCase())) score += 1
-      score += (m.likes || 0) / 1000 + (m.downloads || 0) / 1000000
+      if (pipeline && pipe === pipeline.toLowerCase()) score += 2;
+      if (name.includes(organization.toLowerCase())) score += 1;
+      score += (m.likes || 0) / 1000 + (m.downloads || 0) / 1000000;
 
-      return { id: m.id, private: !!m.private, score }
-    })
+      return { id: m.id, private: !!m.private, score };
+    });
 
-    const sorted = scored.sort((a, b) => b.score - a.score)
-    const filtered = sorted.filter(m => m.score > 0)
-    return filtered.slice(0, filtered.length ? topK : 10)
+    const sorted = scored.sort((a, b) => b.score - a.score);
+    const filtered = sorted.filter((m) => m.score > 0);
+    return filtered.slice(0, filtered.length ? topK : 10);
   }
 }
 

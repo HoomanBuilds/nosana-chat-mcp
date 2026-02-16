@@ -5,6 +5,7 @@ import { ExtractedJobDefinition } from "./draft.schema";
 import { HOOMAN_IMAGE } from "./contants";
 import { chatJSON } from "./helpers";
 import z from "zod";
+import { getPlannerModel } from "./plannerContext";
 
 export async function getModelData(): Promise<any[]> {
     if (typeof window === "undefined") {
@@ -229,11 +230,16 @@ export function createJobDefination(
 export async function chatJSONRetry<T>(
     prompt: string,
     schema: z.ZodSchema<T>,
-    primaryModel = "gemini-2.0-flash-lite"
+    primaryModel?: string
 ): Promise<T> {
-    const fallbackModels = ["gemini-2.5-flash-lite", "gemini-2.0-flash"];
-    const modelsToTry = [primaryModel, ...fallbackModels];
-    const maxRetries = 1;
+    const preferredModel =
+        primaryModel ||
+        getPlannerModel() ||
+        "qwen3:0.6b";
+    const modelsToTry = [preferredModel].filter(
+        (m, i, arr) => m && arr.indexOf(m) === i,
+    );
+    const maxRetries = 3;
 
     for (const model of modelsToTry) {
         for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -242,7 +248,12 @@ export async function chatJSONRetry<T>(
                 const result = await chatJSON(prompt, schema, model);
                 return result;
             } catch (err: any) {
-                console.warn(`⚠️ ${model} attempt ${attempt} failed: ${err.message}`);
+                const msg = String(err?.message || err);
+                console.warn(`⚠️ ${model} attempt ${attempt} failed: ${msg}`);
+                // Auth problems will not be fixed by trying other models with the same key.
+                if (/unauthorized|401|for model\/key combination/i.test(msg)) {
+                    throw new Error(`Planner model authorization failed: ${msg}`);
+                }
                 if (attempt === maxRetries) break;
                 await new Promise((r) => setTimeout(r, 500 * attempt));
             }

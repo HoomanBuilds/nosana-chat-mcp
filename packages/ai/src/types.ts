@@ -1,30 +1,38 @@
 export interface Message {
   id: string;
   content: string;
-  role: 'user' | 'model';
-  type?: 'aborted' | 'messsage' | 'error';
+  role: "user" | "model";
+  type?: "aborted" | "messsage" | "error";
   timestamp: Date;
 }
 
 export interface Model {
   name: string;
   provider: string;
-  generate: (messages: any[], payload?: any, onChunk?: (chunk: string) => void) => Promise<string>;
+  generate: (
+    messages: any[],
+    payload?: any,
+    onChunk?: (chunk: string) => void,
+  ) => Promise<string>;
 }
 
-export type GEMINI_MODEL_AVAILABLE = "gemini-2.5-flash" | "gemini-2.0-flash" | "gemini-2.5-pro" | "gemini-2.0-flash-lite" | "gemini-2.5-flash-lite"
-export const SELF_MODEL_AVAILABLE = ["qwen3:0.6b", "llama-3.8b", "deepseek-r1:7b", "mistral-7b" , "qwen3:4b"] as const;
+export const SELF_MODEL_AVAILABLE = [
+  "qwen3:0.6b",
+  "llama-3.8b",
+  "deepseek-r1:7b",
+  "mistral-7b",
+  "qwen3:4b",
+  "inferiallm",
+] as const;
 
-export type SELF_MODEL_AVAILABLE = typeof SELF_MODEL_AVAILABLE[number];
+export type SELF_MODEL_AVAILABLE = (typeof SELF_MODEL_AVAILABLE)[number];
 
-export type MODEL_AVAILABLE = GEMINI_MODEL_AVAILABLE | SELF_MODEL_AVAILABLE
+export type MODEL_AVAILABLE = SELF_MODEL_AVAILABLE;
 export enum ModelProvider {
-  GEMINI = 'gemini',
-  SELF = 'self',
+  SELF = "self",
 }
 
 export type PROVIDER_AVAILABLE = `${ModelProvider}`;
-
 
 export interface ModelConfig {
   name: string;
@@ -32,11 +40,10 @@ export interface ModelConfig {
   search: boolean;
   contextWindow: number;
   maxTokens: number;
-  retry: boolean
+  retry: boolean;
   thinking: boolean;
-  NoPenalty?: boolean
+  NoPenalty?: boolean;
 }
-
 
 export interface SearchRequest {
   query: string;
@@ -48,6 +55,6 @@ export interface SearchRequest {
 }
 
 export interface ChatMessage {
-  role: "user" | "model",
-  content: string
+  role: "user" | "model";
+  content: string;
 }

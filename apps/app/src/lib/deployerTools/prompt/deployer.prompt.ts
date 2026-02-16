@@ -2,7 +2,10 @@ import { MarketInfo } from "../utils/types";
 
 export function getResolverPrompt(
   refinedQuery: string,
-  { marketDetails, modelName }: { marketDetails: MarketInfo | undefined; modelName: string }
+  {
+    marketDetails,
+    modelName,
+  }: { marketDetails: MarketInfo | undefined; modelName: string },
 ) {
   return `
 You are an expert model resolver.
@@ -94,7 +97,7 @@ Rules:
     * MAX_MODEL_LEN: "8192" if not specified
     * MODEL_ID: required when providerName = container , a full name of model *org/modelName*
     * Optionally include DTYPE or TENSOR_PARALLEL_SIZE if explicitly set 
-  * CONDITIONAL (include only if non-default or explicitly requested): | if user say create details defination or say to be verbose then try to add max keys only if correct data you ahve about the model
+  * CONDITIONAL (include only if non-default or explicitly requested): | if user say create details definition or say to be verbose then try to add max keys only if correct data you ahve about the model
     * ENABLE_STREAMING: "true" only if streaming requested
     * SWAP_SPACE: custom GB value
     * MEMORY_LIMIT: custom value
@@ -536,7 +539,7 @@ SOME of the famous hugging face organization... there are many more ...
 meta-llama | huggingface | qwen | qwen2 | | facebook | nvidia | google | stabilityai | openai | microsoft | mistralai | black-forest-labs | tencent | ibm-granite | cohere-labs | baidu | jina-ai | deepseek-ai |  togethercomputer | salesforce | BAAI | zai-org | google-bert | google-t5 | facebookAi  | Wan-Ai | distilbert | apple | mixedbread | deephat | katenemo | includsionAI | moonshotai | unsloth ....
 
 Now process this user request:
-if query is a defination and type is container then it doesn't mean provider is container ,
+if query is a definition and type is container then it doesn't mean provider is container ,
 if json config contin image as hugging face infere related model with hugging face type model then consider provider name as hugging face only and not container
 ======
 ${refinedQuery}
@@ -550,13 +553,15 @@ CRITICAL CONSTRAINT: The generated JSON must be a production-ready, logically co
 `;
 }
 
-
-export function suggest_model_market_prompt(requirements: string, MARKETS: Record<string, any>): string {
+export function suggest_model_market_prompt(
+  requirements: string,
+  MARKETS: Record<string, any>,
+): string {
   const marketList = Object.entries(MARKETS)
     .map(([slug, m]) => {
-      return `- ${slug}: ${m.vram_gb}GB VRAM, $${m.estimated_price_usd_per_hour}/hr, address: ${m.address}`
+      return `- ${slug}: ${m.vram_gb}GB VRAM, $${m.estimated_price_usd_per_hour}/hr, address: ${m.address}`;
     })
-    .join("\n")
+    .join("\n");
 
   return `
 You are an expert GPU + AI model recommender.
@@ -631,15 +636,15 @@ meta-llama | huggingface | qwen | qwen2 | | facebook | nvidia | google | stabili
 
 ---
 Now analyze the input and output valid JSON only.
-`
+`;
 }
-
-
-
 
 export function getResolverPromptV2(
   refinedQuery: string,
-  { marketDetails, modelName }: { marketDetails?: MarketInfo; modelName?: string }
+  {
+    marketDetails,
+    modelName,
+  }: { marketDetails?: MarketInfo; modelName?: string },
 ) {
   return `
 You are an expert AI JSON Definition Generator.

@@ -1,18 +1,17 @@
 import { ChatMessage } from "@/lib/types";
 import { ContextCutter } from "@/lib/utils/ContextCutter";
-import { Gemini } from "@nosana-chat/ai";
 import { StreamThrottleConfig, type PromptMode } from "./types";
 import { Payload } from "@/lib/utils/validation";
 
 export const trimMessage = (content: string, maxTokens = 1000) => {
   const words = content.split(/\s+/);
   if (words.length <= maxTokens) return content;
-  return words.slice(0, maxTokens).join(' ');
+  return words.slice(0, maxTokens).join(" ");
 };
 
 export function getRecentHistory(
   messages: ChatMessage[],
-  tokenLimit: number = 2000
+  tokenLimit: number = 2000,
 ): ChatMessage[] {
   const MIN_BOTTOM_TOKENS = 1000;
   let totalTokens = 0;
@@ -37,48 +36,60 @@ export function getRecentHistory(
   return result;
 }
 
+import OpenAI from "openai";
 
-export async function getThreadTitle(query: string , apiKey : string) {
+export async function getThreadTitle(query: string, model: string) {
   try {
-    const res = await Gemini.GeminiModel("gemini-2.0-flash-lite" , apiKey).generate([
-      {
-        role: "user",
-        content: `You are an AI model. Based on this query: "${query}", generate a short, clear, and descriptive thread title suitable to show the user. 
-        Respond ONLY with the title as a string.`
-      },
-    ]);
-    const title = res.toString()
-      .trim()
-      .replace(/^["“”‘']+/, '')
-      .replace(/["“”‘']+$/, '');
+    const client = new OpenAI({
+      apiKey: process.env.INFERIA_LLM_API_KEY,
+      baseURL: process.env.NEXT_PUBLIC_INFERIA_LLM_URL,
+    });
+    const titleModel = model || "inferiallm";
+
+    const res = await client.chat.completions.create({
+      model: titleModel,
+      messages: [
+        {
+          role: "user",
+          content: `Based on this query: "${query}", generate a short, clear, and descriptive thread title (max 5 words). 
+          Respond ONLY with the title string.`,
+        },
+      ],
+      max_tokens: 20,
+    });
+
+    const title =
+      res.choices[0]?.message?.content
+        ?.trim()
+        .replace(/^["“”‘']+/, "")
+        .replace(/["“”‘']+$/, "") || query.substring(0, 30);
+
     return title;
-  } catch(err) {
-    console.log("error generating thread title");
+  } catch (err) {
+    console.log("error generating thread title", err);
     return query.substring(0, 30);
   }
 }
 
-
 export async function parseStream(
   textStream: AsyncIterable<string>,
-  send: (event: string, data: string) => void
+  send: (event: string, data: string) => void,
 ) {
-  let buffer = '';
+  let buffer = "";
   let isTool = false;
   let insideResult = false;
-  let toolBuffer = '';
+  let toolBuffer = "";
 
   const resultStartRegex = /<RESULT\b[^>]*>/i;
   const resultEndRegex = /<\/RESULT\s*>/i;
   const toolStartRegex = /<(TOOL|TOOL_CODE)\b[^>]*>/i;
   const toolEndRegex = /<\/(TOOL|TOOL_CODE)\s*>/i;
 
-
-  const FULL_TAG_PREFIXES = ['<RESULT', '</RESULT', '<TOOL', '</TOOL'];
+  const FULL_TAG_PREFIXES = ["<RESULT", "</RESULT", "<TOOL", "</TOOL"];
 
   const isPotentialTagPrefix = (s: string) => {
-    const norm = s.toUpperCase().replace(/\s+/g, '');
-    return FULL_TAG_PREFIXES.some(ft => ft.startsWith(norm));
+    const norm = s.toUpperCase().replace(/\s+/g, "");
+    return FULL_TAG_PREFIXES.some((ft) => ft.startsWith(norm));
   };
 
   for await (const chunk of textStream) {
@@ -89,29 +100,35 @@ export async function parseStream(
         const resultMatch = buffer.match(resultStartRegex);
         const toolMatch = buffer.match(toolStartRegex);
 
-        if (resultMatch && (!toolMatch || resultMatch.index! < toolMatch.index!)) {
+        if (
+          resultMatch &&
+          (!toolMatch || resultMatch.index! < toolMatch.index!)
+        ) {
           insideResult = true;
           buffer = buffer.slice(resultMatch.index! + resultMatch[0].length);
           continue parseLoop;
         } else if (toolMatch) {
           isTool = true;
-          toolBuffer = '';
+          toolBuffer = "";
           buffer = buffer.slice(toolMatch.index! + toolMatch[0].length);
           continue parseLoop;
         } else {
-          const lt = buffer.indexOf('<');
+          const lt = buffer.indexOf("<");
           if (lt === -1) {
-            if (buffer) { send('llmResult', buffer); buffer = ''; }
+            if (buffer) {
+              send("llmResult", buffer);
+              buffer = "";
+            }
             break parseLoop;
           }
 
           const suffix = buffer.slice(lt);
           if (isPotentialTagPrefix(suffix)) {
-            if (lt > 0) send('llmResult', buffer.slice(0, lt));
+            if (lt > 0) send("llmResult", buffer.slice(0, lt));
             buffer = buffer.slice(lt);
             break parseLoop; // wait for more chunks to resolve tag
           } else {
-            send('llmResult', buffer.slice(0, lt + 1));
+            send("llmResult", buffer.slice(0, lt + 1));
             buffer = buffer.slice(lt + 1);
             continue parseLoop;
           }
@@ -123,23 +140,29 @@ export async function parseStream(
         if (endMatch) {
           const endIndex = endMatch.index!;
           const resultPart = buffer.slice(0, endIndex);
-          if (resultPart) send('llmResult', resultPart);
+          if (resultPart) send("llmResult", resultPart);
           buffer = buffer.slice(endIndex + endMatch[0].length);
           insideResult = false;
           continue parseLoop;
         } else {
-          const lastLT = buffer.lastIndexOf('<');
+          const lastLT = buffer.lastIndexOf("<");
           if (lastLT === -1) {
-            if (buffer) { send('llmResult', buffer); buffer = ''; }
+            if (buffer) {
+              send("llmResult", buffer);
+              buffer = "";
+            }
             break parseLoop;
           } else {
             const tail = buffer.slice(lastLT);
             if (isPotentialTagPrefix(tail)) {
-              if (lastLT > 0) send('llmResult', buffer.slice(0, lastLT));
+              if (lastLT > 0) send("llmResult", buffer.slice(0, lastLT));
               buffer = buffer.slice(lastLT);
               break parseLoop;
             } else {
-              if (buffer) { send('llmResult', buffer); buffer = ''; }
+              if (buffer) {
+                send("llmResult", buffer);
+                buffer = "";
+              }
               break parseLoop;
             }
           }
@@ -155,17 +178,17 @@ export async function parseStream(
           const payload = toolBuffer.trim();
           try {
             const parsed = JSON.stringify(JSON.parse(payload), null, 2);
-            send('llmResult', `\`\`\`json\n${parsed}\n\`\`\``);
+            send("llmResult", `\`\`\`json\n${parsed}\n\`\`\``);
           } catch {
-            send('llmResult', `\`\`\`text\n${payload}\n\`\`\``);
+            send("llmResult", `\`\`\`text\n${payload}\n\`\`\``);
           }
 
-          toolBuffer = '';
+          toolBuffer = "";
           isTool = false;
           continue parseLoop;
         } else {
           toolBuffer += buffer;
-          buffer = '';
+          buffer = "";
           break parseLoop;
         }
       }
@@ -173,17 +196,26 @@ export async function parseStream(
   }
 
   if (insideResult) {
-    send('error', 'Unclosed <RESULT> at stream end. Content may be incomplete.');
-    if (buffer) send('llmResult', buffer);
+    send(
+      "error",
+      "Unclosed <RESULT> at stream end. Content may be incomplete.",
+    );
+    if (buffer) send("llmResult", buffer);
   } else if (isTool) {
-    send('error', 'Unclosed <TOOL> at stream end. TOOL content may be incomplete.');
-    if (toolBuffer) send('llmResult', `\`\`\`text\n${toolBuffer}\n\`\`\``);
+    send(
+      "error",
+      "Unclosed <TOOL> at stream end. TOOL content may be incomplete.",
+    );
+    if (toolBuffer) send("llmResult", `\`\`\`text\n${toolBuffer}\n\`\`\``);
   } else if (buffer) {
-    send('llmResult', buffer);
+    send("llmResult", buffer);
   }
 }
 
-const PROMPT_TEMPLATES: Record<PromptMode, { system: string | (() => string); user: string | (() => string) }> = {
+const PROMPT_TEMPLATES: Record<
+  PromptMode,
+  { system: string | (() => string); user: string | (() => string) }
+> = {
   zero: {
     system: () => `
 You are a detailed AI assistant. Follow instructions precisely. Answer clearly and concisely.
@@ -283,18 +315,31 @@ Jane Austen
   },
 };
 
-export const createPrompt = (payload: Payload , customMode: PromptMode) => {
-  const recentChats = ContextCutter.getRecentConversations(payload.chats ?? [], {
-    truncateFrom: payload.customConfig?.context?.truncateFrom,
-    minChats: customMode === "auto" ? payload.customConfig?.context?.prevChatLimit : 5,
-    maxTokens: customMode === "auto" ? payload.customConfig?.context?.maxContextTokens : 1500,
-    absoluteMaxTokens: customMode === "auto" ? payload.customConfig?.context?.absoluteMaxTokens : 3000,
-  });
+export const createPrompt = (payload: Payload, customMode: PromptMode) => {
+  const recentChats = ContextCutter.getRecentConversations(
+    payload.chats ?? [],
+    {
+      truncateFrom: payload.customConfig?.context?.truncateFrom,
+      minChats:
+        customMode === "auto"
+          ? payload.customConfig?.context?.prevChatLimit
+          : 5,
+      maxTokens:
+        customMode === "auto"
+          ? payload.customConfig?.context?.maxContextTokens
+          : 1500,
+      absoluteMaxTokens:
+        customMode === "auto"
+          ? payload.customConfig?.context?.absoluteMaxTokens
+          : 3000,
+    },
+  );
 
   const recentText = (() => {
-    const text = recentChats
-      .map(c => `${c.role}: ${trimMessage(c.content)}`)
-      .join("\n") || "No recent conversation available.";
+    const text =
+      recentChats
+        .map((c) => `${c.role}: ${trimMessage(c.content)}`)
+        .join("\n") || "No recent conversation available.";
 
     if (recentChats.length === payload.chats?.length) {
       return "…no history above\n" + text;
@@ -304,8 +349,11 @@ export const createPrompt = (payload: Payload , customMode: PromptMode) => {
 
   const template = PROMPT_TEMPLATES[customMode];
 
-  const systemPrompt = typeof template.system === "function" ? template.system() : template.system;
-  const userPrompt = (typeof template.user === "function" ? template.user() : template.user)
+  const systemPrompt =
+    typeof template.system === "function" ? template.system() : template.system;
+  const userPrompt = (
+    typeof template.user === "function" ? template.user() : template.user
+  )
     .replace("{recentText}", recentText)
     .replace("{query}", trimMessage(payload.query))
     .replace("{customPrompt}", payload.customPrompt || "None");
@@ -313,12 +361,11 @@ export const createPrompt = (payload: Payload , customMode: PromptMode) => {
   return { systemPrompt, userPrompt };
 };
 
-
 export async function streamThrottleOld(
   text: string,
   send: (event: string, data: string) => void,
   signal?: AbortSignal,
-  config: StreamThrottleConfig = {}
+  config: StreamThrottleConfig = {},
 ) {
   const { chunkSize = 10, minDelay = 1, maxDelay = 50 } = config;
 
@@ -333,8 +380,9 @@ export async function streamThrottleOld(
     send("llmResult", parts[i]);
 
     const t = i / total;
-    const delay = minDelay + (1 - Math.cos(Math.PI * t)) / 2 * (maxDelay - minDelay);
-    await new Promise(r => setTimeout(r, delay));
+    const delay =
+      minDelay + ((1 - Math.cos(Math.PI * t)) / 2) * (maxDelay - minDelay);
+    await new Promise((r) => setTimeout(r, delay));
   }
 }
 
@@ -342,7 +390,7 @@ export async function streamThrottle(
   text: string,
   send: (event: string, data: string) => void,
   signal?: AbortSignal,
-  config: StreamThrottleConfig = {}
+  config: StreamThrottleConfig = {},
 ) {
   const parser = createStreamingParser(send);
 
@@ -360,65 +408,78 @@ export async function streamThrottle(
     parser.parse(parts[i]);
 
     const t = i / total;
-    const delay = minDelay + (1 - Math.cos(Math.PI * t)) / 2 * (maxDelay - minDelay);
-    await new Promise(r => setTimeout(r, delay));
+    const delay =
+      minDelay + ((1 - Math.cos(Math.PI * t)) / 2) * (maxDelay - minDelay);
+    await new Promise((r) => setTimeout(r, delay));
   }
 }
 
-export function createStreamingParser(send: (event: 'llmResult' | 'toolResult' | 'thinking' | 'event' | 'error', data: string) => void) {
-  let state = 'llm';
+export function createStreamingParser(
+  send: (
+    event: "llmResult" | "toolResult" | "thinking" | "event" | "error",
+    data: string,
+  ) => void,
+) {
+  let state = "llm";
 
-  let buffer = '';
+  let buffer = "";
 
-  const startTag = '<think>';
-  const endTag = '</think>';
+  const startTag = "<think>";
+  const endTag = "</think>";
 
   function parse(chunk: string) {
     buffer += chunk;
 
     while (true) {
-      if (state === 'llm') {
+      if (state === "llm") {
         const startIndex = buffer.indexOf(startTag);
 
         if (startIndex === -1) {
-          const potentialTagStart = buffer.lastIndexOf('<');
-          const sendable = potentialTagStart > -1 ? buffer.substring(0, potentialTagStart) : buffer;
+          const potentialTagStart = buffer.lastIndexOf("<");
+          const sendable =
+            potentialTagStart > -1
+              ? buffer.substring(0, potentialTagStart)
+              : buffer;
 
           if (sendable) {
-            send('llmResult', sendable);
-            buffer = potentialTagStart > -1 ? buffer.substring(potentialTagStart) : '';
+            send("llmResult", sendable);
+            buffer =
+              potentialTagStart > -1 ? buffer.substring(potentialTagStart) : "";
           }
           break;
         }
 
         const llmPart = buffer.substring(0, startIndex);
         if (llmPart) {
-          send('llmResult', llmPart);
+          send("llmResult", llmPart);
         }
 
-        state = 'thinking';
+        state = "thinking";
         buffer = buffer.substring(startIndex + startTag.length);
-
-      } else if (state === 'thinking') {
+      } else if (state === "thinking") {
         const endIndex = buffer.indexOf(endTag);
 
         if (endIndex === -1) {
-          const potentialTagStart = buffer.lastIndexOf('<');
-          const sendable = potentialTagStart > -1 ? buffer.substring(0, potentialTagStart) : buffer;
+          const potentialTagStart = buffer.lastIndexOf("<");
+          const sendable =
+            potentialTagStart > -1
+              ? buffer.substring(0, potentialTagStart)
+              : buffer;
 
           if (sendable) {
-            send('thinking', sendable);
-            buffer = potentialTagStart > -1 ? buffer.substring(potentialTagStart) : '';
+            send("thinking", sendable);
+            buffer =
+              potentialTagStart > -1 ? buffer.substring(potentialTagStart) : "";
           }
           break;
         }
 
         const thinkingPart = buffer.substring(0, endIndex);
         if (thinkingPart) {
-          send('thinking', thinkingPart);
+          send("thinking", thinkingPart);
         }
 
-        state = 'llm';
+        state = "llm";
         buffer = buffer.substring(endIndex + endTag.length);
       }
     }
@@ -427,11 +488,10 @@ export function createStreamingParser(send: (event: 'llmResult' | 'toolResult' |
   return { parse };
 }
 
-
 export function registerApiKeys(payload: Payload, headers: Headers) {
   const keyMap: Record<string, string> = {
-    "x-gemini-key": "gemini",
-    "x-tavily-key" : "tavily"
+    "x-openai-key": "openai",
+
   };
 
   const apiKeys: Record<string, string> = {};
@@ -444,5 +504,5 @@ export function registerApiKeys(payload: Payload, headers: Headers) {
   }
 
   payload.apiKeys = apiKeys;
-  return payload
+  return payload;
 }
