@@ -275,9 +275,9 @@ export function useChatLogic() {
         }
         const deployedModelPayload = customServiceUrl
           ? {
-              baseURL: customServiceUrl,
-              model: customServiceModel || modelToSend,
-            }
+            baseURL: customServiceUrl,
+            model: customServiceModel || modelToSend,
+          }
           : undefined;
 
         //making backend ai request
@@ -425,7 +425,7 @@ export function useChatLogic() {
                 }
 
                 case "threadTitle":
-                  if (selectedChatId)
+                  if (routeThreadId || selectedChatId)
                     updateThreadTitle(
                       String(routeThreadId || selectedChatId),
                       data.toString(),
@@ -515,7 +515,7 @@ export function useChatLogic() {
 
                               const curlSnippet =
                                 parsed?.args?.provider === "huggingface" &&
-                                parsed?.args?.testGeneration
+                                  parsed?.args?.testGeneration
                                   ? `
                                 # You can test your deployment using:
                                 curl -s -X POST <service_url>/generate \\
