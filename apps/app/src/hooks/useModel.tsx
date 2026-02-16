@@ -18,6 +18,7 @@ interface UseModelGroupsOptions {
 
 export const useModelGroups = ({ onlyModel }: UseModelGroupsOptions = {}) => {
   const [localModels, setLocalModels] = useState<ModelItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (onlyModel) {
@@ -27,10 +28,12 @@ export const useModelGroups = ({ onlyModel }: UseModelGroupsOptions = {}) => {
           value: onlyModel,
         },
       ]);
+      setIsLoading(false);
       return;
     }
 
     const fetchModels = async () => {
+      setIsLoading(true);
       try {
         const res = await fetch("/api/v1/models", { cache: "no-store" });
         if (!res.ok) {
@@ -46,6 +49,8 @@ export const useModelGroups = ({ onlyModel }: UseModelGroupsOptions = {}) => {
         }
       } catch (err) {
         console.error("Failed to fetch models from endpoint:", err);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchModels();
@@ -65,5 +70,5 @@ export const useModelGroups = ({ onlyModel }: UseModelGroupsOptions = {}) => {
     return groups;
   }, [groups]);
 
-  return filteredGroups;
+  return { groups: filteredGroups, isLoading };
 };

@@ -1,10 +1,19 @@
 "use client";
 import React, { useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { DEFAULT } from "@/lib/constants";
 import { useModelGroups } from "@/hooks/useModel";
 import { cn } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
 
 interface ModelSelectorProps {
   value: string;
@@ -17,7 +26,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
   value,
   onValueChange,
   className,
-  mcp
+  mcp,
 }) => {
   const searchParams = useSearchParams();
   const customServiceUrl =
@@ -35,7 +44,9 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
     return customModelFromUrl || value || DEFAULT.MODEL;
   }, [customServiceUrl, customModelFromUrl, value]);
 
-  const modelGroups = useModelGroups({ onlyModel: lockedModel });
+  const { groups: modelGroups, isLoading } = useModelGroups({
+    onlyModel: lockedModel,
+  });
 
   useEffect(() => {
     if (!lockedModel) return;
@@ -48,22 +59,30 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
 
   return (
     <Select value={selectedValue} onValueChange={onValueChange}>
-      <SelectTrigger 
+      <SelectTrigger
         className={cn(
-          "text-xs border-muted-foreground/20 font-normal text-muted-foreground/80 h-6 rounded-sm bg-black/5", 
+          "text-xs border-muted-foreground/20 font-normal text-muted-foreground/80 h-6 rounded-sm bg-black/5",
           className,
-          mcp && "rounded-none"
-        )} 
+          mcp && "rounded-none",
+        )}
         data-size="sm"
+        disabled={isLoading}
       >
-        <SelectValue />
+        {isLoading ? (
+          <div className="flex items-center gap-1">
+            <Loader2 className="h-3 w-3 animate-spin" />
+            <span>Loading...</span>
+          </div>
+        ) : (
+          <SelectValue />
+        )}
       </SelectTrigger>
 
       <SelectContent className=" w-[250px] border-muted-foreground/10 bg-muted text-muted-foreground/90">
-        {modelGroups.map(group => (
+        {modelGroups.map((group) => (
           <SelectGroup key={group.label}>
             <SelectLabel>{group.label}</SelectLabel>
-            {group.models.map(m => (
+            {group.models.map((m) => (
               <SelectItem
                 key={m.value}
                 value={m.value}
