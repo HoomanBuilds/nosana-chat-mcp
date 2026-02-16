@@ -37,11 +37,11 @@ function getAuthContext(ctx: any, explicitKey?: string | null): AuthContext {
 
 export function registerTools(server: McpServer) {
   // ────────────────────────────────
-  // create_job_defination
+  // create_job_definition
   // ────────────────────────────────
   server.tool(
-    "create_job_defination",
-    "create Job defination which can be used in nosana dashboard to deploy job/decentralized gpu's. Works with both wallet and API key authentication.",
+    "create_job_definition",
+    "create Job definition which can be used in nosana dashboard to deploy job/decentralized gpu's. Works with both wallet and API key authentication.",
     {
       params: z.object({
         modelName: z.enum(SELF_MODEL_AVAILABLE),
@@ -133,7 +133,7 @@ export function registerTools(server: McpServer) {
             {
               type: "text",
               text: `
-SHOW These JSON and table to user and tell him to use that defination to host the our model on nosana decentralized network
+SHOW These JSON and table to user and tell him to use that definition to host the our model on nosana decentralized network
 https://dashboard.nosana.com/deploy
 
 also ask user if he need any kind of update
@@ -161,7 +161,7 @@ Note: ${
                   : "One-time 0.00429 SOL per GPU session (fraction refunded if closed early)."
               }
 
-tell user to use that job defination in nosana dashboard to publish job
+tell user to use that job definition in nosana dashboard to publish job
 `,
             },
           ],

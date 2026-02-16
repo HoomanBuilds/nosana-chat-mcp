@@ -117,7 +117,8 @@ export const handleInferenceMode = async (
 
   const messages = buildMessages(payload, systemInstruction, contextChat);
 
-  const rawBaseUrl = payload.deployedModel?.baseURL || process.env.INFERIA_LLM_URL || "";
+  const rawBaseUrl =
+    payload.deployedModel?.baseURL || process.env.INFERIA_LLM_URL || "";
   const baseURL = normalizeInferenceBaseURL(rawBaseUrl);
   const apiKey =
     payload.deployedModel?.apiKey ||
@@ -135,6 +136,9 @@ export const handleInferenceMode = async (
   const client = new OpenAI({
     apiKey: apiKey,
     baseURL: baseURL,
+    defaultHeaders: payload.ipAddress
+      ? { "X-IP-Address": payload.ipAddress }
+      : undefined,
   });
 
   const parser = createStreamingParser(send, {

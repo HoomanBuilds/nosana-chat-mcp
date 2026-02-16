@@ -38,12 +38,13 @@ async function createJobViaWallet(
   const { wallet, provider } = useWalletStore.getState();
   if (!provider || !wallet) throw new Error("Wallet not connected");
 
+  // Type assertion needed because Wallet interface expects Keypair for payer,
+  // but browser wallets like Phantom don't expose private keys
   const signer = {
     publicKey: provider.publicKey,
-    payer: provider.publicKey,
-    signTransaction: (tx: any) => provider.signTransaction(tx),
-    signAllTransactions: (txs: any[]) => provider.signAllTransactions(txs),
-  };
+    signTransaction: (tx: unknown) => provider.signTransaction(tx),
+    signAllTransactions: (txs: unknown[]) => provider.signAllTransactions(txs),
+  } as unknown as ConstructorParameters<typeof Client>[1];
 
   const NETWORK = (process.env.NEXT_PUBLIC_SOLANA_NETWORK ?? "devnet") as
     | "devnet"

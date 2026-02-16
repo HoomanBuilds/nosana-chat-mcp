@@ -47,9 +47,20 @@ export const DEFAULT_DEPLOYER = {
   },
 };
 
+function getEnvVar(name: string, defaultValue?: string): string {
+  const value = process.env[name] ?? defaultValue;
+  if (!value) {
+    throw new Error(`${name} environment variable is required`);
+  }
+  return value;
+}
+
 export const CONFIG = {
   NOSANA_API_BASE: "https://dashboard.k8s.prd.nos.ci/api",
-  INFERIA_LLM_URL: process.env.INFERIA_LLM_URL || "https://api.inferia.ai/v1",
+  INFERIA_LLM_URL: getEnvVar(
+    "NEXT_PUBLIC_INFERIA_LLM_URL",
+    "https://api.inferia.ai/v1",
+  ),
   EXPLORER_URL: "https://dashboard.nosana.com",
   NODE_DOMAIN: {
     mainnet: "node.k8s.prd.nos.ci",

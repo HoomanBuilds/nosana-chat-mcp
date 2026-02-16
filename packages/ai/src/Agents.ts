@@ -14,10 +14,23 @@ export default class Agents {
     baseURL?: string;
     model?: string;
   }) {
+    const resolvedApiKey = apiKey || process.env.INFERIA_LLM_API_KEY;
+    const resolvedBaseURL = baseURL || process.env.INFERIA_LLM_URL;
+
+    if (!resolvedApiKey) {
+      throw new Error(
+        "INFERIA_LLM_API_KEY is required. Provide it as an argument or set the environment variable.",
+      );
+    }
+    if (!resolvedBaseURL) {
+      throw new Error(
+        "INFERIA_LLM_URL is required. Provide it as an argument or set the environment variable.",
+      );
+    }
+
     this.client = new OpenAI({
-      apiKey: apiKey || process.env.INFERIA_LLM_API_KEY || "dummy",
-      baseURL:
-        baseURL || process.env.INFERIA_LLM_URL || "https://api.inferia.ai/v1",
+      apiKey: resolvedApiKey,
+      baseURL: resolvedBaseURL,
     });
     this.modelName = model || "inferiallm";
   }
@@ -56,7 +69,7 @@ export default class Agents {
         country: parsed.country || "us",
       };
     } catch (e) {
-      console.error("Failed to generate structured search query:", e);
+      // Return default search request on failure
       return {
         query,
         topic: "general",

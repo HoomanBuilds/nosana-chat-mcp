@@ -2,7 +2,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export type AuthMode = 'wallet' | 'api_key' | 'none';
+export type AuthMode = "wallet" | "api_key" | "none";
 
 interface WalletState {
   // ── Auth mode ──
@@ -11,7 +11,7 @@ interface WalletState {
   // ── Wallet (Phantom) state ──
   isPhantom: boolean;
   wallet: string | null;
-  provider: any;
+  provider: Window["solana"];
   isConnected: boolean;
 
   // ── API key state ──
@@ -38,7 +38,7 @@ interface WalletState {
 export const useWalletStore = create<WalletState>()(
   persist(
     (set, get) => ({
-      authMode: 'none',
+      authMode: "none",
       isPhantom: false,
       wallet: null,
       provider: null,
@@ -48,30 +48,42 @@ export const useWalletStore = create<WalletState>()(
       _walletDisconnectedByUser: false,
 
       checkPhantom: () => {
-        const provider = (window as any)?.solana;
+        const provider = window.solana;
         if (provider?.isPhantom) {
           set({ isPhantom: true, provider });
 
           // Only auto-reconnect if the user didn't explicitly disconnect
           const wasDisconnected = get()._walletDisconnectedByUser;
           if (!wasDisconnected) {
-            provider.connect({ onlyIfTrusted: true })
-              .then((resp: any) => {
+            provider
+              .connect({ onlyIfTrusted: true })
+              .then((resp) => {
                 if (resp?.publicKey) {
-                  set({ wallet: resp.publicKey.toString(), isConnected: true, authMode: 'wallet' });
+                  set({
+                    wallet: resp.publicKey.toString(),
+                    isConnected: true,
+                    authMode: "wallet",
+                  });
                 }
               })
-              .catch(() => { });
+              .catch((err: unknown) => {
+                // Silent fail for auto-connect - user hasn't explicitly requested connection
+                if (process.env.NODE_ENV === "development") {
+                  // eslint-disable-next-line no-console
+                  console.debug("Auto-connect failed:", err);
+                }
+              });
           }
 
           provider.removeAllListeners?.("connect");
           provider.removeAllListeners?.("disconnect");
 
-          provider.on("connect", (pubKey: any) => {
+          provider.on("connect", (pubKey: unknown) => {
+            const pk = pubKey as { toString(): string };
             set({
-              wallet: pubKey.toString(),
+              wallet: pk.toString(),
               isConnected: true,
-              authMode: 'wallet',
+              authMode: "wallet",
               _walletDisconnectedByUser: false,
             });
           });
@@ -80,7 +92,7 @@ export const useWalletStore = create<WalletState>()(
             set({
               wallet: null,
               isConnected: false,
-              authMode: get().isApiKeyConnected ? 'api_key' : 'none',
+              authMode: get().isApiKeyConnected ? "api_key" : "none",
             });
           });
         } else {
@@ -89,7 +101,7 @@ export const useWalletStore = create<WalletState>()(
       },
 
       connectWallet: async () => {
-        const provider = (window as any)?.solana;
+        const provider = window.solana;
         if (!provider?.isPhantom) {
           window.open("https://phantom.app/", "_blank");
           throw new Error("Phantom Wallet not installed");
@@ -101,14 +113,15 @@ export const useWalletStore = create<WalletState>()(
               wallet: resp.publicKey.toString(),
               provider,
               isConnected: true,
-              authMode: 'wallet',
-              _walletDisconnectedByUser: false, // Clear the flag on explicit connect
+              authMode: "wallet",
+              _walletDisconnectedByUser: false,
             });
           } else {
             throw new Error("No public key returned");
           }
         } catch (err) {
-          console.warn("Wallet connection rejected:", err);
+          // Re-throw to let caller handle the error
+          throw err;
         }
       },
 
@@ -116,35 +129,50 @@ export const useWalletStore = create<WalletState>()(
         const provider = get().provider;
         try {
           await provider?.disconnect();
-        } catch { }
+        } catch (err: unknown) {
+          // Wallet might already be disconnected, which is fine
+          if (process.env.NODE_ENV === "development") {
+            // eslint-disable-next-line no-console
+            console.debug(
+              "Disconnect error (may be already disconnected):",
+              err,
+            );
+          }
+        }
         set({
           wallet: null,
           isConnected: false,
-          authMode: get().isApiKeyConnected ? 'api_key' : 'none',
-          _walletDisconnectedByUser: true, // Mark as explicitly disconnected
+          authMode: get().isApiKeyConnected ? "api_key" : "none",
+          _walletDisconnectedByUser: true,
         });
       },
 
       verifyConnection: () => {
         // Only verify if user didn't explicitly disconnect
         if (get()._walletDisconnectedByUser) return;
-        const provider = (window as any)?.solana;
+        const provider = window.solana;
         if (provider?.publicKey) {
-          set({ wallet: provider.publicKey.toString(), isConnected: true, authMode: 'wallet' });
+          set({
+            wallet: provider.publicKey.toString(),
+            isConnected: true,
+            authMode: "wallet",
+          });
         }
       },
 
       // ── API key methods ──
 
       setNosanaApiKey: (key: string) => {
-        if (!key.startsWith('nos_')) {
-          console.warn('Invalid Nosana API key format. Expected nos_xxx_...');
+        if (!key.startsWith("nos_") && process.env.NODE_ENV === "development") {
+          // eslint-disable-next-line no-console
+          console.debug(
+            "Warning: Invalid Nosana API key format. Expected nos_xxx_...",
+          );
         }
         set({
           nosanaApiKey: key,
           isApiKeyConnected: true,
-          // Only switch auth mode if wallet is not connected
-          authMode: get().isConnected ? 'wallet' : 'api_key',
+          authMode: get().isConnected ? "wallet" : "api_key",
         });
       },
 
@@ -152,14 +180,15 @@ export const useWalletStore = create<WalletState>()(
         set({
           nosanaApiKey: null,
           isApiKeyConnected: false,
-          authMode: get().isConnected ? 'wallet' : 'none',
+          authMode: get().isConnected ? "wallet" : "none",
         });
       },
 
       getCredential: () => {
         const state = get();
-        if (state.authMode === 'wallet' && state.wallet) return state.wallet;
-        if (state.authMode === 'api_key' && state.nosanaApiKey) return state.nosanaApiKey;
+        if (state.authMode === "wallet" && state.wallet) return state.wallet;
+        if (state.authMode === "api_key" && state.nosanaApiKey)
+          return state.nosanaApiKey;
         // Fallback: return whichever is available
         return state.wallet || state.nosanaApiKey || null;
       },
@@ -176,9 +205,9 @@ export const useWalletStore = create<WalletState>()(
       onRehydrateStorage: () => (state) => {
         // After rehydration, set authMode based on restored API key state
         if (state?.isApiKeyConnected && state?.nosanaApiKey) {
-          state.authMode = 'api_key';
+          state.authMode = "api_key";
         }
       },
-    }
-  )
+    },
+  ),
 );

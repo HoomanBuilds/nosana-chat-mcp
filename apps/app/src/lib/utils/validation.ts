@@ -85,6 +85,7 @@ type ChatRequest = z.infer<typeof chatRequestSchema>;
 export type Payload = ChatRequest & {
   signal?: AbortSignal;
   apiKeys?: Record<string, string>;
+  ipAddress?: string;
   geo?: {
     country: string;
     region: string;

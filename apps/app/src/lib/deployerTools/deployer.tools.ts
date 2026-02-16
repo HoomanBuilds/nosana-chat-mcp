@@ -35,7 +35,7 @@ export const createJob = tool({
     )
     - on every change use this tool dont show update json schema and later run this tool like confirmation
     - If user mentions changes (e.g. "add API key", "update port", "change env var" or any otherkind of changes),
-      summarize those in 'requirements' and re-run the tool automatically. - provide the full defination with requirement both as requirement
+      summarize those in 'requirements' and re-run the tool automatically. - provide the full definition with requirement both as requirement
     - Downstream logic will extract everything from 'requirements'.
     - **CRITICAL VERBOSITY (for Updates):** Upon any change or update request, the 'requirements' field **must** be a highly verbose, **destructured natural language summary** of the complete job state. The summary must include the model name, category, GPU, runtime, and explicitly list every configuration detail (env vars, ports, etc.) except type = container , so that the downstream logic has the complete context and does not discard previous settings. **Avoid submitting the full JSON definition directly into 'requirements' on modification requests.** also add provider == huggingface (in detail) if its hugging face inference container image.
   `,
@@ -221,13 +221,13 @@ Awaiting user confirmation before deployment.
     let result: TResult | null = null;
     try {
       console.log(params.requirements);
-      result = await chatJSON(
+      result = (await chatJSON(
         getResolverPrompt(params.requirements, {
           modelName: params.model,
           marketDetails: params.market ? MARKETS[params.market] : undefined,
         }),
         DecisionSchema,
-      );
+      )) as TResult;
       console.log("✅ Resolver:", result);
     } catch (err) {
       console.error("❌ chatJSON failed:", err);

@@ -41,9 +41,16 @@ export async function POST(req: NextRequest) {
       }
     : undefined;
 
+  const ipAddress =
+    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
+    req.headers.get("x-real-ip") ||
+    req.headers.get("x-vercel-forwarded-for")?.split(",")[0].trim() ||
+    undefined;
+
   const PayloadPro: Payload = {
     ...data,
     ...(geo ? { geo } : {}),
+    ...(ipAddress ? { ipAddress } : {}),
     signal,
     apiKeys: data.apiKeys ?? {},
   };

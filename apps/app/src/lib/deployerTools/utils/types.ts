@@ -6,9 +6,14 @@ export interface WalletBalance {
   nos: number;
 }
 
-export const SELF_MODEL_AVAILABLE = ["qwen", "llama", "deepseek", "mistral"] as const;
+export const SELF_MODEL_AVAILABLE = [
+  "qwen",
+  "llama",
+  "deepseek",
+  "mistral",
+] as const;
 
-export type SELF_MODEL_AVAILABLE = typeof SELF_MODEL_AVAILABLE[number];
+export type SELF_MODEL_AVAILABLE = (typeof SELF_MODEL_AVAILABLE)[number];
 export interface CreditBalance {
   assignedCredits: number;
   reservedCredits: number;
@@ -16,30 +21,29 @@ export interface CreditBalance {
 }
 
 export const DEFAULT_MARKETS = [
-  'nvidia-3060',
-  'nvidia-4060',
-  'nvidia-3070',
-  'nvidia-3080',
-  'nvidia-4070',
-  'nvidia-a4000',
-  'nvidia-4080',
-  'nvidia-3090',
-  'nvidia-5070',
-  'nvidia-a5000',
-  'nvidia-4090',
-  'nvidia-5080',
-  'nvidia-a40',
-  'nvidia-a6000',
-  'nvidia-6000-ada',
-  'nvidia-a100-40gb',
-  'nvidia-5090',
-  'nvidia-a100-80gb',
-  'nvidia-pro-6000',
-  'nvidia-h100'
+  "nvidia-3060",
+  "nvidia-4060",
+  "nvidia-3070",
+  "nvidia-3080",
+  "nvidia-4070",
+  "nvidia-a4000",
+  "nvidia-4080",
+  "nvidia-3090",
+  "nvidia-5070",
+  "nvidia-a5000",
+  "nvidia-4090",
+  "nvidia-5080",
+  "nvidia-a40",
+  "nvidia-a6000",
+  "nvidia-6000-ada",
+  "nvidia-a100-40gb",
+  "nvidia-5090",
+  "nvidia-a100-80gb",
+  "nvidia-pro-6000",
+  "nvidia-h100",
 ] as const;
 
-
-export type GpuMarketSlug = typeof DEFAULT_MARKETS[number];
+export type GpuMarketSlug = (typeof DEFAULT_MARKETS)[number];
 
 export interface MarketInfo {
   slug: GpuMarketSlug;
@@ -49,19 +53,20 @@ export interface MarketInfo {
   notes?: string;
 }
 
-export type ModelId = SELF_MODEL_AVAILABLE
+export type ModelId = SELF_MODEL_AVAILABLE;
 
 export type ModelSpec = {
   id: ModelId;
   dockerImage: string;
   modelName: string;
-    minVramGB: number;
+  minVramGB: number;
   defaultCmd?: string[] | string;
   exposePort?: number;
-  health?: { type: 'http'; path: string; expectedStatus: number } | { type:'websocket'; expected: string };
+  health?:
+    | { type: "http"; path: string; expectedStatus: number }
+    | { type: "websocket"; expected: string };
   allowedMarkets: GpuMarketSlug[];
 };
-
 
 export interface CreateJobParams {
   modelName: ModelId;
@@ -72,7 +77,7 @@ export interface CreateJobParams {
   exposePort?: number;
   env?: Record<string, string>;
   resources?: Array<{
-    type: 'S3' | 'HF';
+    type: "S3" | "HF";
     url?: string;
     target: string;
     repo?: string;
@@ -86,28 +91,25 @@ export interface CreateJobParams {
   }>;
 }
 
-
 export type CreateJobInput = {
   model: string;
   market: GpuMarketSlug;
 
-  entryCmd?: string[] | string;     
-  cmd?: string;                     
-  env?: Record<string, string>;     
+  entryCmd?: string[] | string;
+  cmd?: string;
+  env?: Record<string, string>;
 
-  requiredVramGB?: number;          
-  requiredCuda?: string[];          
-  exposePort?: number;              
-  timeoutSeconds?: number;          
+  requiredVramGB?: number;
+  requiredCuda?: string[];
+  exposePort?: number;
+  timeoutSeconds?: number;
 };
 
-
 export type UpdateJobInput =
-  | { type: 'update_runtime'; jobAddress: string; extensionSeconds: number }
-  | { type: 'update_gpu'; jobAddress: string; market: GpuMarketSlug };
+  | { type: "update_runtime"; jobAddress: string; extensionSeconds: number }
+  | { type: "update_gpu"; jobAddress: string; market: GpuMarketSlug };
 
-export type Network = 'mainnet' | 'devnet';
-
+export type Network = "mainnet" | "devnet";
 
 export interface JobDefinition {
   version?: string;
@@ -187,52 +189,48 @@ export interface JobsResponse {
   totalJobs: number;
 }
 
-  
 export interface ModelQuery {
-  organization: string
-  pipeline: Pipeline
-  keywords?: string[]
-  limit?: number
-  topK?: number
+  organization: string;
+  pipeline: Pipeline;
+  keywords?: string[];
+  limit?: number;
+  topK?: number;
 }
 
 export interface HFModel {
-  id: string
-  private: boolean
+  id: string;
+  private: boolean;
 }
 
-
-
-
 export interface RecommendedGPU {
-    parameters?: string;
-    gpuModel?: string;
-    requiredVram?: string;
-    pricePerHour?: number;
-    memoryUtilization?: string;
-    tensorParallelism?: boolean;
-    [key: string]: any;
+  parameters?: string;
+  gpuModel?: string;
+  requiredVram?: string;
+  pricePerHour?: number;
+  memoryUtilization?: string;
+  tensorParallelism?: boolean;
+  [key: string]: any;
 }
 
 export interface ModelEntry {
-    name: string;
-    size?: string;
-    context?: string;
-    recommendedGPU?: RecommendedGPU;
-    [key: string]: any;
+  name: string;
+  size?: string;
+  context?: string;
+  recommendedGPU?: RecommendedGPU;
+  [key: string]: any;
 }
 
 export interface ModelFamily {
-    family: string;
-    description?: string;
-    tags?: string[];
-    models: ModelEntry[];
-    last_updated?: string;
-    [key: string]: any;
+  family: string;
+  description?: string;
+  tags?: string[];
+  models: ModelEntry[];
+  last_updated?: string;
+  [key: string]: any;
 }
 
 export interface QueryParams {
-  op: "<" | "<=" | ">" | ">=" | "=";
+  op?: "<" | "<=" | ">" | ">=" | "=";
   value?: number | null;
   strict?: boolean;
 }
@@ -248,7 +246,6 @@ export interface QueryFilter {
   sort?: "latest" | "popular" | null;
 }
 
-
 export interface QueryFilter {
   families?: string[];
   params?: QueryParams | null;
@@ -260,8 +257,7 @@ export interface QueryFilter {
   sort?: "latest" | "popular" | null;
 }
 
-
 export interface ScoredModel extends ModelEntry {
-    family: string;
-    score: number;
+  family: string;
+  score: number;
 }

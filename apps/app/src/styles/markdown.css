@@ -32,6 +32,8 @@
 .dark {
   --code-bg: #141414f9;
   --border: #232323;
+  --light: #1a1a1a;
+  --secondary: #a0aec0;
 }
 /* Base styles */
 .markdown-container {

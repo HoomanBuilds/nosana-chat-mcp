@@ -482,7 +482,7 @@ export function useChatLogic() {
                         setPendingTool({
                           funcName,
                           prompt,
-                          heading: "JOB defination confirmation",
+                          heading: "JOB definition confirmation",
                           onConfirm: async () => {
                             try {
                               console.log(`▶ Executing ${funcName}`);
@@ -545,37 +545,44 @@ export function useChatLogic() {
                               let deployedModelName: string | null = null;
                               let deployedModelBaseURL: string | null = null;
 
-                              if (jobId && serviceUrl && typeof window !== "undefined") {
+                              if (
+                                jobId &&
+                                serviceUrl &&
+                                typeof window !== "undefined"
+                              ) {
                                 const {
                                   saveDeployedChatModelFromJob,
                                   inferModelNameFromJobDef,
-                                } =
-                                  await import("@/lib/nosana/deployedModels");
+                                } = await import("@/lib/nosana/deployedModels");
                                 const saved = saveDeployedChatModelFromJob({
                                   jobId,
                                   serviceUrl,
                                   jobDef: approvedJobDef,
                                 });
 
-                                const extractedModel = inferModelNameFromJobDef(
-                                  approvedJobDef,
-                                );
+                                const extractedModel =
+                                  inferModelNameFromJobDef(approvedJobDef);
                                 const savedModel =
                                   saved?.model && saved.model !== "local-model"
                                     ? saved.model
                                     : null;
 
                                 deployedModelName =
-                                  savedModel ||
-                                  extractedModel ||
-                                  null;
-                                deployedModelBaseURL = saved?.baseURL || serviceUrl;
+                                  savedModel || extractedModel || null;
+                                deployedModelBaseURL =
+                                  saved?.baseURL || serviceUrl;
 
                                 const chatParams = new URLSearchParams();
-                                chatParams.set("custom-service_url", serviceUrl);
+                                chatParams.set(
+                                  "custom-service_url",
+                                  serviceUrl,
+                                );
                                 if (deployedModelName) {
                                   chatParams.set("model", deployedModelName);
-                                  chatParams.set("custom-model", deployedModelName);
+                                  chatParams.set(
+                                    "custom-model",
+                                    deployedModelName,
+                                  );
                                 }
                                 nosanaChatUrl = `${window.location.origin}/ask?${chatParams.toString()}`;
                               }
@@ -596,7 +603,8 @@ export function useChatLogic() {
                                       (jobId
                                         ? `${CONFIG.EXPLORER_URL}/jobs/${jobId}`
                                         : CONFIG.EXPLORER_URL),
-                                    testGenerationCurl: curlSnippet.trim() || null,
+                                    testGenerationCurl:
+                                      curlSnippet.trim() || null,
                                   },
                                 }),
                                 undefined,
