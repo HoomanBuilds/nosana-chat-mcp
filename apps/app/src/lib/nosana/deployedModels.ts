@@ -103,10 +103,32 @@ function extractModelFromResources(jobDef: any): string | null {
 
   for (const resource of resources) {
     if (!resource || typeof resource !== "object") continue;
-    const candidate = (resource as Record<string, unknown>).model;
-    if (typeof candidate !== "string" || !candidate.trim()) continue;
 
-    return resolveTemplateGlobalVar(candidate.trim(), jobDef);
+    // Check for explicit model property
+    const candidate = (resource as Record<string, unknown>).model;
+    if (typeof candidate === "string" && candidate.trim()) {
+      return resolveTemplateGlobalVar(candidate.trim(), jobDef);
+    }
+
+    // Extract model from URL (e.g., hugging face model URLs)
+    const url = (resource as Record<string, unknown>).url;
+    if (typeof url === "string" && url.trim()) {
+      // Match patterns like:
+      // https://models.nosana.io/hugging-face/deepseek/janus/models-deepseek-ai-Janus-Pro-1B
+      // https://huggingface.co/deepseek-ai/Janus-Pro-1B
+      const modelMatch =
+        url.match(/models[-/]([^/]+)[-/]([^/]+)$/i) ||
+        url.match(/huggingface\.co\/([^/]+)\/([^/]+)/i);
+      if (modelMatch) {
+        const org = modelMatch[1];
+        const model = modelMatch[2];
+        // Convert hyphenated format to slash format if needed
+        if (org.startsWith("models-")) {
+          return org.replace("models-", "").replace(/-/g, "/") + "/" + model;
+        }
+        return `${org}/${model}`;
+      }
+    }
   }
 
   return null;
@@ -137,6 +159,12 @@ function extractModelName(jobDef: any): string {
   for (const key of ["MODEL", "SERVED_MODEL_NAME", "MODEL_NAME", "MODEL_ID"]) {
     const globalValue = getGlobalVar(jobDef, key);
     if (globalValue) return globalValue;
+  }
+
+  // Try to infer from job definition id if no other source found
+  const jobId = jobDef?.ops?.[0]?.id;
+  if (typeof jobId === "string" && jobId.trim() && jobId !== "container") {
+    return jobId.trim();
   }
 
   return "local-model";

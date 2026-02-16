@@ -541,10 +541,8 @@ export function useChatLogic() {
                                   jobDetails.jobResponse.service_url) ||
                                 "";
 
+                              // Build nosana chat URL and extract model
                               let nosanaChatUrl: string | null = null;
-                              let deployedModelName: string | null = null;
-                              let deployedModelBaseURL: string | null = null;
-
                               if (
                                 jobId &&
                                 serviceUrl &&
@@ -554,7 +552,7 @@ export function useChatLogic() {
                                   saveDeployedChatModelFromJob,
                                   inferModelNameFromJobDef,
                                 } = await import("@/lib/nosana/deployedModels");
-                                const saved = saveDeployedChatModelFromJob({
+                                saveDeployedChatModelFromJob({
                                   jobId,
                                   serviceUrl,
                                   jobDef: approvedJobDef,
@@ -562,26 +560,16 @@ export function useChatLogic() {
 
                                 const extractedModel =
                                   inferModelNameFromJobDef(approvedJobDef);
-                                const savedModel =
-                                  saved?.model && saved.model !== "local-model"
-                                    ? saved.model
-                                    : null;
-
-                                deployedModelName =
-                                  savedModel || extractedModel || null;
-                                deployedModelBaseURL =
-                                  saved?.baseURL || serviceUrl;
-
                                 const chatParams = new URLSearchParams();
                                 chatParams.set(
                                   "custom-service_url",
                                   serviceUrl,
                                 );
-                                if (deployedModelName) {
-                                  chatParams.set("model", deployedModelName);
+                                if (extractedModel) {
+                                  chatParams.set("model", extractedModel);
                                   chatParams.set(
                                     "custom-model",
-                                    deployedModelName,
+                                    extractedModel,
                                   );
                                 }
                                 nosanaChatUrl = `${window.location.origin}/ask?${chatParams.toString()}`;
@@ -596,8 +584,6 @@ export function useChatLogic() {
                                     jobId: jobId || null,
                                     serviceUrl: serviceUrl || null,
                                     nosanaChatUrl,
-                                    deployedModel: deployedModelName,
-                                    inferenceBaseURL: deployedModelBaseURL,
                                     explorerUrl:
                                       jobDetails.explorerUrl ||
                                       (jobId
@@ -606,6 +592,7 @@ export function useChatLogic() {
                                     testGenerationCurl:
                                       curlSnippet.trim() || null,
                                   },
+                                  jobDef: approvedJobDef,
                                 }),
                                 undefined,
                                 true,
