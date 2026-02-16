@@ -786,7 +786,17 @@ export const getWalletBalance = tool({
   execute: async ({ UsersPublicKey }) => {
     try {
       const deployer = ensureDeployer();
-      const balance = await deployer.getWalletBalance(UsersPublicKey);
+
+      // Fetch all data in parallel for better performance
+      const [balance, solUsd, nosUsd] = await Promise.all([
+        deployer.getWalletBalance(UsersPublicKey),
+        deployer.get_sol_Usd(),
+        deployer.get_nos_Usd(),
+      ]);
+
+      const solValue = balance.sol * solUsd;
+      const nosValue = balance.nos * nosUsd;
+      const totalValue = solValue + nosValue;
 
       return {
         content: [
@@ -795,18 +805,11 @@ export const getWalletBalance = tool({
             text: `
             💰 User Wallet Balances
             ────────────────────────────
-            SOLANA : ${balance.sol.toFixed(8)} SOL | $${(
-              balance.sol * (await deployer.get_sol_Usd())
-            ).toFixed(2)}
+            SOLANA : ${balance.sol.toFixed(8)} SOL | $${solValue.toFixed(2)}
 
-            NOSANA : ${balance.nos.toFixed(6)} NOS | $${(
-              balance.nos * (await deployer.get_nos_Usd())
-            ).toFixed(2)}
+            NOSANA : ${balance.nos.toFixed(6)} NOS | $${nosValue.toFixed(2)}
             ────────────────────────────
-            Total Value (USD): $${(
-              balance.sol * (await deployer.get_sol_Usd()) +
-              balance.nos * (await deployer.get_nos_Usd())
-            ).toFixed(2)}
+            Total Value (USD): $${totalValue.toFixed(2)}
             ────────────────────────────
             Would you like to check your jobs or create a new one?
                 `,

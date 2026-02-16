@@ -1,16 +1,28 @@
 import { useChatStore } from "@/store/chat.store";
 import { Button } from "../ui/button";
 import { useState } from "react";
-import { ChevronDown, Loader2Icon, PencilIcon, SaveIcon, XIcon } from "lucide-react";
+import {
+  ChevronDown,
+  Loader2Icon,
+  PencilIcon,
+  SaveIcon,
+  XIcon,
+} from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
+import { useShallow } from "zustand/shallow";
 
 export function ToolExecDialog() {
-  const { pendingTool, setPendingTool } = useChatStore();
+  const { pendingTool, setPendingTool } = useChatStore(
+    useShallow((state) => ({
+      pendingTool: state.pendingTool,
+      setPendingTool: state.setPendingTool,
+    })),
+  );
   const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState("");
@@ -42,10 +54,14 @@ export function ToolExecDialog() {
     <div className="bg-muted/70 text-muted-foreground border rounded-lg p-4 my-3 w-full">
       <h3 className="text-base font-semibold mb-2">⚙️ {pendingTool.heading}</h3>
 
-      <Collapsible open={open} onOpenChange={setOpen} className="w-full mb-3 relative group">
+      <Collapsible
+        open={open}
+        onOpenChange={setOpen}
+        className="w-full mb-3 relative group"
+      >
         <CollapsibleTrigger
           className={cn(
-            "border rounded bg-muted-foreground/5 border-muted-foreground/5 flex items-center justify-between px-3 w-full py-2 text-xs font-medium gap-2 text-gray-600 cursor-pointer transition"
+            "border rounded bg-muted-foreground/5 border-muted-foreground/5 flex items-center justify-between px-3 w-full py-2 text-xs font-medium gap-2 text-gray-600 cursor-pointer transition",
           )}
         >
           <div className="flex flex-col items-start gap-2 text-muted-foreground/50">
@@ -82,17 +98,15 @@ export function ToolExecDialog() {
       <div className="flex gap-3 w-full">
         {!editing ? (
           <>
-            {
-              pendingTool.funcName === "createJob" && (
-                <Button
-                  variant="outline"
-                  onClick={startEditing}
-                  className="flex-1 rounded cursor-pointer text-muted-foreground/50 hover:text-muted-foreground"
-                >
-                  <PencilIcon className="h-4 w-4 mr-2" /> Edit Schema
-                </Button>
-              )
-            }
+            {pendingTool.funcName === "createJob" && (
+              <Button
+                variant="outline"
+                onClick={startEditing}
+                className="flex-1 rounded cursor-pointer text-muted-foreground/50 hover:text-muted-foreground"
+              >
+                <PencilIcon className="h-4 w-4 mr-2" /> Edit Schema
+              </Button>
+            )}
 
             <Button
               variant="outline"
@@ -106,12 +120,12 @@ export function ToolExecDialog() {
                   setLoading(false);
                 }
               }}
-
               className="flex-4 rounded cursor-pointer text-muted-foreground/50 hover:text-muted-foreground rotate-none py-2 transition"
             >
               {loading ? (
                 <span className="flex items-center gap-2">
-                  <Loader2Icon className="mr-2 h-4 w-4 animate-spin" /> Executing...
+                  <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />{" "}
+                  Executing...
                 </span>
               ) : (
                 <span>Run {pendingTool.funcName}</span>

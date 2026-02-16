@@ -1,6 +1,6 @@
 /* eslint-disable */
 
-import React, { memo, useEffect, useRef } from "react";
+import React, { memo, useEffect, useMemo, useRef } from "react";
 import ChatMessage from "./ChatMessage";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -45,6 +45,27 @@ const ChatMessageList = memo(
     );
 
     const reasoningRef = useRef<HTMLDivElement>(null);
+
+    // Memoize markdown components to prevent recreation on every render
+    const markdownComponents = useMemo(
+      () => ({
+        table({ node, ...props }: any) {
+          return (
+            <div style={{ overflowX: "auto", maxWidth: "100%" }}>
+              <table {...props} className="markdown-table" />
+            </div>
+          );
+        },
+      }),
+      [],
+    );
+
+    // Memoize joined content strings
+    const reasoningContent = useMemo(
+      () => reasoningChunks.join(""),
+      [reasoningChunks],
+    );
+    const llmContent = useMemo(() => llmChunks.join(""), [llmChunks]);
 
     useEffect(() => {
       const el = scrollRef.current;
@@ -114,7 +135,7 @@ const ChatMessageList = memo(
                         className="text-muted-foreground/80 leading-6 prose prose-sm max-w-none"
                       >
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                          {reasoningChunks.join("")}
+                          {reasoningContent}
                         </ReactMarkdown>
                       </CardContent>
                     </Card>
@@ -136,17 +157,9 @@ const ChatMessageList = memo(
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
                   rehypePlugins={[rehypeHighlight]}
-                  components={{
-                    table({ node, ...props }) {
-                      return (
-                        <div style={{ overflowX: "auto", maxWidth: "100%" }}>
-                          <table {...props} className="markdown-table" />
-                        </div>
-                      );
-                    },
-                  }}
+                  components={markdownComponents}
                 >
-                  {llmChunks.join("")}
+                  {llmContent}
                 </ReactMarkdown>
 
                 {pendingPermission && (

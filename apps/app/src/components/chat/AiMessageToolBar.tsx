@@ -10,6 +10,7 @@ import { Ellipsis, Trash2, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DEFAULT } from "@/lib/constants";
 import { useChatStore } from "@/store/chat.store";
+import { useShallow } from "zustand/shallow";
 
 type Message = {
   id: string;
@@ -21,14 +22,19 @@ type Message = {
 
 interface MessageToolbarProps {
   msg: Message;
-  tool: string | undefined
+  tool: string | undefined;
 }
 
-export function MessageToolbar({
-  msg,
-  tool
-}: MessageToolbarProps) {
-  const { deleteChat, selectedChatId, downloadMessage, setPendingTool } = useChatStore();
+export function MessageToolbar({ msg, tool }: MessageToolbarProps) {
+  const { deleteChat, selectedChatId, downloadMessage, setPendingTool } =
+    useChatStore(
+      useShallow((state) => ({
+        deleteChat: state.deleteChat,
+        selectedChatId: state.selectedChatId,
+        downloadMessage: state.downloadMessage,
+        setPendingTool: state.setPendingTool,
+      })),
+    );
   return (
     <div className="flex items-center text-xs mb-5">
       <CopyButton
@@ -42,8 +48,8 @@ export function MessageToolbar({
         size="sm"
         onClick={() => {
           if (selectedChatId) {
-            setPendingTool(null)
-            deleteChat(String(selectedChatId), msg.id)
+            setPendingTool(null);
+            deleteChat(String(selectedChatId), msg.id);
           }
         }}
         className="h-7 cursor-pointer px-2 group"
@@ -73,39 +79,34 @@ export function MessageToolbar({
         </DropdownMenu>
       </Button>
 
-      {
-        !tool && (
-          <div className="flex ml-auto items-center">
-            {msg.responseTime && (
-              <span className="text-muted-foreground/20 px-2 border-b border-dashed border border-muted-foreground/20 sm:text-xs text-[10px] italic">
-                ResponseTime: {(msg.responseTime / 1000).toFixed(1)}s
-              </span>
-            )}
-
-            <span className="text-muted-foreground/20 px-2 ml-auto border border-dashed border-muted-foreground/20 border-r sm:text-xs text-[10px] italic">
-              {msg.model?.split("/")[1] || DEFAULT.MODEL}
+      {!tool && (
+        <div className="flex ml-auto items-center">
+          {msg.responseTime && (
+            <span className="text-muted-foreground/20 px-2 border-b border-dashed border border-muted-foreground/20 sm:text-xs text-[10px] italic">
+              ResponseTime: {(msg.responseTime / 1000).toFixed(1)}s
             </span>
+          )}
 
-            {msg.type === "error" || msg.type === "aborted" ? (
-              <span
-                className={cn(
-                  "hidden sm:inline-block px-2 border border-dashed border-muted-foreground/20 sm:text-xs text-[10px] italic",
-                  msg.type === "error"
-                    ? "text-red-500/50"
-                    : "text-yellow-500/50"
-                )}
-              >
-                {msg.type}
-              </span>
-            ) : (
-              <span className="hidden sm:inline-block px-2 border border-dashed border-muted-foreground/20 sm:text-xs text-[10px] italic text-green-600">
-                success
-              </span>
-            )}
-          </div>
-        )
-      }
+          <span className="text-muted-foreground/20 px-2 ml-auto border border-dashed border-muted-foreground/20 border-r sm:text-xs text-[10px] italic">
+            {msg.model?.split("/")[1] || DEFAULT.MODEL}
+          </span>
 
+          {msg.type === "error" || msg.type === "aborted" ? (
+            <span
+              className={cn(
+                "hidden sm:inline-block px-2 border border-dashed border-muted-foreground/20 sm:text-xs text-[10px] italic",
+                msg.type === "error" ? "text-red-500/50" : "text-yellow-500/50",
+              )}
+            >
+              {msg.type}
+            </span>
+          ) : (
+            <span className="hidden sm:inline-block px-2 border border-dashed border-muted-foreground/20 sm:text-xs text-[10px] italic text-green-600">
+              success
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 }
