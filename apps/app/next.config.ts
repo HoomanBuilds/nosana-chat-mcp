@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  
+
   async redirects() {
     return [
       {
@@ -14,6 +14,8 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+
+  transpilePackages: ["@nosana-chat/ai", "@nosana-chat/indexdb"],
 
   // --- FIX for @coral-xyz/anchor + @nosana/sdk build issue ---
   webpack: (config) => {
