@@ -49,6 +49,19 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
   });
 
   useEffect(() => {
+    if (isLoading || modelGroups.length === 0) return;
+
+    const allModels = modelGroups.flatMap((g) => g.models);
+    if (allModels.length === 0) return;
+
+    const currentModelExists = allModels.some((m) => m.value === value);
+
+    if (!currentModelExists) {
+      onValueChange(allModels[0].value);
+    }
+  }, [isLoading, modelGroups, value, onValueChange]);
+
+  useEffect(() => {
     if (!lockedModel) return;
     if (value !== lockedModel) {
       onValueChange(lockedModel);

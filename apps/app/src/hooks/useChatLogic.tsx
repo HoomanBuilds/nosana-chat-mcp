@@ -447,6 +447,14 @@ export function useChatLogic() {
                       id: crypto.randomUUID(),
                       type: "error",
                     });
+                  } else {
+                    addMessage({
+                      role: "model",
+                      model: modelToSend,
+                      content: "Something went wrong.",
+                      id: crypto.randomUUID(),
+                      type: "error",
+                    });
                   }
                   console.error("API Error:", data.message || data);
                   setState("idle");
@@ -791,10 +799,13 @@ export function useChatLogic() {
           });
         } else if (selectedChatId) {
           if (!localConfig.showErrorMessages) {
-            deleteSingleChat(selectedChatId, userMessageId).catch(
-              console.error,
-            );
-            alert("No response from the model.");
+            addMessage({
+              role: "model",
+              content: "Something went wrong. No response from the model.",
+              id: crypto.randomUUID(),
+              type: "error",
+              model: modelToSend,
+            });
           }
         }
       } catch (error) {
@@ -812,13 +823,7 @@ export function useChatLogic() {
           });
         } else {
           console.error("Fetch/Stream error:", error);
-          if (selectedChatId)
-            deleteSingleChat(selectedChatId, userMessageId).catch(
-              console.error,
-            );
-
           if (localConfig.showErrorMessages) {
-            alert(selectedModel);
             addMessage({
               role: "model",
               type: "error",
@@ -827,6 +832,14 @@ export function useChatLogic() {
               reasoning:
                 (error as Error & { reasoning?: string }).reasoning ||
                 (error as Error).message,
+              id: crypto.randomUUID(),
+            });
+          } else {
+            addMessage({
+              role: "model",
+              type: "error",
+              model: modelToSend,
+              content: "Something went wrong.",
               id: crypto.randomUUID(),
             });
           }
