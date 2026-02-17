@@ -64,7 +64,7 @@ function ChatPageInner(): JSX.Element {
 
   const handleSubmit = (e: React.FormEvent<Element>) => {
     e.preventDefault();
-    if (query.trim()) {
+    if (query.trim() && (model || selectedModel)) {
       handleAskChunk(e as React.FormEvent<HTMLFormElement>);
       setQuery("");
 

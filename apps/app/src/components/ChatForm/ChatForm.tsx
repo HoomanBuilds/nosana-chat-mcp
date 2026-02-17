@@ -55,16 +55,18 @@ export const ChatForm: React.FC<ChatFormProps> = ({
 }) => {
   const currentConfig =
     Modes.ChatModeConfig[
-      selectedModel?.split("/")[1] as keyof typeof Modes.ChatModeConfig
+    selectedModel?.split("/")[1] as keyof typeof Modes.ChatModeConfig
     ] || {};
 
   const { tool } = useChatStore(useShallow((state) => ({ tool: state.tool })));
+  const isModelSelected = !!(model || selectedModel);
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     const isMobile = /Mobi|Android/i.test(navigator.userAgent);
 
     if (e.key === "Enter" && !isMobile && !e.shiftKey) {
       e.preventDefault();
-      if (query.trim()) {
+      if (query.trim() && isModelSelected) {
         onSubmit(e);
         setQuery("");
       }
@@ -123,10 +125,10 @@ export const ChatForm: React.FC<ChatFormProps> = ({
 
         <SubmitButton
           isLoading={state === "loading"}
-          isDisabled={!query.trim()}
+          isDisabled={!query.trim() || !isModelSelected}
           onAbort={onAbort}
           onSubmit={() => {
-            if (query.trim()) {
+            if (query.trim() && isModelSelected) {
               onSubmit(new Event("submit") as any);
               setQuery("");
             }
