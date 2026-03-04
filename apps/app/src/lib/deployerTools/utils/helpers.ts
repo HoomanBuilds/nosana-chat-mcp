@@ -17,7 +17,6 @@ const openai = createOpenAI({
   baseURL: normalizeInferenceBaseURL(
     process.env.NEXT_PUBLIC_INFERIA_LLM_URL || "",
   ),
-  compatibility: "compatible",
   headers: {
     ...COMMON_HEADERS,
   },
