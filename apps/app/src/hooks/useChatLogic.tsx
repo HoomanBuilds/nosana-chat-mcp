@@ -764,7 +764,8 @@ export function useChatLogic() {
                 default:
                   if (eventType?.toLowerCase() === "followup") {
                     try {
-                      followUpQuestions = JSON.parse(data);
+                      const parsed = typeof data === "string" ? JSON.parse(data) : data;
+                      followUpQuestions = Array.isArray(parsed) ? parsed : (parsed?.questions || []);
                       setFollowUp(followUpQuestions);
                     } catch (err) {
                       console.error(

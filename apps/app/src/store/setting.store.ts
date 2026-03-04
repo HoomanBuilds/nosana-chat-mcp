@@ -10,7 +10,7 @@ interface SettingsState {
   templateOpen: boolean;
   settingsOpen: boolean;
   activeTab: string;
-  mobileOpen: boolean;               
+  mobileOpen: boolean;
   toggleSettings: () => void;
   openSettings: () => void;
   closeSettings: () => void;
@@ -18,9 +18,9 @@ interface SettingsState {
   toggleTemplate: () => void;
   closeTemplate: () => void;
   setActiveTab: (tab: string) => void;
-  toggleMobile: () => void;          
-  openMobile: () => void;            
-  closeMobile: () => void;           
+  toggleMobile: () => void;
+  openMobile: () => void;
+  closeMobile: () => void;
 
   localConfig: LocalConfig;
   setLocalConfig: (config: Partial<LocalConfig>) => void;
@@ -30,23 +30,32 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   settingsOpen: false,
   templateOpen: false,
   activeTab: "Custom Prompt",
-  mobileOpen: false,                
+  mobileOpen: false,
 
   toggleSettings: () => set((state) => ({ settingsOpen: !state.settingsOpen })),
   openSettings: () => set({ settingsOpen: true }),
   closeSettings: () => set({ settingsOpen: false }),
-  
+
   toggleTemplate: () => set((state) => ({ templateOpen: !state.templateOpen })),
   openTemplate: () => set({ templateOpen: true }),
   closeTemplate: () => set({ templateOpen: false }),
 
-  toggleMobile: () => set((state) => ({ mobileOpen: !state.mobileOpen })), 
-  openMobile: () => set({ mobileOpen: true }),                              
-  closeMobile: () => set({ mobileOpen: false }),                            
+  toggleMobile: () => set((state) => ({ mobileOpen: !state.mobileOpen })),
+  openMobile: () => set({ mobileOpen: true }),
+  closeMobile: () => set({ mobileOpen: false }),
 
   setActiveTab: (tab: string) => set({ activeTab: tab }),
 
-  localConfig: { showErrorMessages: false, appearance: "dark", followUp: true },
+  localConfig: (() => {
+    const defaults: LocalConfig = { showErrorMessages: false, appearance: "dark", followUp: true };
+    if (typeof window === "undefined") return defaults;
+    try {
+      const stored = JSON.parse(localStorage.getItem("localConfig") || "{}");
+      return { ...defaults, ...stored };
+    } catch {
+      return defaults;
+    }
+  })(),
 
   setLocalConfig: (config) =>
     set((state) => {

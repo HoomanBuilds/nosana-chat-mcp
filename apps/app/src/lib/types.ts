@@ -19,19 +19,8 @@ export const SSE_HEADERS = {
   "X-Accel-Buffering": "no",
 } as const;
 
-export type Context = {
+export type SearchResult = {
   title: string;
   url: string;
   content: string;
 };
-
-export interface runLLM {
-  query: string;
-  chats?: { role: string; content: string }[];
-  model?: string;
-  context?: Context[];
-  threadId?: string;
-  chatId?: string;
-  customPrompt?: string;
-  thinking?: boolean;
-}

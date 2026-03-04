@@ -216,7 +216,7 @@ const CustomConfigsTab = () => {
               value={context?.absoluteMaxTokens ?? 4000}
               onChange={(e) => {
                 const val = Math.min(Math.max(Number(e.target.value), 1), 10000);
-                setContext(prev => ({ ...prev, absoluteMaxTokens: val }));
+                setContext({ ...context, absoluteMaxTokens: val });
               }}
             />
             <p className="text-xs text-muted-foreground">Maximum: 10,000</p>
@@ -234,7 +234,7 @@ const CustomConfigsTab = () => {
               value={context?.prevChatLimit ?? 6}
               onChange={(e) => {
                 const val = Math.min(Math.max(Number(e.target.value), 1), 30);
-                setContext(prev => ({ ...prev, prevChatLimit: val }));
+                setContext({ ...context, prevChatLimit: val });
               }}
             />
             <p className="text-xs text-muted-foreground">Minimum messages to include (1-30)</p>
@@ -252,7 +252,7 @@ const CustomConfigsTab = () => {
               value={context?.maxContextTokens ?? 3000}
               onChange={(e) => {
                 const val = Math.min(Math.max(Number(e.target.value), 1), 10000);
-                setContext(prev => ({ ...prev, maxContextTokens: val }));
+                setContext({ ...context, maxContextTokens: val });
               }}
             />
             <p className="text-xs text-muted-foreground">Maximum: 10,000</p>
@@ -268,10 +268,10 @@ const CustomConfigsTab = () => {
                 id="truncate-from"
                 checked={context?.truncateFrom === 'end'}
                 onCheckedChange={() => {
-                  setContext(prev => ({
-                    ...prev,
-                    truncateFrom: prev?.truncateFrom === 'end' ? 'start' : 'end'
-                  }));
+                  setContext({
+                    ...context,
+                    truncateFrom: context?.truncateFrom === 'end' ? 'start' : 'end'
+                  });
                 }}
                 className="cursor-pointer data-[state=unchecked]:bg-muted-foreground/30 data-[state=checked]:bg-green-500"
               />

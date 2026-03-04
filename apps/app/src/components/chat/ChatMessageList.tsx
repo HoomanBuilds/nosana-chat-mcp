@@ -25,6 +25,7 @@ interface ChatMessageListProps {
   event: string;
   setQuery: (q: string) => void;
   textareaRef: React.RefObject<HTMLTextAreaElement | null>;
+  onSubmit?: (question: string) => void;
 }
 
 const ChatMessageList = memo(
@@ -37,6 +38,7 @@ const ChatMessageList = memo(
     event,
     setQuery,
     textareaRef,
+    onSubmit,
   }: ChatMessageListProps) => {
     const autoScroll = useRef(true);
 
@@ -106,6 +108,7 @@ const ChatMessageList = memo(
             conversations={conversations}
             setQuery={setQuery}
             textareaRef={textareaRef}
+            onSubmit={onSubmit}
           />
         ))}
 

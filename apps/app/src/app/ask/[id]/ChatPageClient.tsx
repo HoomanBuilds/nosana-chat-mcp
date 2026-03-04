@@ -122,6 +122,12 @@ function ChatPageInner(): JSX.Element {
           event={event}
           setQuery={setQuery}
           textareaRef={textareaRef}
+          onSubmit={(question) => {
+            setQuery(question);
+            setTimeout(() => {
+              handleAskChunk(undefined, question);
+            }, 50);
+          }}
         />
 
         <ChatForm

@@ -6,6 +6,13 @@ export const metadata: Metadata = {
     description: "Chat history and active conversation",
 };
 
+import { Suspense } from "react";
+import { Loader2 } from "lucide-react";
+
 export default function Page() {
-    return <ChatPageClient />;
+    return (
+        <Suspense fallback={<div className="flex h-screen items-center justify-center"><Loader2 className="animate-spin" /></div>}>
+            <ChatPageClient />
+        </Suspense>
+    );
 }

@@ -28,6 +28,10 @@ export const getFollowUpQuestions = async (
   const client = new OpenAI({
     apiKey: process.env.INFERIA_LLM_API_KEY,
     baseURL: process.env.NEXT_PUBLIC_INFERIA_LLM_URL,
+    defaultHeaders: {
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      "Referer": "https://nosana.chat/",
+    },
   });
 
   try {
@@ -37,7 +41,8 @@ export const getFollowUpQuestions = async (
       response_format: { type: "json_object" },
     });
 
-    const content = response.choices[0]?.message?.content || "[]";
+    const rawContent = response.choices[0]?.message?.content || "[]";
+    const content = rawContent.replace(/<think>[\s\S]*?(<\/think>|$)/g, "").trim();
     let followUps = [];
     try {
       followUps = JSON.parse(content);

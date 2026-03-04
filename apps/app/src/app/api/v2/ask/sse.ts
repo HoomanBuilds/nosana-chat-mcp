@@ -1,6 +1,5 @@
 import { getFollowUpQuestions } from "@/lib/tools";
 import { orchestrateProvider } from "./handlers/orchestrator";
-import { getThreadTitle } from "./handlers/utils";
 import { Payload } from "@/lib/utils/validation";
 
 export function createSSEStream(payload?: Payload) {
@@ -29,11 +28,8 @@ export function createSSEStream(payload?: Payload) {
       }
 
       const threadCheckPromise = (async () => {
-        if (payload.chats && payload.chats.length === 0 && payload.query) {
-          const threadTitle = await getThreadTitle(
-            payload.query,
-            payload.model,
-          );
+        if (payload.chats && payload.chats.length <= 1 && payload.query) {
+          const threadTitle = payload.query.substring(0, 30) + (payload.query.length > 30 ? "..." : "");
           send("threadTitle", threadTitle);
         }
       })();
@@ -43,23 +39,17 @@ export function createSSEStream(payload?: Payload) {
 
       const followUpPromise =
         payload.mode != "deployer" &&
-        (payload?.customConfig ? payload?.customConfig?.followUp : true) &&
-        !isCustomServiceInference
+          (payload?.customConfig ? payload?.customConfig?.followUp : true) &&
+          !isCustomServiceInference
           ? getFollowUpFromPayload(payload, send)
           : Promise.resolve();
 
       try {
-        let followUpResolved = false;
-        followUpPromise.then(() => {
-          followUpResolved = true;
-        });
-
-        await Promise.all([providerPromise, threadCheckPromise]);
-
-        await followUpPromise;
-        if (!followUpResolved && payload.customConfig?.followUp) {
-          send("event", "generating follow-up");
-        }
+        await Promise.allSettled([
+          providerPromise,
+          threadCheckPromise,
+          followUpPromise
+        ]);
       } catch (err) {
         send("error", JSON.stringify({ message: (err as Error).message }));
       } finally {
@@ -92,10 +82,10 @@ function getFollowUpFromPayload(
 
   return combinedQuery
     ? getFollowUpQuestions(combinedQuery, send, payload.model).catch(
-        (err: Error) => {
-          console.error("Follow-up error:", err);
-          return;
-        },
-      )
+      (err: Error) => {
+        console.error("Follow-up error:", err);
+        return;
+      },
+    )
     : Promise.resolve();
 }

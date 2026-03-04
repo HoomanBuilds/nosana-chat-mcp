@@ -13,7 +13,7 @@ import { MessageToolbar } from "./AiMessageToolBar";
 import { useShallow } from "zustand/shallow";
 
 const ChatMessage = memo(
-  ({ msg, index, conversations, setQuery, textareaRef }: any) => {
+  ({ msg, index, conversations, setQuery, textareaRef, onSubmit }: any) => {
     const { tool } = useChatStore(
       useShallow((state) => ({ tool: state.tool })),
     );
@@ -69,6 +69,7 @@ const ChatMessage = memo(
               textareaRef={textareaRef}
               followUPs={msg.followUps}
               setQuery={setQuery}
+              onSubmit={onSubmit}
             />
           )}
         </div>

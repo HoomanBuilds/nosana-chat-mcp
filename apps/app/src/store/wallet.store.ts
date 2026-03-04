@@ -48,6 +48,7 @@ export const useWalletStore = create<WalletState>()(
       _walletDisconnectedByUser: false,
 
       checkPhantom: () => {
+        if (typeof window === "undefined") return;
         const provider = window.solana;
         if (provider?.isPhantom) {
           set({ isPhantom: true, provider });
@@ -101,6 +102,9 @@ export const useWalletStore = create<WalletState>()(
       },
 
       connectWallet: async () => {
+        if (typeof window === "undefined") {
+          throw new Error("Cannot connect wallet during server-side rendering");
+        }
         const provider = window.solana;
         if (!provider?.isPhantom) {
           window.open("https://phantom.app/", "_blank");
@@ -148,6 +152,7 @@ export const useWalletStore = create<WalletState>()(
       },
 
       verifyConnection: () => {
+        if (typeof window === "undefined") return;
         // Only verify if user didn't explicitly disconnect
         if (get()._walletDisconnectedByUser) return;
         const provider = window.solana;

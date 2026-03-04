@@ -3,7 +3,7 @@ import { ContextCutter } from "@/lib/utils/ContextCutter";
 import { StreamThrottleConfig, type PromptMode } from "./types";
 import { Payload } from "@/lib/utils/validation";
 
-export const trimMessage = (content: string, maxTokens = 1000) => {
+const trimMessage = (content: string, maxTokens = 1000) => {
   const words = content.split(/\s+/);
   if (words.length <= maxTokens) return content;
   return words.slice(0, maxTokens).join(" ");
@@ -43,7 +43,12 @@ export async function getThreadTitle(query: string, model: string) {
     const client = new OpenAI({
       apiKey: process.env.INFERIA_LLM_API_KEY,
       baseURL: process.env.NEXT_PUBLIC_INFERIA_LLM_URL,
+      defaultHeaders: {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Referer": "https://nosana.chat/",
+      },
     });
+    // Use the user's selected model for title generation
     const titleModel = model || "inferiallm";
 
     const res = await client.chat.completions.create({
@@ -52,15 +57,18 @@ export async function getThreadTitle(query: string, model: string) {
         {
           role: "user",
           content: `Based on this query: "${query}", generate a short, clear, and descriptive thread title (max 5 words). 
-          Respond ONLY with the title string.`,
+          Respond ONLY with the title string. Do not use </think> or reasoning blocks.`,
         },
       ],
-      max_tokens: 20,
+      max_tokens: 40,
     });
 
+    const rawContent = res.choices[0]?.message?.content || "";
+    // Remove reasoning blocks like <think>...</think> or unclosed `<think>...`
+    const cleanContent = rawContent.replace(/<think>[\s\S]*?(<\/think>|$)/g, "").trim();
+
     const title =
-      res.choices[0]?.message?.content
-        ?.trim()
+      cleanContent
         .replace(/^["“”‘']+/, "")
         .replace(/["“”‘']+$/, "") || query.substring(0, 30);
 

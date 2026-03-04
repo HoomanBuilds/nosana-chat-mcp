@@ -136,9 +136,11 @@ export const handleInferenceMode = async (
   const client = new OpenAI({
     apiKey: apiKey,
     baseURL: baseURL,
-    defaultHeaders: payload.ipAddress
-      ? { "X-IP-Address": payload.ipAddress }
-      : undefined,
+    defaultHeaders: {
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      "Referer": "https://nosana.chat/",
+      ...(payload.ipAddress ? { "X-IP-Address": payload.ipAddress } : {}),
+    },
   });
 
   const parser = createStreamingParser(send, {
