@@ -344,6 +344,13 @@ function llmErr(e: unknown): string {
   console.error("🔴 LLM error:", msg);
 
   if (
+    msg.includes("Upstream Error: 400") ||
+    /invalid_type.*choices.*undefined/i.test(msg + " " + responseBody)
+  ) {
+    return "tool calling is not supported for this model use another model like openai/gpt-oss-20b instead";
+  }
+
+  if (
     statusCode === 404 &&
     typeof url === "string" &&
     url.includes("/responses")

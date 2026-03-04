@@ -443,13 +443,23 @@ export function useChatLogic() {
                   break;
 
                 //stream based error handling
-                case "error":
-                  if (localConfig.showErrorMessages) {
+                case "error": {
+                  const errorMessage = data.message || data;
+                  const isUserFriendly =
+                    typeof errorMessage === "string" &&
+                    (errorMessage.includes("tool calling is not supported") ||
+                      errorMessage.includes("openai/gpt-oss-20b"));
+
+                  if (localConfig.showErrorMessages || isUserFriendly) {
                     addMessage({
                       role: "model",
                       model: modelToSend,
-                      reasoning: `An error occurred: ${data.message || data}}`,
-                      content: `An error occurred: in Response from ${(data.message || data).substring(0, 50)}... Expand to check full error message.`,
+                      reasoning: isUserFriendly
+                        ? undefined
+                        : `An error occurred: ${errorMessage}`,
+                      content: isUserFriendly
+                        ? errorMessage
+                        : `An error occurred: in Response from ${errorMessage.substring(0, 50)}... Expand to check full error message.`,
                       id: crypto.randomUUID(),
                       type: "error",
                     });
@@ -464,6 +474,7 @@ export function useChatLogic() {
                   }
                   console.error("API Error:", data.message || data);
                   setState("idle");
+                }
                   break;
 
                 //tools execution approval
