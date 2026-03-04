@@ -4,13 +4,7 @@ import React, { memo, useEffect, useMemo, useRef } from "react";
 import ChatMessage from "./ChatMessage";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@radix-ui/react-collapsible";
-import { ChevronDown, Sparkles } from "lucide-react";
-import { Card, CardContent } from "../ui/card";
+import { ReasoningSection } from "./ReasoningSection";
 import rehypeHighlight from "rehype-highlight";
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
 import { Conversation, useChatStore } from "@/store/chat.store";
@@ -105,83 +99,16 @@ const ChatMessageList = memo(
           style={{ height: "100%", width: "100%" }}
           data={conversations}
           initialTopMostItemIndex={conversations.length - 1}
+          context={{
+            state,
+            reasoningChunks,
+            llmChunks,
+            event,
+            markdownComponents,
+            pendingPermission,
+          }}
           components={{
-            Footer: () => (
-              <>
-                {(state === "loading") && (
-                  <div className="flex relative justify-start mt-1 items-start gap-4 w-full mb-5 self-start">
-                    <div className="min-w-[95%] w-[100%] flex flex-col gap-2">
-                      {(reasoningChunks?.length > 0) && (
-                        <Collapsible open={true} className="w-full mb-3 px-[5px]">
-                          <CollapsibleTrigger className="flex bg-muted-foreground/5 w-fit items-center justify-between px-3 py-2 text-xs font-medium text-gray-600 rounded-md border-muted-foreground/5 border gap-2 hover:bg-muted/70 transition">
-                            <span className="flex items-center gap-2 text-muted-foreground/50 ">
-                              <Sparkles size={15} /> Reasoning
-                            </span>
-                            <ChevronDown className="h-3 w-3 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                          </CollapsibleTrigger>
-
-                          <CollapsibleContent
-                            className="overflow-y-auto max-h-52 border rounded-md mt-1 overflow-hidden"
-                            ref={reasoningRef}
-                          >
-                            <Card className="border-0 shadow-none text-sm bg-muted/60 rounded-none">
-                              <CardContent
-                                style={{
-                                  padding: "0px",
-                                  paddingRight: "10px",
-                                  paddingLeft: "10px",
-                                }}
-                                className="text-muted-foreground/80 leading-6 prose prose-sm max-w-none"
-                              >
-                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                  {reasoningContent}
-                                </ReactMarkdown>
-                              </CardContent>
-                            </Card>
-                          </CollapsibleContent>
-                        </Collapsible>
-                      )}
-
-                      <div
-                        style={{
-                          paddingLeft: "10px",
-                          paddingRight: "5px",
-                          paddingTop: "0px",
-                          paddingBlock: "0px",
-                          margin: "0px",
-                          backgroundColor: "transparent",
-                        }}
-                        className="markdown-container rounded-lg mt-3 w-full text-black/60 text-sm prose prose-sm max-w-none"
-                      >
-                        <ReactMarkdown
-                          remarkPlugins={[remarkGfm]}
-                          rehypePlugins={[[rehypeHighlight, { ignoreMissing: true }]]}
-                          components={markdownComponents}
-                        >
-                          {llmContent}
-                        </ReactMarkdown>
-
-                        {pendingPermission && (
-                          <PermissionRequest
-                            toolName={pendingPermission.toolName}
-                            args={pendingPermission.args}
-                            onAllow={pendingPermission.onAllow}
-                            onDeny={pendingPermission.onDeny}
-                          />
-                        )}
-
-                        <div className="flex items-center gap-4 text-muted-foreground/50 mt-2 mb-4">
-                          <PulseCircle size={0.8} colorClass="bg-muted-foreground/50" />
-                          <span className="flex-1 flex items-center">{event}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                <div className="h-4" />
-                {state === "loading" && <div className="h-[80vh]" />}
-              </>
-            ),
+            Footer: ChatFooter,
           }}
           itemContent={(index, msg) => (
             <ChatMessage
@@ -201,6 +128,71 @@ const ChatMessageList = memo(
 );
 
 export default ChatMessageList;
+
+const ChatFooter = memo(({ context }: { context: any }) => {
+  const {
+    state,
+    reasoningChunks,
+    llmChunks,
+    event,
+    markdownComponents,
+    pendingPermission,
+  } = context;
+
+  if (state !== "loading" && !reasoningChunks && !llmChunks) {
+    return <div className="h-4" />;
+  }
+
+  return (
+    <>
+      {state === "loading" && (
+        <div className="flex relative justify-start mt-1 items-start gap-4 w-full mb-5 self-start">
+          <div className="min-w-[95%] w-[100%] flex flex-col gap-2">
+            {reasoningChunks?.length > 0 && (
+              <ReasoningSection reasoning={reasoningChunks} isStreaming={true} />
+            )}
+
+            <div
+              style={{
+                paddingLeft: "10px",
+                paddingRight: "5px",
+                paddingTop: "0px",
+                paddingBlock: "0px",
+                margin: "0px",
+                backgroundColor: "transparent",
+              }}
+              className="markdown-container rounded-lg mt-3 w-full text-black/60 text-sm prose prose-sm max-w-none"
+            >
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={[[rehypeHighlight, { ignoreMissing: true }]]}
+                components={markdownComponents}
+              >
+                {llmChunks}
+              </ReactMarkdown>
+
+              {pendingPermission && (
+                <PermissionRequest
+                  toolName={pendingPermission.toolName}
+                  args={pendingPermission.args}
+                  onAllow={pendingPermission.onAllow}
+                  onDeny={pendingPermission.onDeny}
+                />
+              )}
+
+              <div className="flex items-center gap-4 text-muted-foreground/50 mt-2 mb-4">
+                <PulseCircle size={0.8} colorClass="bg-muted-foreground/50" />
+                <span className="flex-1 flex items-center">{event}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      <div className="h-4" />
+      {state === "loading" && <div className="h-[80vh]" />}
+    </>
+  );
+});
 
 const PulseCircle: React.FC<{ size?: number; colorClass?: string }> = ({
   size = 4,
