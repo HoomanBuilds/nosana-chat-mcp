@@ -7,6 +7,7 @@ import { useSettingsStore } from "@/store/setting.store";
 import SideBar from "@/components/SideBar";
 import ChatNavBar from "@/components/Chatnavbar";
 import { ChatForm } from "@/components/ChatForm/ChatForm";
+import { LoadingScreen } from "@/components/ui/LoadingScreen";
 
 function ChatPageInner(): JSX.Element {
   const {
@@ -154,7 +155,7 @@ function ChatPageInner(): JSX.Element {
 
 export default function ChatPageClient() {
   return (
-    <Suspense fallback={<div>Loading chat...</div>}>
+    <Suspense fallback={<LoadingScreen />}>
       <ChatPageInner />
     </Suspense>
   );

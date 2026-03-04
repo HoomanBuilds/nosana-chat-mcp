@@ -9,9 +9,11 @@ export const metadata: Metadata = {
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 
+import { LoadingScreen } from "@/components/ui/LoadingScreen";
+
 export default function Page() {
     return (
-        <Suspense fallback={<div className="flex h-screen items-center justify-center"><Loader2 className="animate-spin" /></div>}>
+        <Suspense fallback={<LoadingScreen />}>
             <ChatPageClient />
         </Suspense>
     );

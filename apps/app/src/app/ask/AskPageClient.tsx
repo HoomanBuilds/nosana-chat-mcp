@@ -2,7 +2,7 @@
 "use client";
 import { Suspense, useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowRightFromLine, LucideLoader2 } from "lucide-react";
+import { ArrowRightFromLine } from "lucide-react";
 import { Footer } from "@/components/Footer";
 import { useChatLogic } from "@/hooks/useChatLogic";
 import { deployerQuestions, questions } from "@/lib/utils/questions";
@@ -13,6 +13,7 @@ import { DEFAULT } from "@/lib/constants";
 import { AskForm } from "@/components/ChatForm/AskForm";
 import { useChatStore } from "@/store/chat.store";
 import ChatNavBar from "@/components/Chatnavbar";
+import { LoadingScreen } from "@/components/ui/LoadingScreen";
 
 function AskPage() {
   const [input, setInput] = useState("");
@@ -225,11 +226,7 @@ function AskPage() {
 export default function AskPageClient() {
   return (
     <Suspense
-      fallback={
-        <div className="bg-muted w-full h-full flex items-center justify-center">
-          <LucideLoader2 className="animate-spin" />
-        </div>
-      }
+      fallback={<LoadingScreen />}
     >
       <AskPage />
     </Suspense>
