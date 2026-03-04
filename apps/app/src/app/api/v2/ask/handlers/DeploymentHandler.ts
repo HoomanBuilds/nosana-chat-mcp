@@ -222,7 +222,6 @@ ${payload.customPrompt || ""}
         messages,
         tools,
         toolChoice: "auto",
-        parallelToolCalls: false,
         stopWhen: stepCountIs(6),
         abortSignal: payload.signal,
         maxRetries: 1,
