@@ -42,13 +42,36 @@ const ChatMessageList = memo(
     onSubmit,
   }: ChatMessageListProps) => {
     const autoScroll = useRef(true);
+    const virtuosoRef = useRef<VirtuosoHandle>(null);
+    const prevLen = useRef(conversations.length);
+
+    useEffect(() => {
+      // If we just added a message and are now loading, force the latest prompt to the TOP
+      if (conversations.length > prevLen.current && state === "loading") {
+        const targetIndex = conversations.length - 1;
+
+        // Multiple attempts to ensure the scroll hits after dynamic layout shifts
+        const scroll = () => {
+          virtuosoRef.current?.scrollToIndex({
+            index: targetIndex,
+            align: "start",
+            behavior: "smooth",
+          });
+        };
+
+        // Try immediately and again after a short delay for Markdown/Images to settle
+        scroll();
+        setTimeout(scroll, 100);
+        setTimeout(scroll, 300);
+      }
+      prevLen.current = conversations.length;
+    }, [conversations.length, state]);
 
     const { pendingPermission } = useChatStore(
       useShallow((state) => ({ pendingPermission: state.pendingPermission })),
     );
 
     const reasoningRef = useRef<HTMLDivElement>(null);
-    const virtuosoRef = useRef<VirtuosoHandle>(null);
 
     // Memoize markdown components to prevent recreation on every render
     const markdownComponents = useMemo(
@@ -75,25 +98,13 @@ const ChatMessageList = memo(
       }
     }, [reasoningChunks]);
 
-    // Auto-scroll the main list when new chunks arrive
-    useEffect(() => {
-      if (state === "loading" && virtuosoRef.current) {
-        virtuosoRef.current.scrollToIndex({
-          index: conversations.length,
-          align: "end",
-          behavior: "auto"
-        });
-      }
-    }, [llmChunks, reasoningChunks, state, conversations.length]);
-
     return (
-      <div className="flex-1 w-[95vw] pb-4 sm:w-[80vw] md:w-[70vw] lg:w-[60vw] xl:w-[60vw] max-w-[800px] h-full relative">
+      <div className="flex-1 w-[95vw] pb-4 sm:w-[80vw] md:w-[70vw] lg:w-[60vw] xl:w-[60vw] max-w-[800px] h-full">
         <Virtuoso
           ref={virtuosoRef}
           style={{ height: "100%", width: "100%" }}
           data={conversations}
-          followOutput="smooth"
-          initialTopMostItemIndex={conversations.length > 0 ? conversations.length - 1 : 0}
+          initialTopMostItemIndex={conversations.length - 1}
           components={{
             Footer: () => (
               <>
@@ -168,6 +179,7 @@ const ChatMessageList = memo(
                   </div>
                 )}
                 <div className="h-4" />
+                {state === "loading" && <div className="h-[80vh]" />}
               </>
             ),
           }}

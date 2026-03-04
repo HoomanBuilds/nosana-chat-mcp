@@ -155,14 +155,7 @@
 html,
 body,
 #__next {
-  height: 100dvh;
-  margin: 0;
-  padding: 0;
+  height: 100%;
   overflow: hidden;
-}
-
-#chat-container {
-  height: 100dvh !important;
-  display: flex;
-  flex-direction: column;
+  /* stop page from moving */
 }
