@@ -64,7 +64,7 @@ function SearchPopup({ setPopupOpen, chatHistory }: SearchPopupProps) {
             category: "Chat"
         },
         {
-            keywords: ["mcp", "nosana", "deploy" ,"gpu" , "host"],
+            keywords: ["mcp", "nosana", "deploy", "gpu", "host"],
             label: "Deploy Model",
             action: () => router.push("/ask?mcp=deployer"),
             type: "command",
@@ -248,34 +248,20 @@ function SearchPopup({ setPopupOpen, chatHistory }: SearchPopupProps) {
         setPopupOpen(false);
     };
 
-    const HighlightText = ({ text, query }: { text: string; query: string }) => {
-        if (!query.trim()) return <span>{text}</span>;
 
-        const normalizedText = text.toLowerCase();
-        const normalizedQuery = query.toLowerCase();
-        const index = normalizedText.indexOf(normalizedQuery);
-
-        if (index === -1) return <span>{text}</span>;
-
-        return (
-            <span>
-                {text.substring(0, index)}
-                <mark className="text-green-500 bg-transparent px-1 rounded">
-                    {text.substring(index, index + query.length)}
-                </mark>
-                {text.substring(index + query.length)}
-            </span>
-        );
-    };
 
     return (
         <div
             className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4"
             onClick={() => setPopupOpen(false)}
+            role="presentation"
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { setPopupOpen(false); e.preventDefault(); } }}
         >
             <div
                 className="bg-background rounded-xl border shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden"
                 onClick={e => e.stopPropagation()}
+                role="presentation"
+                onKeyDown={(e) => e.stopPropagation()}
             >
                 <div className="p-6 border-b bg-muted/50">
                     <div className="flex items-center gap-3 mb-3">
@@ -283,7 +269,6 @@ function SearchPopup({ setPopupOpen, chatHistory }: SearchPopupProps) {
                         <h2 className="text-lg font-semibold">Search & Commands</h2>
                     </div>
                     <Input
-                        autoFocus
                         type="text"
                         placeholder="Search chats or commands..."
                         value={search}
@@ -308,7 +293,7 @@ function SearchPopup({ setPopupOpen, chatHistory }: SearchPopupProps) {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 {filteredCommands.map((cmd, idx) => (
                                     <ResultCard
-                                        key={idx}
+                                        key={cmd.label || idx}
                                         onClick={() => handleResultClick(cmd.action)}
                                     >
                                         <div className="flex items-center gap-3">
@@ -345,7 +330,7 @@ function SearchPopup({ setPopupOpen, chatHistory }: SearchPopupProps) {
                             <div className="space-y-2">
                                 {filteredChats.map((chat, idx) => (
                                     <ResultCard
-                                        key={idx}
+                                        key={chat.thread_id || idx}
                                         onClick={() => handleChatClick(chat.thread_id)}
                                     >
                                         <div className="flex items-center gap-3">
@@ -386,6 +371,26 @@ function SearchPopup({ setPopupOpen, chatHistory }: SearchPopupProps) {
 }
 
 export default SearchPopup;
+
+const HighlightText = ({ text, query }: { text: string; query: string }) => {
+    if (!query.trim()) return <span>{text}</span>;
+
+    const normalizedText = text.toLowerCase();
+    const normalizedQuery = query.toLowerCase();
+    const index = normalizedText.indexOf(normalizedQuery);
+
+    if (index === -1) return <span>{text}</span>;
+
+    return (
+        <span>
+            {text.substring(0, index)}
+            <mark className="text-green-500 bg-transparent px-1 rounded">
+                {text.substring(index, index + query.length)}
+            </mark>
+            {text.substring(index + query.length)}
+        </span>
+    );
+};
 
 
 const ResultCard = ({

@@ -2,24 +2,10 @@ import { ContextCutter } from "@/lib/utils/ContextCutter";
 import { Payload } from "@/lib/utils/validation";
 import OpenAI from "openai";
 import { createStreamingParser, buildMessages } from "./handleSelfHostedMode";
+import { normalizeInferenceBaseURL, COMMON_HEADERS } from "@/lib/utils/llm";
 import { getInstructions } from "@/lib/utils/keyword";
 import { performSearch } from "@/lib/tools/webSearch";
 
-function normalizeInferenceBaseURL(rawUrl: string): string {
-  const trimmed = rawUrl.trim().replace(/\/+$/, "");
-  if (!trimmed) return trimmed;
-
-  if (trimmed.endsWith("/v1/chat/completions")) {
-    return trimmed.replace(/\/chat\/completions$/, "");
-  }
-  if (trimmed.endsWith("/chat/completions")) {
-    return trimmed.replace(/\/chat\/completions$/, "");
-  }
-  if (trimmed.endsWith("/v1")) {
-    return trimmed;
-  }
-  return `${trimmed}/v1`;
-}
 
 function isServiceLoadingError(error: unknown): boolean {
   const err = error as {
@@ -136,9 +122,10 @@ export const handleInferenceMode = async (
   const client = new OpenAI({
     apiKey: apiKey,
     baseURL: baseURL,
-    defaultHeaders: payload.ipAddress
-      ? { "X-IP-Address": payload.ipAddress }
-      : undefined,
+    defaultHeaders: {
+      ...COMMON_HEADERS,
+      ...(payload.ipAddress ? { "X-IP-Address": payload.ipAddress } : {}),
+    },
   });
 
   const parser = createStreamingParser(send, {

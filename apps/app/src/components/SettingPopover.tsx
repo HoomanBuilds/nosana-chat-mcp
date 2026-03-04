@@ -39,8 +39,9 @@ const CustomPromptTab = () => {
 
   return (
     <div className="flex flex-col gap-4 mx-auto">
-      <label className="font-medium text-sm">Custom Prompt:</label>
+      <label htmlFor="custom-prompt-textarea" className="font-medium text-sm">Custom Prompt:</label>
       <textarea
+        id="custom-prompt-textarea"
         value={customPrompt}
         onChange={(e) => setCustomPrompt(e.target.value)}
         className="border border-muted-foreground/20 bg-background/30 h-52 rounded-lg p-3 w-full resize-none focus:outline-none focus:ring-2 focus:ring-green-500/50 transition-colors"
@@ -54,7 +55,7 @@ const CustomPromptTab = () => {
       </button>
 
       <div className="mt-2">
-        <label className="font-medium text-sm">Quick Prompt Templates:</label>
+        <span className="font-medium text-sm">Quick Prompt Templates:</span>
         <div className="flex flex-wrap gap-2 mt-3">
           {QUICK_TEMPLATES.map((template) => (
             <button
@@ -71,6 +72,8 @@ const CustomPromptTab = () => {
   );
 };
 
+const EMPTY_V_LABELS: string[] = [];
+
 const SliderControl = ({
   label,
   value,
@@ -78,7 +81,7 @@ const SliderControl = ({
   min,
   max,
   step = 0.01,
-  valueLabels = []
+  valueLabels = EMPTY_V_LABELS
 }: {
   label: string;
   value: number;
@@ -213,7 +216,7 @@ const CustomConfigsTab = () => {
               value={context?.absoluteMaxTokens ?? 4000}
               onChange={(e) => {
                 const val = Math.min(Math.max(Number(e.target.value), 1), 10000);
-                setContext(prev => ({ ...prev, absoluteMaxTokens: val }));
+                setContext({ ...context, absoluteMaxTokens: val });
               }}
             />
             <p className="text-xs text-muted-foreground">Maximum: 10,000</p>
@@ -231,7 +234,7 @@ const CustomConfigsTab = () => {
               value={context?.prevChatLimit ?? 6}
               onChange={(e) => {
                 const val = Math.min(Math.max(Number(e.target.value), 1), 30);
-                setContext(prev => ({ ...prev, prevChatLimit: val }));
+                setContext({ ...context, prevChatLimit: val });
               }}
             />
             <p className="text-xs text-muted-foreground">Minimum messages to include (1-30)</p>
@@ -249,7 +252,7 @@ const CustomConfigsTab = () => {
               value={context?.maxContextTokens ?? 3000}
               onChange={(e) => {
                 const val = Math.min(Math.max(Number(e.target.value), 1), 10000);
-                setContext(prev => ({ ...prev, maxContextTokens: val }));
+                setContext({ ...context, maxContextTokens: val });
               }}
             />
             <p className="text-xs text-muted-foreground">Maximum: 10,000</p>
@@ -265,10 +268,10 @@ const CustomConfigsTab = () => {
                 id="truncate-from"
                 checked={context?.truncateFrom === 'end'}
                 onCheckedChange={() => {
-                  setContext(prev => ({
-                    ...prev,
-                    truncateFrom: prev?.truncateFrom === 'end' ? 'start' : 'end'
-                  }));
+                  setContext({
+                    ...context,
+                    truncateFrom: context?.truncateFrom === 'end' ? 'start' : 'end'
+                  });
                 }}
                 className="cursor-pointer data-[state=unchecked]:bg-muted-foreground/30 data-[state=checked]:bg-green-500"
               />
@@ -415,7 +418,7 @@ const TabButton = ({ tab, isActive, onClick }: { tab: Tab; isActive: boolean; on
   </button>
 );
 
-function  SettingPopover({ open, setOpen }: { open: boolean; setOpen: (open: boolean) => void }) {
+function SettingPopover({ open, setOpen }: { open: boolean; setOpen: (open: boolean) => void }) {
   const { activeTab, setActiveTab } = useSettings();
 
   const renderActiveTab = () => {
@@ -455,7 +458,10 @@ function  SettingPopover({ open, setOpen }: { open: boolean; setOpen: (open: boo
           </DialogHeader>
 
           <div>
-            {renderActiveTab()}
+            {activeTab === "Custom Prompt" && <CustomPromptTab />}
+            {activeTab === "Custom Configs" && <CustomConfigsTab />}
+            {activeTab === "Additional Setting" && <AdditionalSettingsTab />}
+            {activeTab === "API Keys" && <ApiKeysTab />}
           </div>
         </div>
       </DialogContent>

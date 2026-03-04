@@ -17,10 +17,16 @@ import {
 import { buildApiKeyToolSet } from "@/lib/deployerTools/apikey.tools";
 import { streamThrottle } from "./utils";
 import { runWithPlannerModel } from "@/lib/deployerTools/utils/plannerContext";
+import { normalizeInferenceBaseURL, COMMON_HEADERS } from "@/lib/utils/llm";
 
 const openai = createOpenAI({
-  apiKey: process.env.INFERIA_LLM_API_KEY,
-  baseURL: process.env.NEXT_PUBLIC_INFERIA_LLM_URL,
+  apiKey: process.env.INFERIA_LLM_API_KEY || "nosana-local",
+  baseURL: normalizeInferenceBaseURL(
+    process.env.NEXT_PUBLIC_INFERIA_LLM_URL || "",
+  ),
+  headers: {
+    ...COMMON_HEADERS,
+  },
 });
 
 /** Wallet mode tools — on-chain via SDK */
@@ -342,6 +348,13 @@ function llmErr(e: unknown): string {
   const responseBody = (e as any)?.responseBody || "";
 
   console.error("🔴 LLM error:", msg);
+
+  if (
+    msg.includes("Upstream Error: 400") ||
+    /invalid_type.*choices.*undefined/i.test(msg + " " + responseBody)
+  ) {
+    return "tool calling is not supported for this model use another model like openai/gpt-oss-20b instead";
+  }
 
   if (
     statusCode === 404 &&

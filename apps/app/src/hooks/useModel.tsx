@@ -1,4 +1,5 @@
-import { JSX, useEffect, useMemo, useState } from "react";
+import { JSX, useMemo } from "react";
+import useSWR from "swr";
 
 export interface ModelItem {
   label: string;
@@ -16,47 +17,41 @@ interface UseModelGroupsOptions {
   onlyModel?: string;
 }
 
-export const useModelGroups = ({ onlyModel }: UseModelGroupsOptions = {}) => {
-  const [localModels, setLocalModels] = useState<ModelItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+const fetcher = (url: string) => fetch(url).then(res => {
+  if (!res.ok) throw new Error("Failed to fetch");
+  return res.json();
+});
 
-  useEffect(() => {
+export const useModelGroups = ({ onlyModel }: UseModelGroupsOptions = {}) => {
+  const { data, isLoading: isSwrLoading } = useSWR(
+    onlyModel ? null : "/api/v1/models",
+    fetcher,
+    { revalidateOnFocus: false }
+  );
+
+  const localModels: ModelItem[] = useMemo(() => {
     if (onlyModel) {
-      setLocalModels([
+      return [
         {
           label: onlyModel,
           value: onlyModel,
         },
-      ]);
-      setIsLoading(false);
-      return;
+      ];
     }
 
-    const fetchModels = async () => {
-      setIsLoading(true);
-      try {
-        const res = await fetch("/api/v1/models", { cache: "no-store" });
-        if (!res.ok) {
-          throw new Error(`Failed to fetch models: ${res.status}`);
-        }
-        const json = await res.json();
-        if (json.data && Array.isArray(json.data)) {
-          const items: ModelItem[] = json.data.map((m: any) => ({
-            label: m.id,
-            value: m.id,
-          }));
-          setLocalModels(items);
-        }
-      } catch (err) {
-        console.error("Failed to fetch models from endpoint:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchModels();
-  }, [onlyModel]);
+    if (data?.data && Array.isArray(data.data)) {
+      return data.data.map((m: any) => ({
+        label: m.id,
+        value: m.id,
+      }));
+    }
 
-  const groups = useMemo(
+    return [];
+  }, [onlyModel, data]);
+
+  const isLoading = onlyModel ? false : isSwrLoading;
+
+  const groups: ModelGroup[] = useMemo(
     () => [
       {
         label: "Available Models",
@@ -66,9 +61,5 @@ export const useModelGroups = ({ onlyModel }: UseModelGroupsOptions = {}) => {
     [localModels],
   );
 
-  const filteredGroups: ModelGroup[] = useMemo(() => {
-    return groups;
-  }, [groups]);
-
-  return { groups: filteredGroups, isLoading };
+  return { groups, isLoading };
 };

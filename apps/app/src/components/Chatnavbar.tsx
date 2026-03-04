@@ -30,7 +30,15 @@ function ChatNavBar({ className, onTemplateSelect }: ChatNavBarProps) {
                 </button>
 
                 <div className='flex items-center gap-5'>
-                    {tool == "deployer" && <div onClick={() => toggleTemplate()}><LayoutGrid className='text-green-500' /></div>}
+                    {tool == "deployer" && (
+                        <button
+                            onClick={() => toggleTemplate()}
+                            aria-label="Toggle deployment templates"
+                            className="p-1 hover:bg-muted-foreground/10 rounded transition-colors"
+                        >
+                            <LayoutGrid className='text-green-500' />
+                        </button>
+                    )}
 
                     {currentChat.length > 0 && <Button
                         title="Export chat"
@@ -41,8 +49,8 @@ function ChatNavBar({ className, onTemplateSelect }: ChatNavBarProps) {
             </div>
 
             {templateOpen && onTemplateSelect && (
-                <TemplatePopUP 
-                    toggleTemplate={toggleTemplate} 
+                <TemplatePopUP
+                    toggleTemplate={toggleTemplate}
                     onSelectTemplate={onTemplateSelect}
                 />
             )}

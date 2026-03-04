@@ -18,15 +18,16 @@ export const FeatureToggle: React.FC<FeatureToggleProps> = ({
   className
 }) => {
   return (
-    <div
+    <button
       onClick={onClick}
       className={cn(
-        "cursor-pointer transition-colors",
+        "cursor-pointer transition-colors p-1 hover:bg-muted-foreground/5 rounded-md",
         isActive ? activeColor : "text-muted-foreground/50",
         className
       )}
+      type="button"
     >
       {icon}
-    </div>
+    </button>
   );
 };

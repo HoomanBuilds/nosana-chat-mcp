@@ -2,6 +2,7 @@
 
 import { ReactNode, useEffect, useState } from "react";
 import { useSettingsStore } from "@/store/setting.store";
+import { LazyMotion, domAnimation } from "motion/react";
 
 interface ThemeProviderProps {
   children: ReactNode;
@@ -27,7 +28,17 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     }
   }, [appearance, mounted]);
 
-  if (!mounted) return null;
+  if (!mounted) {
+    return (
+      <div style={{ visibility: "hidden" }} aria-hidden="true">
+        {children}
+      </div>
+    );
+  }
 
-  return <>{children}</>;
+  return (
+    <LazyMotion features={domAnimation}>
+      {children}
+    </LazyMotion>
+  );
 }

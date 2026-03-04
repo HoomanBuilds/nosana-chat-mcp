@@ -10,10 +10,16 @@ import { TResult } from "./schema";
 import { getPlannerModel } from "./plannerContext";
 import { IMAGE_REGISTRY } from "./ImageRegistry";
 import { SolanaService } from "../../services/SolanaService";
+import { normalizeInferenceBaseURL, COMMON_HEADERS } from "@/lib/utils/llm";
 
 const openai = createOpenAI({
-  apiKey: process.env.INFERIA_LLM_API_KEY,
-  baseURL: process.env.NEXT_PUBLIC_INFERIA_LLM_URL,
+  apiKey: process.env.INFERIA_LLM_API_KEY || "nosana-local",
+  baseURL: normalizeInferenceBaseURL(
+    process.env.NEXT_PUBLIC_INFERIA_LLM_URL || "",
+  ),
+  headers: {
+    ...COMMON_HEADERS,
+  },
 });
 
 function resolvePlannerModel(model?: string): string {

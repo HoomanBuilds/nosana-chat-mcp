@@ -11,7 +11,12 @@ export async function getModelData(): Promise<any[]> {
     if (typeof window === "undefined") {
         const filePath = path.join(process.cwd(), "data", "models.json");
         const data = fs.readFileSync(filePath, "utf8");
-        return JSON.parse(data);
+        try {
+            return JSON.parse(data);
+        } catch (error) {
+            console.error("Failed to parse models.json:", error);
+            return [];
+        }
     }
 
     const res = await fetch("/models.json");

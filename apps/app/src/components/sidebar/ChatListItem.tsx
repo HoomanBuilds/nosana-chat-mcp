@@ -24,9 +24,16 @@ const ChatListItem = memo(
     return (
       <div
         onClick={() => !isEditing && onChatClick(item.thread_id)}
-        className={`select-none group mb-0.5 text-muted-foreground/80 flex items-center justify-between p-2 gap-2 rounded cursor-pointer hover:bg-muted-foreground/3 ${
-          isSelected ? "bg-muted-foreground/5" : ""
-        } ${isEditing ? "bg-muted-foreground/10" : ""}`}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (!isEditing && (e.key === "Enter" || e.key === " ")) {
+            onChatClick(item.thread_id);
+            e.preventDefault();
+          }
+        }}
+        className={`select-none group mb-0.5 text-muted-foreground/80 flex items-center justify-between p-2 gap-2 rounded cursor-pointer hover:bg-muted-foreground/3 ${isSelected ? "bg-muted-foreground/5" : ""
+          } ${isEditing ? "bg-muted-foreground/10" : ""}`}
       >
         {isEditing ? (
           <div className="flex items-center gap-1 w-full">
@@ -42,7 +49,6 @@ const ChatListItem = memo(
               onChange={(e) => setEditContent(e.target.value)}
               className="border px-2 rounded text-sm w-full h-8"
               onClick={(e) => e.stopPropagation()}
-              autoFocus
             />
             <button
               onClick={(e) => {

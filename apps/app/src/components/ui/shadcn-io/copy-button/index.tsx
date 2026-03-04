@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { AnimatePresence, HTMLMotionProps, motion } from 'motion/react';
+import { AnimatePresence, HTMLMotionProps, m } from 'motion/react';
 import { CheckIcon, CopyIcon } from 'lucide-react';
 import { cva, type VariantProps } from 'class-variance-authority';
 
@@ -95,7 +95,7 @@ function CopyButton({
   );
 
   return (
-    <motion.button
+    <m.button
       data-slot="copy-button"
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
@@ -104,19 +104,19 @@ function CopyButton({
       {...props}
     >
       <AnimatePresence mode="wait">
-        <motion.span
+        <m.span
           key={localIsCopied ? 'check' : 'copy'}
           data-slot="copy-button-icon"
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          exit={{ scale: 0 }}
+          initial={{ scale: 0.95, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.95, opacity: 0 }}
           transition={{ duration: 0.15 }}
         >
           <Icon />
-        </motion.span>
+        </m.span>
       </AnimatePresence>
-    </motion.button>
+    </m.button>
   );
 }
 
-export { CopyButton, buttonVariants, type CopyButtonProps };
+export { CopyButton };

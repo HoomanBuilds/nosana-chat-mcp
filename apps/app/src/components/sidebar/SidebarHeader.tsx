@@ -1,5 +1,7 @@
 import { cn } from "@/lib/utils";
 import { ArrowLeftToLine } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
 
 /* eslint-disable @next/next/no-img-element */
 interface SidebarHeaderProps {
@@ -16,16 +18,19 @@ const SidebarHeader = ({ barOpen, setBarOpen, toggleMobile, router }: SidebarHea
     )}>
         {barOpen ? (
             <div className="flex items-center gap-2 text-muted-foreground/20 font-semibold w-full">
-                <img
-                    src="/nosana.png"
-                    alt="nosana Logo"
-                    className="w-6 h-6 aspect-square cursor-pointer"
-                    onClick={() => router.push("/ask")}
-                />
-                <div className="flex gap-1 items-baseline flex-1">
-                    <span className="text-xl text-muted-foreground/70">NOSANA</span>
-                    <span>Chat</span>
-                </div>
+                <Link href="/ask" className="flex items-center gap-2 flex-1">
+                    <Image
+                        src="/nosana.png"
+                        alt="nosana Logo"
+                        width={24}
+                        height={24}
+                        className="w-6 h-6 aspect-square cursor-pointer"
+                    />
+                    <div className="flex gap-1 items-baseline">
+                        <span className="text-xl text-muted-foreground/70">NOSANA</span>
+                        <span>Chat</span>
+                    </div>
+                </Link>
                 <button
                     onClick={() => {
                         if (window.innerWidth < 1024) {
@@ -41,12 +46,15 @@ const SidebarHeader = ({ barOpen, setBarOpen, toggleMobile, router }: SidebarHea
             </div>
         ) : (
             <div className="flex flex-col items-center gap-2">
-                <img
-                    src="/nosana.png"
-                    alt="nosana Logo"
-                    className="w-8 h-8 aspect-square cursor-pointer"
-                    onClick={() => router.push("/ask")}
-                />
+                <Link href="/ask">
+                    <Image
+                        src="/nosana.png"
+                        alt="nosana Logo"
+                        width={32}
+                        height={32}
+                        className="w-8 h-8 aspect-square cursor-pointer"
+                    />
+                </Link>
             </div>
         )}
     </div>

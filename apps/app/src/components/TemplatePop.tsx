@@ -1,5 +1,5 @@
-/* eslint-disable @next/next/no-img-element */
 import { useState } from "react"
+import Image from "next/image"
 import { Button } from "./ui/button"
 import { ScrollArea } from "./ui/scroll-area"
 import { getTemplatesByCategory, Template } from "@/lib/utils/templates"
@@ -16,10 +16,14 @@ export function TemplatePopUP({ toggleTemplate, onSelectTemplate }: TemplatePopU
         <div
             className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4"
             onClick={() => toggleTemplate()}
+            role="presentation"
+            onKeyDown={(e) => { if (e.key === 'Escape') toggleTemplate(); }}
         >
             <div
                 className="p-6 bg-background rounded-xl border shadow-2xl w-full max-w-7xl h-[80vh] max-h-[90vh] flex flex-col overflow-hidden"
                 onClick={e => e.stopPropagation()}
+                role="presentation"
+                onKeyDown={(e) => e.stopPropagation()}
             >
                 <div className="mb-6">
                     <h1 className="text-2xl font-bold text-foreground mb-2">Deployment Templates</h1>
@@ -105,9 +109,12 @@ function TemplateCard({ template, onSelectTemplate }: TemplateCardProps) {
                     <div className="flex items-start gap-3">
                         <div className="h-14 w-14 flex-shrink-0 flex items-center justify-center rounded-lg bg-muted overflow-hidden border">
                             {template.icon ? (
-                                <img
+                                <Image
                                     src={template.icon}
                                     alt={template.name}
+                                    width={48}
+                                    height={48}
+                                    unoptimized
                                     className="h-full w-full object-contain p-1"
                                 />
                             ) : (

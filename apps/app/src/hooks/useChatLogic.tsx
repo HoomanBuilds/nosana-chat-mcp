@@ -38,8 +38,8 @@ export function useChatLogic() {
     return localStorage.getItem("llmmodel") || DEFAULT.MODEL;
   });
   const [state, setState] = useState<"idle" | "loading" | null>(null);
-  const [reasoningChunks, setReasoningChunks] = useState<string[]>([]);
-  const [llmChunks, setLLMChunks] = useState<string[]>([]);
+  const [reasoningChunks, setReasoningChunks] = useState<string>("");
+  const [llmChunks, setLLMChunks] = useState<string>("");
   const [event, setEvent] = useState<string>("");
   const [mcp, setmcp] = useState(false);
 
@@ -245,8 +245,8 @@ export function useChatLogic() {
           type: "message",
         });
       setQuery("");
-      setReasoningChunks([]);
-      setLLMChunks([]);
+      setReasoningChunks("");
+      setLLMChunks("");
       setPendingTool(null);
 
       //abort controller
@@ -259,6 +259,7 @@ export function useChatLogic() {
       let responseTime = 0;
       let followUpQuestions: { question: string }[] = [];
       let fallbackLLM = "";
+      let hasError = false;
 
       //model configured
       const DEFAULT_MODEL = DEFAULT.MODEL;
@@ -365,14 +366,11 @@ export function useChatLogic() {
         // Throttled UI updates
         const flushBuffers = () => {
           if (llmBufferRef.current.length > 0) {
-            setLLMChunks((prev) => [...prev, ...llmBufferRef.current]);
+            setLLMChunks((prev) => prev + llmBufferRef.current.join(""));
             llmBufferRef.current = [];
           }
           if (reasoningBufferRef.current.length > 0) {
-            setReasoningChunks((prev) => [
-              ...prev,
-              ...reasoningBufferRef.current,
-            ]);
+            setReasoningChunks((prev) => prev + reasoningBufferRef.current.join(""));
             reasoningBufferRef.current = [];
           }
           throttleTimeoutRef.current = null;
@@ -401,7 +399,12 @@ export function useChatLogic() {
 
           for (const { event: eventType, data: dataRaw } of events) {
             try {
-              const data = JSON.parse(dataRaw);
+              let data;
+              try {
+                data = JSON.parse(dataRaw);
+              } catch {
+                data = dataRaw;
+              }
               //handling various events
               switch (eventType) {
                 case "thinking": {
@@ -433,17 +436,32 @@ export function useChatLogic() {
                   break;
 
                 case "searchResult":
-                  searchResult = JSON.parse(data);
+                  try {
+                    searchResult = typeof data === "string" ? JSON.parse(data) : data;
+                  } catch (e) {
+                    console.error("Failed to parse searchResult:", e);
+                  }
                   break;
 
                 //stream based error handling
-                case "error":
-                  if (localConfig.showErrorMessages) {
+                case "error": {
+                  if (hasError) break;
+                  const errorMessage = data.message || data;
+                  const isUserFriendly =
+                    typeof errorMessage === "string" &&
+                    (errorMessage.includes("tool calling is not supported") ||
+                      errorMessage.includes("openai/gpt-oss-20b"));
+
+                  if (localConfig.showErrorMessages || isUserFriendly) {
                     addMessage({
                       role: "model",
                       model: modelToSend,
-                      reasoning: `An error occurred: ${data.message || data}}`,
-                      content: `An error occurred: in Response from ${(data.message || data).substring(0, 50)}... Expand to check full error message.`,
+                      reasoning: isUserFriendly
+                        ? undefined
+                        : `An error occurred: ${errorMessage}`,
+                      content: isUserFriendly
+                        ? errorMessage
+                        : `An error occurred: in Response from ${errorMessage.substring(0, 50)}... Expand to check full error message.`,
                       id: crypto.randomUUID(),
                       type: "error",
                     });
@@ -456,8 +474,12 @@ export function useChatLogic() {
                       type: "error",
                     });
                   }
+                  hasError = true;
                   console.error("API Error:", data.message || data);
                   setState("idle");
+                  // Try to break out of the stream if we hit a critical error
+                  if (controllerRef.current) controllerRef.current.abort();
+                }
                   break;
 
                 //tools execution approval
@@ -755,7 +777,8 @@ export function useChatLogic() {
                 default:
                   if (eventType?.toLowerCase() === "followup") {
                     try {
-                      followUpQuestions = JSON.parse(data);
+                      const parsed = typeof data === "string" ? JSON.parse(data) : data;
+                      followUpQuestions = Array.isArray(parsed) ? parsed : (parsed?.questions || []);
                       setFollowUp(followUpQuestions);
                     } catch (err) {
                       console.error(
@@ -797,7 +820,7 @@ export function useChatLogic() {
             followUps: followUpQuestions || [],
             type: "message",
           });
-        } else if (selectedChatId) {
+        } else if (selectedChatId && !hasError) {
           if (!localConfig.showErrorMessages) {
             addMessage({
               role: "model",
@@ -846,8 +869,8 @@ export function useChatLogic() {
         }
       } finally {
         //cleanUp
-        setReasoningChunks([]);
-        setLLMChunks([]);
+        setReasoningChunks("");
+        setLLMChunks("");
         setState("idle");
         setEvent("");
         controllerRef.current = null;

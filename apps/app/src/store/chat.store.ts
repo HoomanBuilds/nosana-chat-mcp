@@ -1,11 +1,25 @@
 import { create } from "zustand";
-import { ChatDB } from "@nosana-chat/indexdb";
+import * as Comlink from "comlink";
+import type { ChatDB } from "@nosana-chat/indexdb";
 
-let chatDB: ChatDB | null = null;
+let chatDB: Comlink.Remote<ChatDB> | null = null;
+
 const getChatDB = () => {
-  if (!chatDB) chatDB = ChatDB.getInstance();
-  return chatDB;
+  if (!chatDB && typeof window !== "undefined") {
+    const worker = new Worker(new URL("../lib/db.worker.ts", import.meta.url));
+    chatDB = Comlink.wrap<ChatDB>(worker);
+  }
+  return chatDB!;
 };
+
+function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 export interface PermissionRequest {
   toolName: string;
@@ -218,12 +232,12 @@ export const useChatStore = create<IChatStore>((set, get) => ({
 
   exportThread: async (thread_id: string) => {
     const blob = await getChatDB().exportThread(thread_id);
-    ChatDB.downloadBlob(blob, `thread.${thread_id}.json`);
+    downloadBlob(blob, `thread.${thread_id}.json`);
   },
 
   exportAllThreads: async () => {
     const blob = await getChatDB().exportAllThreads();
-    ChatDB.downloadBlob(blob, "all_threads.json");
+    downloadBlob(blob, "all_threads.json");
   },
 
   importThreads: async (blob: Blob) => {
@@ -235,7 +249,7 @@ export const useChatStore = create<IChatStore>((set, get) => ({
     if (!get().selectedChatId) return;
     const threadId = get().selectedChatId as string;
     const blob = await getChatDB().downloadMessage(threadId, message_id, type);
-    ChatDB.downloadBlob(blob, `message_${message_id.substring(0, 6)}.json`);
+    downloadBlob(blob, `message_${message_id.substring(0, 6)}.json`);
   },
 
   clearAll: async () => {

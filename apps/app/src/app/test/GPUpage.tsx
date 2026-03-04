@@ -16,21 +16,26 @@ const gpuList = [
 ];
 
 export default function DummyGpuFrontend() {
-    const { wallet, connectWallet, isConnected } = useWalletStore(); // Add isConnected
+  const { wallet, connectWallet, isConnected } = useWalletStore(); // Add isConnected
 
-    const [selectedGpu, setSelectedGpu] = useState<string | null>(null);
-    const [minutes, setMinutes] = useState<number>(10);
-    const [jobId, setJobId] = useState<string>("");
-    const [extendMinutes, setExtendMinutes] = useState<number>(10);
-    const [loading, setLoading] = useState(false);
-    const [jobs, setJobs] = useState<any[]>([]);
+  const [formState, setFormState] = useState({
+    selectedGpu: null as string | null,
+    minutes: 10,
+    jobId: "",
+    extendMinutes: 10,
+    loading: false,
+  });
+  const [jobs, setJobs] = useState<any[]>([]);
 
-    useEffect(() => {
-      const { checkPhantom, verifyConnection } = useWalletStore.getState();
-      checkPhantom();
-      // optional delayed recheck
-      setTimeout(verifyConnection, 1000);
-    }, []);
+  const { selectedGpu, minutes, jobId, extendMinutes, loading } = formState;
+  const updateForm = (updates: Partial<typeof formState>) => setFormState(p => ({ ...p, ...updates }));
+
+  useEffect(() => {
+    const { checkPhantom, verifyConnection } = useWalletStore.getState();
+    checkPhantom();
+    // optional delayed recheck
+    setTimeout(verifyConnection, 1000);
+  }, []);
 
   // ------------------- FIXED WALLET CHECK -------------------
   async function ensureWallet() {
@@ -136,7 +141,7 @@ export default function DummyGpuFrontend() {
       const r = validateJobDefinition(jobFlow);
       if (!r.success) throw new Error("Invalid Job Definition");
 
-      setLoading(true);
+      updateForm({ loading: true });
       await createJob(jobFlow, marketKey, jobTimeout);
       await fetchJobs();
       alert("✅ Job created successfully");
@@ -144,7 +149,7 @@ export default function DummyGpuFrontend() {
       console.error(err);
       alert("❌ " + (err.message || "Error creating job"));
     } finally {
-      setLoading(false);
+      updateForm({ loading: false });
     }
   }
 
@@ -153,7 +158,7 @@ export default function DummyGpuFrontend() {
     try {
       await ensureWallet();
       if (!jobId.trim()) return alert("Enter a valid Job ID.");
-      setLoading(true);
+      updateForm({ loading: true });
       await extendJob(jobId.trim(), extendMinutes);
       await fetchJobs();
       alert("✅ Job extended");
@@ -161,7 +166,7 @@ export default function DummyGpuFrontend() {
       console.error(err);
       alert("❌ " + (err.message || "Error extending job"));
     } finally {
-      setLoading(false);
+      updateForm({ loading: false });
     }
   }
 
@@ -170,7 +175,7 @@ export default function DummyGpuFrontend() {
     try {
       await ensureWallet();
       if (!jobId.trim()) return alert("Enter a valid Job ID.");
-      setLoading(true);
+      updateForm({ loading: true });
       await stopJob(jobId.trim());
       await fetchJobs();
       alert("🛑 Job stopped");
@@ -178,7 +183,7 @@ export default function DummyGpuFrontend() {
       console.error(err);
       alert("❌ " + (err.message || "Error stopping job"));
     } finally {
-      setLoading(false);
+      updateForm({ loading: false });
     }
   }
 
@@ -211,7 +216,7 @@ export default function DummyGpuFrontend() {
                 ? "bg-blue-600"
                 : "bg-zinc-700 hover:bg-zinc-600"
                 }`}
-              onClick={() => setSelectedGpu(gpu.key)}
+              onClick={() => updateForm({ selectedGpu: gpu.key })}
             >
               {gpu.name} <span className="text-gray-400 ml-1">{gpu.price}</span>
             </button>
@@ -219,11 +224,12 @@ export default function DummyGpuFrontend() {
         </div>
 
         <div className="flex flex-col items-center gap-2">
-          <label>Run Time (minutes)</label>
+          <label htmlFor="runtime-minutes">Run Time (minutes)</label>
           <input
+            id="runtime-minutes"
             type="number"
             value={minutes}
-            onChange={(e) => setMinutes(Number(e.target.value))}
+            onChange={(e) => updateForm({ minutes: Number(e.target.value) })}
             className="w-24 text-center bg-zinc-800 border border-zinc-600 rounded"
           />
           <button
@@ -243,14 +249,14 @@ export default function DummyGpuFrontend() {
           type="text"
           placeholder="Enter Job ID"
           value={jobId}
-          onChange={(e) => setJobId(e.target.value)}
+          onChange={(e) => updateForm({ jobId: e.target.value })}
           className="w-full px-3 py-2 bg-zinc-800 border border-zinc-600 rounded text-sm"
         />
         <div className="flex gap-3 justify-center">
           <input
             type="number"
             value={extendMinutes}
-            onChange={(e) => setExtendMinutes(Number(e.target.value))}
+            onChange={(e) => updateForm({ extendMinutes: Number(e.target.value) })}
             min={1}
             className="w-20 text-center bg-zinc-800 border border-zinc-600 rounded"
           />
@@ -299,7 +305,7 @@ export default function DummyGpuFrontend() {
                       {job.logs?.length ? (
                         <div className="max-h-32 overflow-y-auto space-y-1">
                           {job.logs.slice(0, 50).map((l: string, i: number) => (
-                            <div key={i}>› {l}</div>
+                            <div key={`${job.jobId}-log-${i}`}>› {l}</div>
                           ))}
                         </div>
                       ) : (

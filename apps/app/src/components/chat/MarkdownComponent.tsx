@@ -125,7 +125,7 @@ function MarkdownComponent({ msg }: MarkdownComponentProps) {
   return (
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
-      rehypePlugins={[rehypeHighlight, rehypeRaw]}
+      rehypePlugins={[[rehypeHighlight, { ignoreMissing: true }], rehypeRaw]}
       components={markdownComponents}
     >
       {msg.content}

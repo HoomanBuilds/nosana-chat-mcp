@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import React from "react";
+import Image from "next/image";
 import {
   Collapsible,
   CollapsibleTrigger,
@@ -31,13 +32,16 @@ export function SearchResultsSection({ search }: { search: SearchResult[] }) {
           <CardContent className="p-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-gray-700">
             {search.map((s, i) => (
               <Card
-                key={i}
+                key={s.url || i}
                 className="bg-muted-foreground/5 shadow-sm rounded-lg hover:shadow-md hover:bg-muted-foreground/10 transition"
               >
                 {s.image && (
-                  <img
+                  <Image
                     src={s.image}
                     alt={s.title}
+                    width={300}
+                    height={128}
+                    unoptimized
                     className="w-full h-32 object-cover rounded-t-lg"
                   />
                 )}

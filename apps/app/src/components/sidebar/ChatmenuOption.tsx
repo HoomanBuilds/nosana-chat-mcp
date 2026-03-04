@@ -27,14 +27,15 @@ export function ChatOptionsMenu({
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <div
+                <button
                     className={cn(
-                        "block sm:invisible group-hover:visible"
+                        "block sm:invisible group-hover:visible p-1 hover:bg-muted-foreground/10 rounded transition-colors"
                     )}
                     onClick={(e) => e.stopPropagation()}
+                    aria-label="Chat options"
                 >
                     <Ellipsis className="size-4 text-muted-foreground/40 cursor-pointer" />
-                </div>
+                </button>
             </DropdownMenuTrigger>
 
             <DropdownMenuContent
@@ -75,6 +76,3 @@ export function ChatOptionsMenu({
         </DropdownMenu>
     );
 }
-
-
-export default ChatOptionsMenu;
