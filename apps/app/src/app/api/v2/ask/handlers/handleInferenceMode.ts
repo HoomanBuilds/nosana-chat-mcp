@@ -2,24 +2,10 @@ import { ContextCutter } from "@/lib/utils/ContextCutter";
 import { Payload } from "@/lib/utils/validation";
 import OpenAI from "openai";
 import { createStreamingParser, buildMessages } from "./handleSelfHostedMode";
+import { normalizeInferenceBaseURL, COMMON_HEADERS } from "@/lib/utils/llm";
 import { getInstructions } from "@/lib/utils/keyword";
 import { performSearch } from "@/lib/tools/webSearch";
 
-function normalizeInferenceBaseURL(rawUrl: string): string {
-  const trimmed = rawUrl.trim().replace(/\/+$/, "");
-  if (!trimmed) return trimmed;
-
-  if (trimmed.endsWith("/v1/chat/completions")) {
-    return trimmed.replace(/\/chat\/completions$/, "");
-  }
-  if (trimmed.endsWith("/chat/completions")) {
-    return trimmed.replace(/\/chat\/completions$/, "");
-  }
-  if (trimmed.endsWith("/v1")) {
-    return trimmed;
-  }
-  return `${trimmed}/v1`;
-}
 
 function isServiceLoadingError(error: unknown): boolean {
   const err = error as {
@@ -137,8 +123,7 @@ export const handleInferenceMode = async (
     apiKey: apiKey,
     baseURL: baseURL,
     defaultHeaders: {
-      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-      "Referer": "https://nosana.chat/",
+      ...COMMON_HEADERS,
       ...(payload.ipAddress ? { "X-IP-Address": payload.ipAddress } : {}),
     },
   });

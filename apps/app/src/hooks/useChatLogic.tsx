@@ -259,6 +259,7 @@ export function useChatLogic() {
       let responseTime = 0;
       let followUpQuestions: { question: string }[] = [];
       let fallbackLLM = "";
+      let hasError = false;
 
       //model configured
       const DEFAULT_MODEL = DEFAULT.MODEL;
@@ -444,6 +445,7 @@ export function useChatLogic() {
 
                 //stream based error handling
                 case "error": {
+                  if (hasError) break;
                   const errorMessage = data.message || data;
                   const isUserFriendly =
                     typeof errorMessage === "string" &&
@@ -472,8 +474,11 @@ export function useChatLogic() {
                       type: "error",
                     });
                   }
+                  hasError = true;
                   console.error("API Error:", data.message || data);
                   setState("idle");
+                  // Try to break out of the stream if we hit a critical error
+                  if (controllerRef.current) controllerRef.current.abort();
                 }
                   break;
 
@@ -815,7 +820,7 @@ export function useChatLogic() {
             followUps: followUpQuestions || [],
             type: "message",
           });
-        } else if (selectedChatId) {
+        } else if (selectedChatId && !hasError) {
           if (!localConfig.showErrorMessages) {
             addMessage({
               role: "model",

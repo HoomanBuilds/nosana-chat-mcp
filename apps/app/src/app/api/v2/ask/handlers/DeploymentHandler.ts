@@ -17,10 +17,17 @@ import {
 import { buildApiKeyToolSet } from "@/lib/deployerTools/apikey.tools";
 import { streamThrottle } from "./utils";
 import { runWithPlannerModel } from "@/lib/deployerTools/utils/plannerContext";
+import { normalizeInferenceBaseURL, COMMON_HEADERS } from "@/lib/utils/llm";
 
 const openai = createOpenAI({
-  apiKey: process.env.INFERIA_LLM_API_KEY,
-  baseURL: process.env.NEXT_PUBLIC_INFERIA_LLM_URL,
+  apiKey: process.env.INFERIA_LLM_API_KEY || "nosana-local",
+  baseURL: normalizeInferenceBaseURL(
+    process.env.NEXT_PUBLIC_INFERIA_LLM_URL || "",
+  ),
+  compatibility: "compatible",
+  headers: {
+    ...COMMON_HEADERS,
+  },
 });
 
 /** Wallet mode tools — on-chain via SDK */
@@ -216,6 +223,7 @@ ${payload.customPrompt || ""}
         messages,
         tools,
         toolChoice: "auto",
+        parallelToolCalls: false,
         stopWhen: stepCountIs(6),
         abortSignal: payload.signal,
         maxRetries: 1,

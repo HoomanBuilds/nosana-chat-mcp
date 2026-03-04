@@ -2,6 +2,7 @@ import { ChatMessage } from "@/lib/types";
 import { ContextCutter } from "@/lib/utils/ContextCutter";
 import { StreamThrottleConfig, type PromptMode } from "./types";
 import { Payload } from "@/lib/utils/validation";
+import { normalizeInferenceBaseURL, COMMON_HEADERS } from "@/lib/utils/llm";
 
 const trimMessage = (content: string, maxTokens = 1000) => {
   const words = content.split(/\s+/);
@@ -42,10 +43,11 @@ export async function getThreadTitle(query: string, model: string) {
   try {
     const client = new OpenAI({
       apiKey: process.env.INFERIA_LLM_API_KEY,
-      baseURL: process.env.NEXT_PUBLIC_INFERIA_LLM_URL,
+      baseURL: normalizeInferenceBaseURL(
+        process.env.NEXT_PUBLIC_INFERIA_LLM_URL || "",
+      ),
       defaultHeaders: {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Referer": "https://nosana.chat/",
+        ...COMMON_HEADERS,
       },
     });
     // Use the user's selected model for title generation
