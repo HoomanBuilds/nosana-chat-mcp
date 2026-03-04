@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.32",
+    "@ai-sdk/react": "^3.0.113",
     "@coral-xyz/anchor": "^0.32.1",
     "@icons-pack/react-simple-icons": "^13.8.0",
     "@modelcontextprotocol/sdk": "^1.20.0",
@@ -36,6 +37,7 @@
     "ai": "^5.0.44",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "comlink": "^4.4.2",
     "dotenv": "^17.2.2",
     "highlight.js": "^11.11.1",
     "jsonwebtoken": "^9.0.2",
@@ -52,6 +54,7 @@
     "react-icons": "^5.5.0",
     "react-markdown": "^10.1.0",
     "react-syntax-highlighter": "^15.6.6",
+    "react-virtuoso": "^4.18.3",
     "rehype-highlight": "^7.0.2",
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.1",

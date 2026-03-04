@@ -38,8 +38,8 @@ export function useChatLogic() {
     return localStorage.getItem("llmmodel") || DEFAULT.MODEL;
   });
   const [state, setState] = useState<"idle" | "loading" | null>(null);
-  const [reasoningChunks, setReasoningChunks] = useState<string[]>([]);
-  const [llmChunks, setLLMChunks] = useState<string[]>([]);
+  const [reasoningChunks, setReasoningChunks] = useState<string>("");
+  const [llmChunks, setLLMChunks] = useState<string>("");
   const [event, setEvent] = useState<string>("");
   const [mcp, setmcp] = useState(false);
 
@@ -245,8 +245,8 @@ export function useChatLogic() {
           type: "message",
         });
       setQuery("");
-      setReasoningChunks([]);
-      setLLMChunks([]);
+      setReasoningChunks("");
+      setLLMChunks("");
       setPendingTool(null);
 
       //abort controller
@@ -365,14 +365,11 @@ export function useChatLogic() {
         // Throttled UI updates
         const flushBuffers = () => {
           if (llmBufferRef.current.length > 0) {
-            setLLMChunks((prev) => [...prev, ...llmBufferRef.current]);
+            setLLMChunks((prev) => prev + llmBufferRef.current.join(""));
             llmBufferRef.current = [];
           }
           if (reasoningBufferRef.current.length > 0) {
-            setReasoningChunks((prev) => [
-              ...prev,
-              ...reasoningBufferRef.current,
-            ]);
+            setReasoningChunks((prev) => prev + reasoningBufferRef.current.join(""));
             reasoningBufferRef.current = [];
           }
           throttleTimeoutRef.current = null;
@@ -856,8 +853,8 @@ export function useChatLogic() {
         }
       } finally {
         //cleanUp
-        setReasoningChunks([]);
-        setLLMChunks([]);
+        setReasoningChunks("");
+        setLLMChunks("");
         setState("idle");
         setEvent("");
         controllerRef.current = null;
