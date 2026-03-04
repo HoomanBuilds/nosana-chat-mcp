@@ -15,10 +15,15 @@ import { m, AnimatePresence } from "motion/react";
 interface ReasoningSectionProps {
   reasoning: string;
   isStreaming?: boolean;
+  hasNormalResponseStarted?: boolean;
 }
 
-export function ReasoningSection({ reasoning, isStreaming = false }: ReasoningSectionProps) {
-  const [isOpen, setIsOpen] = useState(isStreaming);
+export function ReasoningSection({
+  reasoning,
+  isStreaming = false,
+  hasNormalResponseStarted = false
+}: ReasoningSectionProps) {
+  const [isOpen, setIsOpen] = useState(isStreaming && !hasNormalResponseStarted);
   const contentRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll logic if it's streaming and open
@@ -28,12 +33,16 @@ export function ReasoningSection({ reasoning, isStreaming = false }: ReasoningSe
     }
   }, [reasoning, isStreaming, isOpen]);
 
-  // If it starts streaming, ensure it's open
+  // If it starts streaming, ensure it's open, but if normal response starts, close it
   useEffect(() => {
     if (isStreaming) {
-      setIsOpen(true);
+      if (hasNormalResponseStarted) {
+        setIsOpen(false);
+      } else {
+        setIsOpen(true);
+      }
     }
-  }, [isStreaming]);
+  }, [isStreaming, hasNormalResponseStarted]);
 
   if (!reasoning && !isStreaming) return null;
 

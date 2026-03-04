@@ -149,7 +149,11 @@ const ChatFooter = memo(({ context }: { context: any }) => {
         <div className="flex relative justify-start mt-1 items-start gap-4 w-full mb-5 self-start">
           <div className="min-w-[95%] w-[100%] flex flex-col gap-2">
             {reasoningChunks?.length > 0 && (
-              <ReasoningSection reasoning={reasoningChunks} isStreaming={true} />
+              <ReasoningSection
+                reasoning={reasoningChunks}
+                isStreaming={true}
+                hasNormalResponseStarted={llmChunks.length > 0}
+              />
             )}
 
             <div
