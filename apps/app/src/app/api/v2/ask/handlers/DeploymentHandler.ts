@@ -19,14 +19,22 @@ import { streamThrottle } from "./utils";
 import { runWithPlannerModel } from "@/lib/deployerTools/utils/plannerContext";
 import { normalizeInferenceBaseURL, COMMON_HEADERS } from "@/lib/utils/llm";
 
+const provider = process.env.LLM_PROVIDER || "inferia";
+let fallbackBaseUrl = process.env.NEXT_PUBLIC_INFERIA_LLM_URL || "";
+let fallbackApiKey = process.env.INFERIA_LLM_API_KEY || "nosana-local";
+
+if (provider === "deepseek") {
+  fallbackBaseUrl = process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com/v1";
+  fallbackApiKey = process.env.DEEPSEEK_API_KEY || "";
+}
+
 const openai = createOpenAI({
-  apiKey: process.env.INFERIA_LLM_API_KEY || "nosana-local",
-  baseURL: normalizeInferenceBaseURL(
-    process.env.NEXT_PUBLIC_INFERIA_LLM_URL || "",
-  ),
+  apiKey: fallbackApiKey,
+  baseURL: normalizeInferenceBaseURL(fallbackBaseUrl),
   headers: {
     ...COMMON_HEADERS,
   },
+  compatibility: "compatible", // Enforces mapping 'developer' back to 'system' so standard inference endpoints don't complain
 });
 
 /** Wallet mode tools — on-chain via SDK */
@@ -130,15 +138,16 @@ export const handleDeployment = async (
     const normalizeChats = (chats: any[] = []): any[] =>
       chats
         .filter((m) => m && m.content)
-        .map((m) => ({
-          role:
-            m.role === "model"
-              ? "assistant"
-              : ["user", "assistant", "system"].includes(m.role)
-                ? m.role
-                : "user",
-          content: String(m.content),
-        }));
+        .map((m) => {
+          let mappedRole = m.role === "model" ? "assistant" : m.role;
+          if (!["user", "assistant", "system"].includes(mappedRole)) {
+            mappedRole = "user";
+          }
+          return {
+            role: mappedRole,
+            content: String(m.content),
+          };
+        });
 
     // ── System prompt — clean, mode-specific ──
     const authPrompt = isApiKeyMode
@@ -217,9 +226,22 @@ ${payload.customPrompt || ""}
 
     let stream;
     try {
+      const strictRoleMessages = messages.map(m => {
+        let mappedRole = m.role as string;
+        if (mappedRole === "system" || mappedRole === "developer") {
+          mappedRole = provider === "deepseek" ? "user" : "system";
+        } else if (!["user", "assistant", "system", "tool"].includes(mappedRole)) {
+          mappedRole = "user";
+        }
+        return {
+          ...m,
+          role: mappedRole
+        };
+      }) as any;
+
       stream = streamText({
         model: openai.chat(plannerModel),
-        messages,
+        messages: strictRoleMessages,
         tools,
         toolChoice: "auto",
         stopWhen: stepCountIs(6),

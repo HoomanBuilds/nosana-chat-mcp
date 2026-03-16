@@ -103,13 +103,18 @@ export const handleInferenceMode = async (
 
   const messages = buildMessages(payload, systemInstruction, contextChat);
 
-  const rawBaseUrl =
-    payload.deployedModel?.baseURL || process.env.NEXT_PUBLIC_INFERIA_LLM_URL || "";
+  const provider = process.env.LLM_PROVIDER || "inferia";
+  let fallbackBaseUrl = process.env.NEXT_PUBLIC_INFERIA_LLM_URL || "";
+  let fallbackApiKey = process.env.INFERIA_LLM_API_KEY || "nosana-local";
+
+  if (provider === "deepseek") {
+    fallbackBaseUrl = process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com/v1";
+    fallbackApiKey = process.env.DEEPSEEK_API_KEY || "";
+  }
+
+  const rawBaseUrl = payload.deployedModel?.baseURL || fallbackBaseUrl;
   const baseURL = normalizeInferenceBaseURL(rawBaseUrl);
-  const apiKey =
-    payload.deployedModel?.apiKey ||
-    process.env.INFERIA_LLM_API_KEY ||
-    "nosana-local";
+  const apiKey = payload.deployedModel?.apiKey || fallbackApiKey;
 
   if (!baseURL) {
     throw new Error(

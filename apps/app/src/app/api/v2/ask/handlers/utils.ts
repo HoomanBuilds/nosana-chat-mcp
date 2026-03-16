@@ -41,17 +41,24 @@ import OpenAI from "openai";
 
 export async function getThreadTitle(query: string, model: string) {
   try {
+    const provider = process.env.LLM_PROVIDER || "inferia";
+    let fallbackBaseUrl = process.env.NEXT_PUBLIC_INFERIA_LLM_URL || "";
+    let fallbackApiKey = process.env.INFERIA_LLM_API_KEY || "nosana-local";
+
+    if (provider === "deepseek") {
+      fallbackBaseUrl = process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com/v1";
+      fallbackApiKey = process.env.DEEPSEEK_API_KEY || "";
+    }
+
     const client = new OpenAI({
-      apiKey: process.env.INFERIA_LLM_API_KEY,
-      baseURL: normalizeInferenceBaseURL(
-        process.env.NEXT_PUBLIC_INFERIA_LLM_URL || "",
-      ),
+      apiKey: fallbackApiKey,
+      baseURL: normalizeInferenceBaseURL(fallbackBaseUrl),
       defaultHeaders: {
         ...COMMON_HEADERS,
       },
     });
     // Use the user's selected model for title generation
-    const titleModel = model || "inferiallm";
+    const titleModel = model || (provider === "deepseek" ? "deepseek-chat" : "inferiallm");
 
     const res = await client.chat.completions.create({
       model: titleModel,
