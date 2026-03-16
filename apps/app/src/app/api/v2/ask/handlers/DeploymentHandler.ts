@@ -2,6 +2,8 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { stepCountIs, streamText, ToolSet } from "ai";
 import { Payload } from "@/lib/utils/validation";
 import { getModels, createJob } from "@/lib/deployerTools/tool.createJob";
+import * as fs from "fs";
+import * as path from "path";
 
 import {
   estimateJobCost,
@@ -24,7 +26,8 @@ let fallbackBaseUrl = process.env.NEXT_PUBLIC_INFERIA_LLM_URL || "";
 let fallbackApiKey = process.env.INFERIA_LLM_API_KEY || "nosana-local";
 
 if (provider === "deepseek") {
-  fallbackBaseUrl = process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com/v1";
+  fallbackBaseUrl =
+    process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com/v1";
   fallbackApiKey = process.env.DEEPSEEK_API_KEY || "";
 }
 
@@ -36,6 +39,31 @@ const openai = createOpenAI({
   },
   compatibility: "compatible", // Enforces mapping 'developer' back to 'system' so standard inference endpoints don't complain
 });
+
+let nosanaSkillCache: string | null = null;
+
+function loadNosanaSkill(): string {
+  if (nosanaSkillCache) return nosanaSkillCache;
+
+  try {
+    const skillPath = path.join(process.cwd(), "skills", "nosana", "SKILL.md");
+    if (fs.existsSync(skillPath)) {
+      const content = fs.readFileSync(skillPath, "utf-8");
+      const lines = content.split("\n");
+      const skillContentStart = lines.findIndex(
+        (line, i) => i > 5 && line.startsWith("# "),
+      );
+      nosanaSkillCache =
+        skillContentStart > -1
+          ? lines.slice(skillContentStart).join("\n").trim()
+          : content;
+      return nosanaSkillCache;
+    }
+  } catch (err) {
+    console.warn("Failed to load Nosana skill:", err);
+  }
+  return "";
+}
 
 /** Wallet mode tools — on-chain via SDK */
 function getWalletTools(): ToolSet {
@@ -215,6 +243,11 @@ You are **NosanaDeploy**, a deployment agent for Nosana's decentralized GPU netw
 
 ${authPrompt}
 
+${(() => {
+  const skillContent = loadNosanaSkill();
+  return skillContent ? `\n## Nosana Skill Guide\n${skillContent}\n` : "";
+})()}
+
 Handling User JSON:
 1. If JSON has 'type', 'ops', 'meta' → first run createJob.
    - On pass + deploy request → createJob(directJobDef={...json...})
@@ -246,16 +279,18 @@ ${payload.customPrompt || ""}
 
     let stream;
     try {
-      const strictRoleMessages = messages.map(m => {
+      const strictRoleMessages = messages.map((m) => {
         let mappedRole = m.role as string;
         if (mappedRole === "system" || mappedRole === "developer") {
           mappedRole = provider === "deepseek" ? "user" : "system";
-        } else if (!["user", "assistant", "system", "tool"].includes(mappedRole)) {
+        } else if (
+          !["user", "assistant", "system", "tool"].includes(mappedRole)
+        ) {
           mappedRole = "user";
         }
         return {
           ...m,
-          role: mappedRole
+          role: mappedRole,
         };
       }) as any;
 
@@ -393,10 +428,10 @@ function llmErr(e: unknown): string {
   console.error("🔴 LLM error details:", { msg, statusCode, url });
 
   // Handle standard HTTP / Vercel AI SDK network errors
-  if (err?.name === 'TimeoutError' || /deadline|timeout/i.test(msg)) {
+  if (err?.name === "TimeoutError" || /deadline|timeout/i.test(msg)) {
     return "The AI request took too long and timed out. Please try again.";
   }
-  if (err?.name === 'AbortError' || /aborted|SIGINT/i.test(msg)) {
+  if (err?.name === "AbortError" || /aborted|SIGINT/i.test(msg)) {
     return "Request was cancelled before completion.";
   }
 
@@ -404,25 +439,38 @@ function llmErr(e: unknown): string {
   if (
     msg.includes("Upstream Error: 400") ||
     /invalid_type.*choices.*undefined/i.test(msg + " " + responseBody) ||
-    /tool_use_failed|Failed to parse tool call arguments as JSON/i.test(msg + " " + responseBody)
+    /tool_use_failed|Failed to parse tool call arguments as JSON/i.test(
+      msg + " " + responseBody,
+    )
   ) {
     return "The selected model failed to execute tool calls correctly. Try using a more capable model like openai/gpt-oss-20b.";
   }
 
   // Endpoint compatibility
-  if (statusCode === 404 && typeof url === "string" && url.includes("/responses")) {
+  if (
+    statusCode === 404 &&
+    typeof url === "string" &&
+    url.includes("/responses")
+  ) {
     return "Model endpoint does not support /v1/responses. Configure deployer planner to use a /v1/chat/completions-compatible backend.";
   }
 
   // Auth limits
-  if (statusCode === 401 || statusCode === 403 || /unauthorized|permission|key|quota/i.test(msg)) {
+  if (
+    statusCode === 401 ||
+    statusCode === 403 ||
+    /unauthorized|permission|key|quota/i.test(msg)
+  ) {
     return responseBody
       ? `Authorization or quota limit failed. Details: ${responseBody.substring(0, 100)}`
       : "Server error: The AI service quota or key limit has been reached. Try again later.";
   }
 
   // Server downtime
-  if (statusCode >= 500 || /Prompt processing failed/i.test(responseBody || msg)) {
+  if (
+    statusCode >= 500 ||
+    /Prompt processing failed/i.test(responseBody || msg)
+  ) {
     return "AI Provider failed while processing the prompt. Please wait a moment and retry.";
   }
 
