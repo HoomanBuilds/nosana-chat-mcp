@@ -8,8 +8,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
     "build:package": "turbo run build --filter=packages/**",
-    "deploy": "turbo run deploy",
-    "deploy:mcp": "turbo run deploy --filter=apps/nosana_mcp"
+    "deploy": "turbo run deploy"
   },
   "devDependencies": {
     "prettier": "^3.6.2",
