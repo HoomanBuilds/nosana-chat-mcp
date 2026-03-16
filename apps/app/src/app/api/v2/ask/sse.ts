@@ -77,7 +77,10 @@ function getFollowUpFromPayload(
     .join("\n");
 
   if (combinedQuery.length > MAX_LENGTH) {
-    combinedQuery = combinedQuery.slice(-MAX_LENGTH);
+    // Avoid splitting a word in half when trimming
+    const sliced = combinedQuery.slice(-MAX_LENGTH);
+    const firstSpaceIndex = sliced.indexOf(" ");
+    combinedQuery = firstSpaceIndex !== -1 ? sliced.slice(firstSpaceIndex + 1) : sliced;
   }
 
   return combinedQuery

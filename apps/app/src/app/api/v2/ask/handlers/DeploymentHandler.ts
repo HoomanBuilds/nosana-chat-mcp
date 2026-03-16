@@ -135,8 +135,8 @@ export const handleDeployment = async (
     ]);
     const seenSanitizedToolStarts = new Set<string>();
 
-    const normalizeChats = (chats: any[] = []): any[] =>
-      chats
+    const normalizeChats = (chats: any[] = []): any[] => {
+      const validChats = chats
         .filter((m) => m && m.content)
         .map((m) => {
           let mappedRole = m.role === "model" ? "assistant" : m.role;
@@ -148,6 +148,26 @@ export const handleDeployment = async (
             content: String(m.content),
           };
         });
+
+      const MAX_CHARS = 32000; // ~8k tokens safe context window
+      let charCount = 0;
+      const history = [];
+
+      for (let i = validChats.length - 1; i >= 0; i--) {
+        const msg = validChats[i];
+        if (charCount + msg.content.length <= MAX_CHARS) {
+          history.unshift(msg);
+          charCount += msg.content.length;
+        } else {
+          // Keep partial message if it's the only one that fits
+          if (history.length === 0) {
+            history.unshift({ ...msg, content: msg.content.slice(-MAX_CHARS) });
+          }
+          break;
+        }
+      }
+      return history;
+    };
 
     // ── System prompt — clean, mode-specific ──
     const authPrompt = isApiKeyMode
@@ -218,7 +238,7 @@ If errors occur, try recovery twice before stopping. Always inform user of what'
 ${payload.customPrompt || ""}
 `.trim(),
       },
-      ...normalizeChats(payload.chats?.slice(-10) || []),
+      ...normalizeChats(payload.chats || []),
       { role: "user", content: payload.query || "" },
     ];
 
@@ -364,56 +384,52 @@ ${payload.customPrompt || ""}
 };
 
 function llmErr(e: unknown): string {
-  const msg = (e as any)?.message || String(e);
-  const url = (e as any)?.url || "";
-  const statusCode = (e as any)?.statusCode;
-  const responseBody = (e as any)?.responseBody || "";
+  const err = e as any;
+  const msg = err?.message || String(e);
+  const url = err?.url || "";
+  const statusCode = err?.statusCode;
+  const responseBody = err?.responseBody || "";
 
-  console.error("🔴 LLM error:", msg);
+  console.error("🔴 LLM error details:", { msg, statusCode, url });
 
+  // Handle standard HTTP / Vercel AI SDK network errors
+  if (err?.name === 'TimeoutError' || /deadline|timeout/i.test(msg)) {
+    return "The AI request took too long and timed out. Please try again.";
+  }
+  if (err?.name === 'AbortError' || /aborted|SIGINT/i.test(msg)) {
+    return "Request was cancelled before completion.";
+  }
+
+  // Model backend capability errors
   if (
     msg.includes("Upstream Error: 400") ||
-    /invalid_type.*choices.*undefined/i.test(msg + " " + responseBody)
+    /invalid_type.*choices.*undefined/i.test(msg + " " + responseBody) ||
+    /tool_use_failed|Failed to parse tool call arguments as JSON/i.test(msg + " " + responseBody)
   ) {
-    return "tool calling is not supported for this model use another model like openai/gpt-oss-20b instead";
+    return "The selected model failed to execute tool calls correctly. Try using a more capable model like openai/gpt-oss-20b.";
   }
 
-  if (
-    statusCode === 404 &&
-    typeof url === "string" &&
-    url.includes("/responses")
-  ) {
-    return "Model endpoint does not support /v1/responses. Configure deployer planner to use /v1/chat/completions-compatible backend.";
+  // Endpoint compatibility
+  if (statusCode === 404 && typeof url === "string" && url.includes("/responses")) {
+    return "Model endpoint does not support /v1/responses. Configure deployer planner to use a /v1/chat/completions-compatible backend.";
   }
 
-  if (
-    /tool_use_failed|Failed to parse tool call arguments as JSON/i.test(
-      msg + " " + responseBody,
-    )
-  ) {
-    return "Selected model generated invalid tool-call JSON. Choose a tool-calling capable model in the selector and retry.";
-  }
-
-  if (
-    statusCode === 500 &&
-    /Prompt processing failed/i.test(responseBody || msg)
-  ) {
-    return "Selected model backend failed while processing the prompt. Retry once; if persistent, choose a different model in the selector.";
-  }
-
-  if (/aborted|AbortError|SIGINT/i.test(msg))
-    return "Request was cancelled before completion.";
-
-  if (/deadline|timeout/i.test(msg))
-    return "The AI request took too long and timed out. Please try again.";
-
-  if (/unauthorized|permission|key|quota/i.test(msg))
+  // Auth limits
+  if (statusCode === 401 || statusCode === 403 || /unauthorized|permission|key|quota/i.test(msg)) {
     return responseBody
-      ? `Authorization failed for deployer model call. Details: ${responseBody}`
-      : "Server error: the AI service quota or key limit has been reached. Try again later.";
+      ? `Authorization or quota limit failed. Details: ${responseBody.substring(0, 100)}`
+      : "Server error: The AI service quota or key limit has been reached. Try again later.";
+  }
 
-  if (/network|fetch|ECONN|ENOTFOUND|TLS/i.test(msg))
-    return "Network issue: unable to reach the AI service. Check connection and retry.";
+  // Server downtime
+  if (statusCode >= 500 || /Prompt processing failed/i.test(responseBody || msg)) {
+    return "AI Provider failed while processing the prompt. Please wait a moment and retry.";
+  }
 
-  return "Unexpected server error occurred while processing your request.";
+  // Network drops
+  if (/network|fetch|ECONN|ENOTFOUND|TLS/i.test(msg)) {
+    return "Network issue: Unable to reach the AI service upstream. Check connection and retry.";
+  }
+
+  return "Unexpected server error occurred while processing your request. Please check the logs.";
 }
