@@ -37,7 +37,6 @@ const openai = createOpenAI({
   headers: {
     ...COMMON_HEADERS,
   },
-  compatibility: "compatible", // Enforces mapping 'developer' back to 'system' so standard inference endpoints don't complain
 });
 
 let nosanaSkillCache: string | null = null;

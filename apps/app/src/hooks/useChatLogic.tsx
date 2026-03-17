@@ -276,13 +276,13 @@ export function useChatLogic() {
         }
         const deployedModelPayload = customServiceUrl
           ? {
-            baseURL: customServiceUrl,
-            model: customServiceModel || modelToSend,
-          }
+              baseURL: customServiceUrl,
+              model: customServiceModel || modelToSend,
+            }
           : undefined;
 
         //making backend ai request
-        const res = await fetch(`/api/v2/ask`, {
+        const res = await fetch(`/api/v1/ask`, {
           method: "POST",
           headers,
           body: JSON.stringify({
@@ -370,7 +370,9 @@ export function useChatLogic() {
             llmBufferRef.current = [];
           }
           if (reasoningBufferRef.current.length > 0) {
-            setReasoningChunks((prev) => prev + reasoningBufferRef.current.join(""));
+            setReasoningChunks(
+              (prev) => prev + reasoningBufferRef.current.join(""),
+            );
             reasoningBufferRef.current = [];
           }
           throttleTimeoutRef.current = null;
@@ -437,49 +439,51 @@ export function useChatLogic() {
 
                 case "searchResult":
                   try {
-                    searchResult = typeof data === "string" ? JSON.parse(data) : data;
+                    searchResult =
+                      typeof data === "string" ? JSON.parse(data) : data;
                   } catch (e) {
                     console.error("Failed to parse searchResult:", e);
                   }
                   break;
 
                 //stream based error handling
-                case "error": {
-                  if (hasError) break;
-                  const errorMessage = data.message || data;
-                  const isUserFriendly =
-                    typeof errorMessage === "string" &&
-                    (errorMessage.includes("tool calling is not supported") ||
-                      errorMessage.includes("openai/gpt-oss-20b"));
+                case "error":
+                  {
+                    if (hasError) break;
+                    const errorMessage = data.message || data;
+                    const isUserFriendly =
+                      typeof errorMessage === "string" &&
+                      (errorMessage.includes("tool calling is not supported") ||
+                        errorMessage.includes("openai/gpt-oss-20b"));
 
-                  if (localConfig.showErrorMessages || isUserFriendly) {
-                    addMessage({
-                      role: "model",
-                      model: modelToSend,
-                      reasoning: isUserFriendly
-                        ? undefined
-                        : `An error occurred: ${errorMessage}`,
-                      content: isUserFriendly
-                        ? errorMessage
-                        : `An error occurred: in Response from ${errorMessage.substring(0, 50)}... Expand to check full error message.`,
-                      id: crypto.randomUUID(),
-                      type: "error",
-                    });
-                  } else {
-                    addMessage({
-                      role: "model",
-                      model: modelToSend,
-                      content: "Something went wrong.",
-                      id: crypto.randomUUID(),
-                      type: "error",
-                    });
+                    if (localConfig.showErrorMessages || isUserFriendly) {
+                      addMessage({
+                        role: "model",
+                        model: modelToSend,
+                        reasoning: isUserFriendly
+                          ? undefined
+                          : `An error occurred: ${errorMessage}`,
+                        content: isUserFriendly
+                          ? errorMessage
+                          : `An error occurred: in Response from ${errorMessage.substring(0, 50)}... Expand to check full error message.`,
+                        id: crypto.randomUUID(),
+                        type: "error",
+                      });
+                    } else {
+                      addMessage({
+                        role: "model",
+                        model: modelToSend,
+                        content: "Something went wrong.",
+                        id: crypto.randomUUID(),
+                        type: "error",
+                      });
+                    }
+                    hasError = true;
+                    console.error("API Error:", data.message || data);
+                    setState("idle");
+                    // Try to break out of the stream if we hit a critical error
+                    if (controllerRef.current) controllerRef.current.abort();
                   }
-                  hasError = true;
-                  console.error("API Error:", data.message || data);
-                  setState("idle");
-                  // Try to break out of the stream if we hit a critical error
-                  if (controllerRef.current) controllerRef.current.abort();
-                }
                   break;
 
                 //tools execution approval
@@ -518,9 +522,8 @@ export function useChatLogic() {
                               console.log(`▶ Executing ${funcName}`);
                               const approvedJobDef =
                                 pendingTool?.prompt || parsed.prompt;
-                              const { validateJobDefinition } = await import(
-                                "@nosana/sdk"
-                              );
+                              const { validateJobDefinition } =
+                                await import("@nosana/sdk");
                               const r = validateJobDefinition(approvedJobDef);
                               if (!r.success) {
                                 const validationErrors = JSON.stringify(
@@ -530,9 +533,8 @@ export function useChatLogic() {
                                   `Invalid job definition: ${validationErrors}`,
                                 );
                               }
-                              const { createJob } = await import(
-                                "@/lib/nosana/createJob"
-                              );
+                              const { createJob } =
+                                await import("@/lib/nosana/createJob");
                               const result = await createJob(
                                 approvedJobDef,
                                 parsed.args.marketPubKey,
@@ -545,7 +547,7 @@ export function useChatLogic() {
 
                               const curlSnippet =
                                 parsed?.args?.provider === "huggingface" &&
-                                  parsed?.args?.testGeneration
+                                parsed?.args?.testGeneration
                                   ? `
                                 # You can test your deployment using:
                                 curl -s -X POST <service_url>/generate \\
@@ -663,9 +665,8 @@ export function useChatLogic() {
                           onConfirm: async () => {
                             try {
                               console.log(`▶ Executing ${funcName}`);
-                              const { stopJob } = await import(
-                                "@/lib/nosana/stopJob"
-                              );
+                              const { stopJob } =
+                                await import("@/lib/nosana/stopJob");
                               const result = await stopJob(parsed.args.jobId);
                               await handleAskChunk(
                                 undefined,
@@ -710,9 +711,8 @@ export function useChatLogic() {
                           onConfirm: async () => {
                             try {
                               console.log(`▶ Executing ${funcName}`);
-                              const { extendJob } = await import(
-                                "@/lib/nosana/extendjob"
-                              );
+                              const { extendJob } =
+                                await import("@/lib/nosana/extendjob");
                               const result = await extendJob(
                                 parsed.args.jobId,
                                 parsed.args.extensionSeconds / 60,
@@ -777,8 +777,11 @@ export function useChatLogic() {
                 default:
                   if (eventType?.toLowerCase() === "followup") {
                     try {
-                      const parsed = typeof data === "string" ? JSON.parse(data) : data;
-                      followUpQuestions = Array.isArray(parsed) ? parsed : (parsed?.questions || []);
+                      const parsed =
+                        typeof data === "string" ? JSON.parse(data) : data;
+                      followUpQuestions = Array.isArray(parsed)
+                        ? parsed
+                        : parsed?.questions || [];
                       setFollowUp(followUpQuestions);
                     } catch (err) {
                       console.error(
