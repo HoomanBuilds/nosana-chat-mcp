@@ -6,6 +6,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ReasoningSection } from "./ReasoningSection";
 import { AgentTrace } from "./AgentTrace";
+import { StreamContent } from "./StreamContent";
 import rehypeHighlight from "rehype-highlight";
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
 import { Conversation, useChatStore } from "@/store/chat.store";
@@ -22,7 +23,7 @@ interface ChatMessageListProps {
   setQuery: (q: string) => void;
   textareaRef: React.RefObject<HTMLTextAreaElement | null>;
   onSubmit?: (question: string) => void;
-  streamingTrace?: any[];
+  streamItems?: any[];
 }
 
 const ChatMessageList = memo(
@@ -36,7 +37,7 @@ const ChatMessageList = memo(
     setQuery,
     textareaRef,
     onSubmit,
-    streamingTrace = [],
+    streamItems = [],
   }: ChatMessageListProps) => {
     const autoScroll = useRef(true);
     const virtuosoRef = useRef<VirtuosoHandle>(null);
@@ -107,7 +108,7 @@ const ChatMessageList = memo(
             event,
             markdownComponents,
             pendingPermission,
-            streamingTrace,
+            streamItems,
           }}
           components={{
             Footer: ChatFooter,
@@ -139,10 +140,15 @@ const ChatFooter = memo(({ context }: { context: any }) => {
     event,
     markdownComponents,
     pendingPermission,
-    streamingTrace = [],
+    streamItems = [],
   } = context;
 
-  if (state !== "loading" && !reasoningChunks && !llmChunks) {
+  if (
+    state !== "loading" &&
+    !reasoningChunks &&
+    !llmChunks &&
+    streamItems.length === 0
+  ) {
     return <div className="h-4" />;
   }
 
@@ -155,47 +161,61 @@ const ChatFooter = memo(({ context }: { context: any }) => {
               <ReasoningSection
                 reasoning={reasoningChunks}
                 isStreaming={true}
-                hasNormalResponseStarted={llmChunks.length > 0}
+                hasNormalResponseStarted={
+                  llmChunks.length > 0 || streamItems.length > 0
+                }
               />
             )}
 
-            {streamingTrace.length > 0 && (
-              <AgentTrace trace={streamingTrace} isStreaming={true} />
-            )}
-
-            <div
-              style={{
-                paddingLeft: "10px",
-                paddingRight: "5px",
-                paddingTop: "0px",
-                paddingBlock: "0px",
-                margin: "0px",
-                backgroundColor: "transparent",
-              }}
-              className="markdown-container rounded-lg mt-3 w-full text-black/60 text-sm prose prose-sm max-w-none"
-            >
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                rehypePlugins={[[rehypeHighlight, { ignoreMissing: true }]]}
-                components={markdownComponents}
+            {streamItems.length > 0 ? (
+              <>
+                <div className="rounded-lg mt-3 markdown-container markdown-body text-sm max-w-none">
+                  <StreamContent
+                    items={streamItems}
+                    markdownComponents={markdownComponents}
+                    isStreaming={state === "loading"}
+                  />
+                </div>
+                <div className="flex items-center gap-4 text-muted-foreground/50 mt-2 mb-4">
+                  <PulseCircle size={0.8} colorClass="bg-muted-foreground/50" />
+                  <span className="flex-1 flex items-center">{event}</span>
+                </div>
+              </>
+            ) : (
+              <div
+                style={{
+                  paddingLeft: "10px",
+                  paddingRight: "5px",
+                  paddingTop: "0px",
+                  paddingBlock: "0px",
+                  margin: "0px",
+                  backgroundColor: "transparent",
+                }}
+                className="markdown-container rounded-lg mt-3 w-full text-black/60 text-sm prose prose-sm max-w-none"
               >
-                {llmChunks}
-              </ReactMarkdown>
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[[rehypeHighlight, { ignoreMissing: true }]]}
+                  components={markdownComponents}
+                >
+                  {llmChunks}
+                </ReactMarkdown>
 
-              {pendingPermission && (
-                <PermissionRequest
-                  toolName={pendingPermission.toolName}
-                  args={pendingPermission.args}
-                  onAllow={pendingPermission.onAllow}
-                  onDeny={pendingPermission.onDeny}
-                />
-              )}
+                {pendingPermission && (
+                  <PermissionRequest
+                    toolName={pendingPermission.toolName}
+                    args={pendingPermission.args}
+                    onAllow={pendingPermission.onAllow}
+                    onDeny={pendingPermission.onDeny}
+                  />
+                )}
 
-              <div className="flex items-center gap-4 text-muted-foreground/50 mt-2 mb-4">
-                <PulseCircle size={0.8} colorClass="bg-muted-foreground/50" />
-                <span className="flex-1 flex items-center">{event}</span>
+                <div className="flex items-center gap-4 text-muted-foreground/50 mt-2 mb-4">
+                  <PulseCircle size={0.8} colorClass="bg-muted-foreground/50" />
+                  <span className="flex-1 flex items-center">{event}</span>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       )}

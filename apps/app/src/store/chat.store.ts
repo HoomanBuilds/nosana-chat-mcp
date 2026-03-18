@@ -52,6 +52,7 @@ export interface Conversation {
   followUps?: { question: string }[];
   type?: "message" | "error" | "aborted";
   trace?: TraceEvent[];
+  streamItems?: any[];
 }
 
 export interface ChatHistory {

@@ -42,13 +42,13 @@ export function useChatLogic() {
   const [llmChunks, setLLMChunks] = useState<string>("");
   const [event, setEvent] = useState<string>("");
   const [mcp, setmcp] = useState(false);
-  const [streamingTrace, setStreamingTrace] = useState<any[]>([]);
+  const [streamItems, setStreamItems] = useState<any[]>([]);
 
   // Buffer refs for throttling
   const llmBufferRef = useRef<string[]>([]);
   const reasoningBufferRef = useRef<string[]>([]);
   const throttleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const traceRef = useRef<any[]>([]);
+  const streamItemsRef = useRef<any[]>([]);
 
   // --- Stores ---
   const {
@@ -250,8 +250,8 @@ export function useChatLogic() {
       setReasoningChunks("");
       setLLMChunks("");
       setPendingTool(null);
-      traceRef.current = [];
-      setStreamingTrace([]);
+      streamItemsRef.current = [];
+      setStreamItems([]);
 
       //abort controller
       controllerRef.current = new AbortController();
@@ -430,8 +430,13 @@ export function useChatLogic() {
                     const traceEvent =
                       typeof data === "string" ? JSON.parse(data) : data;
                     if (traceEvent && traceEvent.type) {
-                      traceRef.current.push(traceEvent);
-                      setStreamingTrace([...traceRef.current]);
+                      streamItemsRef.current.push({
+                        id: crypto.randomUUID(),
+                        type: "trace",
+                        data: traceEvent,
+                        timestamp: Date.now(),
+                      });
+                      setStreamItems([...streamItemsRef.current]);
                     }
                   } catch (e) {
                     console.error("Failed to parse trace event:", e);
@@ -443,7 +448,13 @@ export function useChatLogic() {
                   const text = data.toString();
                   llmBufferRef.current.push(text);
                   finalLLM += text;
-                  queueUpdate();
+                  streamItemsRef.current.push({
+                    id: crypto.randomUUID(),
+                    type: "text",
+                    data: text,
+                    timestamp: Date.now(),
+                  });
+                  setStreamItems([...streamItemsRef.current]);
                   break;
                 }
 
@@ -827,7 +838,11 @@ export function useChatLogic() {
 
         //wrapping UP
         const finalContent = (finalLLM + fallbackLLM).trim();
-        const finalTrace = [...traceRef.current];
+        const finalTrace = [...streamItemsRef.current];
+        const traceOnly = finalTrace
+          .filter((i) => i.type === "trace")
+          .map((i) => i.data);
+
         if (finalContent !== "" || finalThinking.trim() !== "") {
           addMessage({
             role: "model",
@@ -841,7 +856,8 @@ export function useChatLogic() {
             responseTime: responseTime || undefined,
             followUps: followUpQuestions || [],
             type: "message",
-            trace: finalTrace.length > 0 ? finalTrace : undefined,
+            trace: traceOnly.length > 0 ? traceOnly : undefined,
+            streamItems: finalTrace.length > 0 ? finalTrace : undefined,
           });
         } else if (selectedChatId && !hasError) {
           if (!localConfig.showErrorMessages) {
@@ -896,8 +912,8 @@ export function useChatLogic() {
         setLLMChunks("");
         setState("idle");
         setEvent("");
-        traceRef.current = [];
-        setStreamingTrace([]);
+        streamItemsRef.current = [];
+        setStreamItems([]);
         controllerRef.current = null;
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -949,7 +965,7 @@ export function useChatLogic() {
     setLLMChunks,
     mcp,
     setmcp,
-    streamingTrace,
+    streamItems,
   };
 }
 

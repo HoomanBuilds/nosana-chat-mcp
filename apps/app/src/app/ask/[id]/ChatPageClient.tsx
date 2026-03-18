@@ -29,7 +29,7 @@ function ChatPageInner(): JSX.Element {
     setThinking,
     event,
     controllerRef,
-    streamingTrace,
+    streamItems,
   } = useChatLogic();
 
   const {
@@ -135,7 +135,7 @@ function ChatPageInner(): JSX.Element {
               handleAskChunk(undefined, question);
             }, 50);
           }}
-          streamingTrace={streamingTrace}
+          streamItems={streamItems}
         />
 
         <ChatForm

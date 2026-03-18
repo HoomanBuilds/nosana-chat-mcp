@@ -1,5 +1,5 @@
 /* eslint-disable */
-import React, { memo, useEffect } from "react";
+import React, { memo, useEffect, useMemo } from "react";
 import { ToolExecDialog } from "./ToolExecDialog";
 import { useChatStore } from "@/store/chat.store";
 import { cn } from "@/lib/utils";
@@ -11,6 +11,7 @@ import { ReasoningSection } from "./ReasoningSection";
 import { SearchResultsSection } from "./SearchResultsSection";
 import { MessageToolbar } from "./AiMessageToolBar";
 import { AgentTrace } from "./AgentTrace";
+import { StreamContent } from "./StreamContent";
 import { useShallow } from "zustand/shallow";
 
 const ChatMessage = memo(
@@ -30,6 +31,19 @@ const ChatMessage = memo(
       }
     });
 
+    const markdownComponents = useMemo(
+      () => ({
+        table({ node, ...props }: any) {
+          return (
+            <div style={{ overflowX: "auto", maxWidth: "100%" }}>
+              <table {...props} className="markdown-table" />
+            </div>
+          );
+        },
+      }),
+      [],
+    );
+
     if (msg.role === "user") return <UserMessage msg={msg} />;
 
     return (
@@ -38,30 +52,35 @@ const ChatMessage = memo(
           {/* Reasoning preview */}
           {msg.reasoning && <ReasoningSection reasoning={msg.reasoning} />}
 
-          {/* Agent Trace */}
-          {msg.trace && msg.trace.length > 0 && (
-            <AgentTrace trace={msg.trace} />
-          )}
-
           {/* search Result */}
           {msg.search && msg.search.length > 0 && (
             <SearchResultsSection search={msg.search} />
           )}
 
-          {/* markdown */}
-          <div
-            style={{
-              paddingLeft: "5px",
-              paddingRight: "5px",
-              paddingTop: "0px",
-              paddingBlock: "0px",
-              margin: "0px",
-              backgroundColor: "transparent",
-            }}
-            className="rounded-lg mt-3 markdown-container markdown-body text-sm prose prose-sm max-w-none"
-          >
-            <MarkdownComponent msg={msg} />
-          </div>
+          {msg.streamItems && msg.streamItems.length > 0 ? (
+            <div
+              style={{ paddingLeft: "5px", paddingRight: "5px", margin: "0px", backgroundColor: "transparent" }}
+              className="rounded-lg mt-3 markdown-container markdown-body text-sm max-w-none"
+            >
+              <StreamContent
+                items={msg.streamItems}
+                markdownComponents={markdownComponents}
+                isStreaming={false}
+              />
+            </div>
+          ) : (
+            <>
+              {msg.trace && msg.trace.length > 0 && (
+                <AgentTrace trace={msg.trace} />
+              )}
+              <div
+                style={{ paddingLeft: "5px", paddingRight: "5px", paddingTop: "0px", paddingBlock: "0px", margin: "0px", backgroundColor: "transparent" }}
+                className="rounded-lg mt-3 markdown-container markdown-body text-sm max-w-none"
+              >
+                <MarkdownComponent msg={msg} />
+              </div>
+            </>
+          )}
 
           {/* tool execution dialog box , show run tool */}
           {tool && index === conversations.length - 1 && <ToolExecDialog />}
