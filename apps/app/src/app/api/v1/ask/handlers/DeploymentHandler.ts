@@ -315,7 +315,7 @@ ${payload.customPrompt || ""}
         messages: strictRoleMessages,
         tools,
         toolChoice: "auto",
-        stopWhen: stepCountIs(6),
+        stopWhen: stepCountIs(10),
         abortSignal: payload.signal,
         maxRetries: 1,
       });

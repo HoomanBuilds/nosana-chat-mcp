@@ -149,7 +149,29 @@ extendJobRuntime({
 })
 ```
 
-## GPU Markets
+## VRAM Requirements by Model Size
+
+Use this to pick the right market without asking the user:
+
+| Parameters | Precision | VRAM needed | Recommended Market       |
+| ---------- | --------- | ----------- | ------------------------ |
+| 1–3B       | fp16      | 4–6 GB      | nvidia-rtx-4090          |
+| 7–8B       | fp16      | 14–16 GB    | nvidia-rtx-4090          |
+| 7–8B       | int4/GGUF | 5–6 GB      | nvidia-rtx-4090          |
+| 13B        | fp16      | 26 GB       | nvidia-rtx-4090 (tight)  |
+| 13B        | int4      | 8–10 GB     | nvidia-rtx-4090          |
+| 30–34B     | fp16      | 60–70 GB    | nvidia-a100-80gb         |
+| 30–34B     | int4      | 18–20 GB    | nvidia-rtx-4090          |
+| 70B        | fp16      | 140 GB      | 2× nvidia-a100-80gb      |
+| 70B        | int4      | 35–40 GB    | nvidia-a100-40gb         |
+| 72B        | int4      | 40 GB       | nvidia-a100-40gb         |
+
+**Rules:**
+- Default to fp16 unless user says "quantized", "GGUF", "int4", or "fast/cheap"
+- If model name contains `:4b`, `:8b`, `:14b` etc. (Ollama tag) use that as parameter count
+- If unsure, run `suggest_model_market` first
+
+
 
 ### Available Markets
 
@@ -259,7 +281,33 @@ Returns:
 5. **Handle errors gracefully** - explain what went wrong and suggest solutions
 6. **Default timeout is 1 hour** - extend if needed but explain costs
 
-## Job Definition Templates
+## Choosing the Right Deployment Template
+
+Follow this decision tree when a user asks to deploy a model:
+
+```
+User wants to deploy a model
+│
+├── Is it a Jupyter/notebook/interactive session?
+│   └── YES → Use PyTorch Jupyter template
+│
+├── Does the user say "Ollama" or want a chat UI / simple API?
+│   └── YES → Use Ollama template, set MODEL to ollama tag (e.g. llama3.2:3b)
+│
+├── Does the user want OpenAI-compatible API / vLLM / production inference?
+│   └── YES → Use vLLM template, set MODEL to HuggingFace ID
+│
+└── Does the user provide a raw job JSON?
+    └── YES → Use directJobDef, do not modify unless asked
+```
+
+**Ollama model tag format:** `<name>:<size>` e.g. `llama3.2:3b`, `gemma3:4b-it-qat`, `mistral:7b`
+**vLLM model format:** HuggingFace ID e.g. `meta-llama/Llama-3.1-8B-Instruct`
+
+When using Ollama template, always add health check on `/api/tags`.
+When using vLLM template, expose port `8000` and add `--max-model-len` based on available VRAM.
+
+
 
 Use these as reference when constructing job definitions.
 
