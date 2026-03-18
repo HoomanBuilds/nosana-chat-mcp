@@ -169,7 +169,7 @@ const ChatFooter = memo(({ context }: { context: any }) => {
 
             {streamItems.length > 0 ? (
               <>
-                <div className="rounded-lg mt-3 markdown-container markdown-body text-sm max-w-none">
+                <div style={{ paddingLeft: "5px", paddingRight: "5px", paddingTop: "0px", paddingBlock: "0px", margin: "0px", backgroundColor: "transparent" }} className="rounded-lg mt-3 markdown-container markdown-body text-sm max-w-none">
                   <StreamContent
                     items={streamItems}
                     markdownComponents={markdownComponents}

@@ -71,26 +71,6 @@ export const StreamContent = memo(function StreamContent({
     <>
       {segments.map((segment, idx) => {
         if (segment.type === "text") {
-          if (isStreaming) {
-            // Split into completed lines (stable markdown) + last incomplete line (raw)
-            const lastNewline = segment.content.lastIndexOf("\n");
-            const stable = lastNewline >= 0 ? segment.content.slice(0, lastNewline + 1) : "";
-            const tail = lastNewline >= 0 ? segment.content.slice(lastNewline + 1) : segment.content;
-            return (
-              <React.Fragment key={idx}>
-                {stable && (
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    rehypePlugins={[[rehypeHighlight, { ignoreMissing: true }]]}
-                    components={markdownComponents}
-                  >
-                    {stable}
-                  </ReactMarkdown>
-                )}
-                {tail && <span className="whitespace-pre-wrap">{tail}</span>}
-              </React.Fragment>
-            );
-          }
           return (
             <ReactMarkdown
               key={idx}
