@@ -75,7 +75,19 @@ export const StreamContent = memo(function StreamContent({
           );
         }
         const traceData = segment.content as TraceEvent;
-        // Check if there's a tool_result for this tool_start AFTER this segment index
+        // Skip tool_start if its tool_result has already arrived
+        if (
+          traceData.type === "tool_start" &&
+          items.some(
+            (item) =>
+              item.type === "trace" &&
+              (item.data as TraceEvent).type === "tool_result" &&
+              (item.data as TraceEvent).toolName === traceData.toolName &&
+              (item.data as TraceEvent).timestamp > traceData.timestamp
+          )
+        ) {
+          return null;
+        }
         const isCompleted = items.some(
           (item, i) =>
             item.type === "trace" &&
