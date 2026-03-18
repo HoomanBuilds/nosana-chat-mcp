@@ -169,16 +169,16 @@ const ChatFooter = memo(({ context }: { context: any }) => {
 
             {streamItems.length > 0 ? (
               <>
+                <div className="flex items-center gap-4 text-muted-foreground/50 mb-2">
+                  <PulseCircle size={0.8} colorClass="bg-muted-foreground/50" />
+                  <span className="flex-1 flex items-center">{event || "streaming..."}</span>
+                </div>
                 <div style={{ paddingLeft: "5px", paddingRight: "5px", paddingTop: "0px", paddingBlock: "0px", margin: "0px", backgroundColor: "transparent" }} className="rounded-lg mt-3 markdown-container markdown-body text-sm max-w-none">
                   <StreamContent
                     items={streamItems}
                     markdownComponents={markdownComponents}
                     isStreaming={state === "loading"}
                   />
-                </div>
-                <div className="flex items-center gap-4 text-muted-foreground/50 mt-2 mb-4">
-                  <PulseCircle size={0.8} colorClass="bg-muted-foreground/50" />
-                  <span className="flex-1 flex items-center">{event}</span>
                 </div>
               </>
             ) : (
@@ -193,6 +193,10 @@ const ChatFooter = memo(({ context }: { context: any }) => {
                 }}
                 className="markdown-container rounded-lg mt-3 w-full text-black/60 text-sm prose prose-sm max-w-none"
               >
+                <div className="flex items-center gap-4 text-muted-foreground/50 mb-2">
+                  <PulseCircle size={0.8} colorClass="bg-muted-foreground/50" />
+                  <span className="flex-1 flex items-center">{event || "streaming..."}</span>
+                </div>
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
                   rehypePlugins={[[rehypeHighlight, { ignoreMissing: true }]]}
@@ -209,11 +213,6 @@ const ChatFooter = memo(({ context }: { context: any }) => {
                     onDeny={pendingPermission.onDeny}
                   />
                 )}
-
-                <div className="flex items-center gap-4 text-muted-foreground/50 mt-2 mb-4">
-                  <PulseCircle size={0.8} colorClass="bg-muted-foreground/50" />
-                  <span className="flex-1 flex items-center">{event}</span>
-                </div>
               </div>
             )}
           </div>

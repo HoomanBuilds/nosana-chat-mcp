@@ -9,19 +9,22 @@ import { getPlannerModel } from "./plannerContext";
 
 export async function getModelData(): Promise<any[]> {
     if (typeof window === "undefined") {
-        const filePath = path.join(process.cwd(), "data", "models.json");
-        const data = fs.readFileSync(filePath, "utf8");
         try {
+            const filePath = path.join(process.cwd(), "data", "models.json");
+            const data = fs.readFileSync(filePath, "utf8");
             return JSON.parse(data);
-        } catch (error) {
-            console.error("Failed to parse models.json:", error);
+        } catch {
             return [];
         }
     }
 
-    const res = await fetch("/models.json");
-    if (!res.ok) throw new Error(`Failed to fetch models.json: ${res.status}`);
-    return await res.json();
+    try {
+        const res = await fetch("/models.json");
+        if (!res.ok) return [];
+        return await res.json();
+    } catch {
+        return [];
+    }
 }
 
 export function getRelatedModels(models: ModelFamily[], q: QueryFilter): ScoredModel[] {
@@ -160,76 +163,123 @@ export function createJobDefination(
     { userPubKey, market, timeoutSeconds, family }: { userPubKey: string; market?: string; timeoutSeconds?: number, family?: string }
 ) {
     const now = new Date().toISOString();
-    const isTemplate = result.type === "template";
+    const image = result.image || "";
+    const isOllama = image.includes("ollama");
+    const isVllm = image.includes("vllm");
+    const isJupyter = image.includes("jupyter") || image.includes("pytorch-jupyter");
 
-    const baseEnv: Record<string, string> = {
-        MODEL_NAME: `${result.modelName}` || "unknown",
-        SERVED_MODEL_NAME: result.modelName || "unknown",
-        PORT: String(result.exposePort) || "8000",
-        MAX_MODEL_LEN: "NAN",
-        PARAMETER_SIZE: result.parameterSize ? getSafeParameterSize(result.parameterSize) : "10B",
-        QUANTIZATION: "NAN",
-        MEMORY_LIMIT: "NAN",
-        TENSOR_PARALLEL_SIZE: "1",
-        GPU_MEMORY_UTILIZATION: "NAN",
-        SWAP_SPACE: "NAN",
-        BLOCK_SIZE: "NAN",
-        ENABLE_STREAMING: "false",
-        API_KEY: "",
+    const resultEnvObject: Record<string, any> = Array.isArray(result.env)
+        ? Object.fromEntries(result.env.map(({ key, value }) => [key, value ?? ""]))
+        : (result.env as any || {});
+
+    // Build expose based on image type
+    let expose: any;
+    if (isOllama) {
+        expose = [{
+            port: 11434,
+            health_checks: [{
+                path: "/api/tags",
+                type: "http",
+                method: "GET",
+                continuous: false,
+                expected_status: 200,
+            }],
+        }];
+    } else {
+        expose = result.exposePort || (isVllm ? 8000 : 8888);
+    }
+
+    // Build resources (Ollama model pull)
+    const resources: any[] = [];
+    if (isOllama && result.modelName) {
+        resources.push({ type: "Ollama", model: result.modelName });
+    } else if (result.resources?.length) {
+        resources.push(...result.resources);
+    }
+
+    // Build args
+    const args: any = {
+        gpu: result.gpu ?? true,
+        image,
+        expose,
+        ...(resources.length ? { resources } : {}),
+        ...(Object.keys(resultEnvObject).length ? { env: resultEnvObject } : {}),
+        ...(result.command?.length ? { cmd: result.command } : {}),
     };
-
-    const resultEnvObject = Array.isArray(result.env)
-        ? Object.fromEntries(result.env.map(({ key, value }) => [key, value]))
-        : (result.env || {});
-
-    const env = isTemplate
-        ? { ...baseEnv, ...resultEnvObject }
-        : resultEnvObject;
-    // const hardcodedResources = [
-    //     {
-    //         type: "HF",
-    //         repo: `${result.modelName}`,
-    //         target: `/data-models/`,
-    //     },
-    // ];
 
     return {
         version: "0.1",
         type: "container",
         meta: {
-            trigger: "cli",
+            trigger: "dashboard",
             system_requirements: {
                 required_vram: result.vRAM_required || 6,
             },
-            description:
-                result.otherExtra?.Description ?? `AI job for ${result.modelName} model.`,
+            description: result.otherExtra?.Description ?? `AI job for ${result.modelName} model.`,
             owner: userPubKey,
             created_at: now,
             referer: "nosana-chat",
             ...(market && { market }),
             ...(timeoutSeconds && { timeout: timeoutSeconds }),
-            // category: result.category ?? "Unknown",
         },
-        ops: [
-            {
-                id: `oneClickLLM`,
-                type: "container/run",
-                args: {
-                    ...(result.command != null ? { cmd: result.command } : {}),
-                    gpu: result.gpu ?? false,
-                    image: isTemplate ? HOOMAN_IMAGE : result.image,
-                    expose: result.exposePort || 8000,
-                    env: env,
-                    resources: isTemplate
-                        ? []
-                        : result.resources?.length
-                            ? result.resources
-                            : [],
-                },
-            },
-        ],
-
+        ops: [{
+            id: result.modelName || "job",
+            type: "container/run",
+            args,
+        }],
+        ...(isOllama && result.modelName ? {
+            global: { variables: { MODEL: result.modelName } }
+        } : {}),
     };
+}
+
+export function buildOllamaJob(modelTag: string, requiredVram: number): any {
+  return {
+    version: "0.1",
+    type: "container",
+    global: { variables: { MODEL: modelTag } },
+    ops: [{
+      id: modelTag.replace(/[^a-z0-9-]/gi, "-").toLowerCase(),
+      type: "container/run",
+      args: {
+        gpu: true,
+        image: "docker.io/ollama/ollama:0.15.4",
+        expose: [{ port: 11434, health_checks: [{ path: "/api/tags", type: "http", method: "GET", continuous: false, expected_status: 200 }] }],
+        resources: [{ type: "Ollama", model: "%%global.variables.MODEL%%" }],
+      },
+    }],
+    meta: { trigger: "dashboard", system_requirements: { required_vram: requiredVram } },
+  };
+}
+
+export function buildVllmJob(hfModelId: string, requiredVram: number, maxModelLen = 30000): any {
+  return {
+    version: "0.1",
+    type: "container",
+    ops: [{
+      id: hfModelId.replace(/[^a-z0-9-]/gi, "-").toLowerCase(),
+      type: "container/run",
+      args: {
+        gpu: true,
+        image: "docker.io/vllm/vllm-openai:v0.16.0",
+        expose: [{
+          port: 9000,
+          health_checks: [{
+            type: "http",
+            path: "/v1/chat/completions",
+            method: "POST",
+            expected_status: 200,
+            continuous: false,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ model: hfModelId, messages: [{ role: "user", content: "Respond with a single word: Ready" }], stream: false }),
+          }],
+        }],
+        cmd: [hfModelId, "--served-model-name", hfModelId, "--port", "9000", "--max-model-len", String(maxModelLen), "--gpu-memory-utilization", "0.8", "--max-num-seqs", "128", "--dtype", "auto", "--trust-remote-code", "--kv-cache-dtype", "auto"],
+        env: { CUDA_MODULE_LOADING: "LAZY", NVIDIA_DISABLE_CUDA_COMPAT: "1" },
+      },
+    }],
+    meta: { trigger: "dashboard", system_requirements: { required_vram: requiredVram } },
+  };
 }
 
 export async function chatJSONRetry<T>(
@@ -237,10 +287,8 @@ export async function chatJSONRetry<T>(
     schema: z.ZodSchema<T>,
     primaryModel?: string
 ): Promise<T> {
-    const preferredModel =
-        primaryModel ||
-        getPlannerModel() ||
-        "qwen3:0.6b";
+    const preferredModel = primaryModel || getPlannerModel();
+    if (!preferredModel) throw new Error("No model selected");
     const modelsToTry = [preferredModel].filter(
         (m, i, arr) => m && arr.indexOf(m) === i,
     );

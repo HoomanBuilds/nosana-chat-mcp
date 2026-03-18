@@ -263,7 +263,7 @@ export const ModelQuerySchema = z.object({
 
   params: z
     .object({
-      op: z.enum(["<", "<=", ">", ">=", "="]).default("="),
+      op: z.enum(["<", "<=", ">", ">=", "=", "==", "~"]).transform(v => (v === "==" || v === "~") ? "=" : v).default("="),
       value: z.number().nullable().default(null),
       strict: z.boolean().optional().default(false),
     })
@@ -282,8 +282,9 @@ export const ModelQuerySchema = z.object({
     .default(null),
 
   context: z
-    .string()
+    .union([z.string(), z.number()])
     .nullable()
+    .transform(v => v != null ? String(v) : null)
     .describe("Model context length if mentioned, e.g. '128K'.")
     .default(null),
 

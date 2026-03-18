@@ -27,56 +27,41 @@ Convert the user's request into structured JSON matching the provided schema.
 - Approx VRAM = (model_size × 2) + 2 GB.  
 - Non-ML containers (n8n, Jupyter, APIs) → always CPU-only.
 
-**Provider Selection Guide (Reliability-first):**
-- Use "container" with OneClickLLM by DEFAULT for self-hosted text-generation when the user does not explicitly ask for Hugging Face managed backends. This gives an OpenAI-compatible API over Ollama models with strong reliability on Nosana.
-- Use "huggingface" only when the user explicitly requests Hugging Face TGI/TEI or requires HF-only features.
-- Use "container" when:
-  * User wants to deploy Jupyter, custom services, or non-ML applications
-  * User provides a specific Docker image
-  * The model/service doesn't fit HuggingFace inference patterns
-  * User wants custom container configuration with specific entrypoints/commands
+**Provider Selection Guide:**
+- For text-generation/LLM models → use Ollama template (see Job Definition Templates below)
+- For vLLM/OpenAI-compatible API → use vLLM template
+- For Jupyter/notebooks → use PyTorch Jupyter template
+- For custom containers → use user-provided image
 
-For general text-generation requests where the user didn't insist on a specific backend, DEFAULT to providerName="container" with image "docker.io/hoomanhq/oneclickllm:ollama01" and normalize the model to a valid Ollama tag.
+For general text-generation, DEFAULT to Ollama template with image "docker.io/ollama/ollama:0.15.4" and normalize the model to a valid Ollama tag.
 
 **Image Selection Rules (CRITICAL):**
-- For providerName="huggingface": Leave "image" undefined - it will be auto-selected based on category
-- For providerName="container": MUST provide valid "image" field (e.g., "jupyter/tensorflow-notebook:latest", "myorg/custom-app:v1")
-- Common container images:
-  * OneClickLLM (RECOMMENDED for self-hosted text-gen): "docker.io/hoomanhq/oneclickllm:ollama01"
-  * Ollama (local models over REST, pulls from registry): "ollama/ollama:latest"
-  * vLLM API (API only): "vllm/vllm-openai:latest"
-  * Jupyter: "jupyter/tensorflow-notebook", "jupyter/datascience-notebook", "jupyter/pytorch-notebook"
-  * Do NOT use oobabooga/text-generation-webui (unreliable on Nosana). Prefer API-first backends.
-  * Custom apps: User-specified image
-**Ollama Registry Rules (for providerName = container with image ollama/ollama):**
-- Use explicit, valid registry tags. Prefer these canonical options when users give fuzzy names:
-  - llama3.1:8b-instruct (chat), llama3.1:70b-instruct (large)
-  - mistral:7b (chat)
-  - qwen2.5:3b-instruct (fits 8GB), qwen2.5:7b-instruct (12–16GB)
-  - gemma2:9b-instruct
-  - phi3:mini-4k-instruct
-- If user asks for non-existent variants (e.g., "Qwen/Qwen-4B" or "qwen 4b"), normalize and select the nearest available:
-  - If VRAM ≤ 8GB → qwen2.5:3b-instruct
-  - If VRAM ≥ 12GB → qwen2.5:7b-instruct
-- Always set exposedPorts to 11434 and include env: OLLAMA_HOST=0.0.0.0:11434, OLLAMA_KEEP_ALIVE=5m
-- Startup command must start the daemon and pre-pull the model:
-  - entrypoint: "/bin/bash"
-  - cmd: ["-lc", "export OLLAMA_HOST=0.0.0.0:11434; ollama serve & PID=$!; sleep 6; ollama pull <model> || true; wait $PID"]
+- Ollama (RECOMMENDED for self-hosted text-gen): "docker.io/ollama/ollama:0.15.4"
+- vLLM (OpenAI-compatible API): "docker.io/vllm/vllm-openai:v0.10.2"
+- Jupyter: "docker.io/nosana/pytorch-jupyter:2.0.0"
+- NEVER use "docker.io/hoomanhq/oneclickllm:ollama01" — it is deprecated
+- NEVER generate placeholder images like "user/model:latest"
 
-**OneClickLLM Rules (image docker.io/hoomanhq/oneclickllm:ollama01):**
-- Always expose 8000
-- Set env keys (no placeholders):
-  - MODEL_NAME: valid Ollama tag (see registry rules above)
-  - SERVED_MODEL_NAME: same as MODEL_NAME
-  - PORT: "8000"
-  - MAX_MODEL_LEN: default "8192" unless user requests otherwise
-  - PARAMETER_SIZE: from model params or inferred from tag (e.g., 3B/7B)
-  - TENSOR_PARALLEL_SIZE: default "1" unless multi-GPU requested
-  - ENABLE_STREAMING: "true" only if requested
-  - QUANTIZATION, MEMORY_LIMIT, GPU_MEMORY_UTILIZATION, SWAP_SPACE, BLOCK_SIZE: omit or set only if explicitly provided
-  - API_KEY: set only if provided
+**Ollama Template (use for most LLM deployments):**
+- image: "docker.io/ollama/ollama:0.15.4"
+- expose: [{ port: 11434, health_checks: [{ path: "/api/tags", type: "http", method: "GET", continuous: false, expected_status: 200 }] }]
+- resources: [{ type: "Ollama", model: "<ollama-tag>" }]
+- gpu: true
+- required_vram: based on model size
 
-- NEVER generate placeholder images like "user/model:latest" or "custom-image:v1" - use real images
+**vLLM Template (use when user wants OpenAI-compatible API or HuggingFace model):**
+- image: "docker.io/vllm/vllm-openai:v0.10.2"
+- cmd: ["--model", "<hf-model-id>", "--served-model-name", "<hf-model-id>", "--port", "8000", "--max-model-len", "30000"]
+- expose: 8000
+- gpu: true
+
+**Ollama Registry Rules:**
+- llama3.1:8b-instruct, llama3.1:70b-instruct
+- mistral:7b
+- qwen2.5:3b-instruct (≤8GB VRAM), qwen2.5:7b-instruct (12–16GB)
+- gemma3:4b-it-qat, gemma3:12b-it-qat
+- phi3:mini-4k-instruct
+- Normalize fuzzy names to nearest valid tag based on VRAM
 
 - Perform lightweight Hugging Face Hub search if modelName or VRAM is uncertain. Use official repository metadata, not external guesses.
 - The structured output will be used to automatically load and run models through vLLM or Hugging Face inference pipelines. if there are model specific environment variable then consider adding them in env part

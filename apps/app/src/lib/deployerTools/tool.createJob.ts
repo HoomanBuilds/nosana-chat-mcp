@@ -1,49 +1,41 @@
 import z from "zod";
 import { tool } from "ai";
-import {
-  chatJSONRetry,
-  createJobDefination,
-  findFamilyByModel,
-  getModelData,
-  getRelatedModels,
-} from "./utils/draft.helper";
-import { chatJSON, fail } from "./utils/helpers";
-import { ContainerExecutionTemplate, ModelQuerySchema } from "./utils/schema";
-import { model_families } from "../modelfamily";
-import { DEFAULT_MARKETS, QueryFilter } from "./utils/types";
+import { buildOllamaJob, buildVllmJob } from "./utils/draft.helper";
+import { fail } from "./utils/helpers";
+import { DEFAULT_MARKETS } from "./utils/types";
 import { validateJobDefinition } from "@nosana/sdk";
 import { MARKETS } from "./utils/supportingModel";
 import { ensureDeployer } from "./Deployer";
 import { JOB_MESSAGE } from "./utils/contants";
-import { extractDefination, getResolvedPrompt } from "./utils/draft.prompt";
-import {
-  ExtractedJobDefinition,
-  JobDefinitionSchema,
-} from "./utils/draft.schema";
+import { extractDefination } from "./utils/draft.prompt";
 import { getPlannerModel } from "./utils/plannerContext";
 
+
+
 export const createJob = tool({
-  description: `
-     Create or update a Nosana job definition.
-     - Use 'directJobDef' only when the user provides a full Nosana job JSON (type, ops, meta).
-     - If user just gives changes (e.g., add env var, update port, etc.), modify existing def internally.
-     - Always include 'requirements' — a verbose summary of model, GPU, runtime, env , commands and all configuration details.
-     - If user mentions GPU or runtime, extract 'market' accordingly.
-     - show the job definition to user in JSON code block one you get it
-     `,
+  description: `Create a Nosana job and show a deploy button.
+- For model deployments: REQUIRES resolvedModel from getModels tool. Call getModels first, then pass its result here.
+- For direct JSON: use directJobDef.
+- For custom containers only (nginx, n8n, etc.): use requirements.`,
 
   inputSchema: z.object({
     directJobDef: z
       .record(z.string(), z.any())
       .optional()
-      .describe(
-        "Complete Nosana job definition with 'type', 'ops', and 'meta'. If not given, generate dynamically.",
-      ),
+      .describe("Complete Nosana job definition with 'type', 'ops', and 'meta'."),
+    resolvedModel: z
+      .object({
+        id: z.string().describe("HuggingFace model ID, e.g. mistralai/Mistral-7B-Instruct-v0.3"),
+        vram: z.number().describe("Required VRAM in GB"),
+        type: z.enum(["ollama", "vllm", "custom"]),
+        ollamaTag: z.string().nullable().optional().describe("Ollama pull tag if type=ollama"),
+      })
+      .optional()
+      .describe("Pre-resolved model info from getModels tool."),
     requirements: z
       .string()
-      .describe(
-        "Complete user request context. Must include model name, family, GPU needs, env vars (like API_KEY), ports, commands, and all custom parameters provided by the user. Used to dynamically build the full job definition.",
-      ),
+      .optional()
+      .describe("Only for custom non-LLM containers (e.g. nginx, n8n, Jupyter). Do NOT use this for model deployments — use resolvedModel from getModels instead."),
     userPublicKey: z
       .string()
       .optional()
@@ -51,7 +43,7 @@ export const createJob = tool({
     market: z
       .enum(DEFAULT_MARKETS)
       .optional()
-      .describe("GPU market; if unsure, auto-select safe default."),
+      .describe("GPU market; if unsure, auto-select based on VRAM."),
     timeoutSeconds: z
       .number()
       .min(600)
@@ -62,8 +54,8 @@ export const createJob = tool({
 
   execute: async (params) => {
     const deployer = ensureDeployer();
-    const plannerModel =
-      getPlannerModel() || "qwen3:0.6b";
+    const plannerModel = getPlannerModel();
+    if (!plannerModel) throw new Error("No model selected");
     let market_public_key: string = "";
     let Job_cost: number | null = null;
 
@@ -184,68 +176,55 @@ export const createJob = tool({
       }
 
       try {
-        const resolvedPrompt = getResolvedPrompt(
-          params.requirements,
-          model_families,
-        );
-        const query = await chatJSONRetry(resolvedPrompt, ModelQuerySchema);
-
-        console.log("query", query);
-        const models = await getModelData();
-        const results = getRelatedModels(models, query as QueryFilter);
-        console.log("results", results);
-
-        const extract_jobdef_prompt = extractDefination(
-          params.requirements + query.input,
-          results,
-          MARKETS,
-        );
-
-        const extract_jobdef = (await chatJSON(
-          extract_jobdef_prompt,
-          JobDefinitionSchema,
-          plannerModel,
-        )) as ExtractedJobDefinition;
-
-        try {
-          let selected;
-
-          if (params.market) {
-            selected = MARKETS[params.market];
-            if (!selected)
-              throw new Error(`Market ${params.market} not found.`);
-          } else {
-            const fallback = Object.entries(MARKETS).find(
-              ([, m]) => m.vram_gb >= (extract_jobdef.vRAM_required || 6),
-            );
-            selected = fallback?.[1];
-          }
-
-          market_public_key =
-            selected?.address ?? MARKETS["nvidia-4070"].address;
-        } catch (err) {
-          console.warn("Market resolution fallback:", err);
-          market_public_key = MARKETS["nvidia-4070"].address;
-        }
-
-        const family =
-          findFamilyByModel(models, extract_jobdef.modelName) ||
-          query.families?.[0] ||
-          "";
+        // --- Fast-path: resolvedModel from getModels tool ---
         let jobdef: any;
-        try {
-          jobdef = createJobDefination(extract_jobdef, {
-            userPubKey: effectiveUserPubKey,
-            market: params.market || market_public_key,
-            timeoutSeconds: params.timeoutSeconds,
-            family: family + "/",
+
+        if (params.resolvedModel) {
+          const { id, vram, type, ollamaTag: tag } = params.resolvedModel;
+          if (type === "ollama") {
+            jobdef = buildOllamaJob(tag || id, vram);
+          } else if (type === "vllm") {
+            jobdef = buildVllmJob(id, vram);
+          } else {
+            return fail("Custom job type requires a directJobDef.");
+          }
+        } else {
+          // Fallback: LLM generates job JSON from requirements
+          const req = params.requirements || "";
+          const extract_jobdef_prompt = extractDefination(req, {}, MARKETS);
+          const { text } = await (await import("ai")).generateText({
+            model: (await import("@ai-sdk/openai")).createOpenAI({
+              apiKey: process.env.LLM_PROVIDER === "deepseek"
+                ? process.env.DEEPSEEK_API_KEY || ""
+                : process.env.INFERIA_LLM_API_KEY || "nosana-local",
+              baseURL: process.env.LLM_PROVIDER === "deepseek"
+                ? process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com/v1"
+                : process.env.NEXT_PUBLIC_INFERIA_LLM_URL || "",
+            }).chat(plannerModel),
+            prompt: extract_jobdef_prompt,
           });
-        } catch (err) {
-          console.error("Job definition creation failed:", err);
-          return fail(
-            `Failed to create job definition: ${(err as Error).message}`,
-          );
+          const jsonMatch = text.match(/\{[\s\S]*\}/);
+          if (!jsonMatch) return fail("No JSON in LLM response");
+          jobdef = JSON.parse(jsonMatch[0]);
         }
+
+        // Resolve market_public_key
+        if (params.market) {
+          const selected = MARKETS[params.market];
+          if (!selected) return fail(`Unknown market: ${params.market}`);
+          market_public_key = selected.address;
+        } else {
+          const requiredVram = jobdef.meta?.system_requirements?.required_vram || 6;
+          const fallback = Object.entries(MARKETS).find(([, m]) => m.vram_gb >= requiredVram);
+          market_public_key = fallback?.[1]?.address ?? MARKETS["nvidia-4070"].address;
+        }
+
+        // Inject only the required meta fields into the job definition
+        jobdef.meta = {
+          trigger: jobdef.meta?.trigger || "dashboard",
+          system_requirements: jobdef.meta?.system_requirements,
+        };
+
         console.log("jobdef", JSON.stringify(jobdef));
 
         if (!jobdef)
@@ -272,7 +251,7 @@ export const createJob = tool({
           return fail(
             JOB_MESSAGE.validation_failed(
               formattedErrors || "Unknown validation errors",
-              schemaShape(ContainerExecutionTemplate),
+              "",
             ),
           );
         }
@@ -289,9 +268,9 @@ export const createJob = tool({
               type: "text",
               text: JOB_MESSAGE.job_ready_to_deploy(
                 jobdef,
-                extract_jobdef.image || "",
+                jobdef.ops?.[0]?.args?.image || "",
                 market_public_key,
-                extract_jobdef.vRAM_required,
+                jobdef.meta?.system_requirements?.required_vram,
                 params.timeoutSeconds,
                 Job_cost,
               ),
@@ -310,70 +289,60 @@ export const createJob = tool({
 });
 
 export const getModels = tool({
-  description: `
-     Expands user requests into a detailed model definition.
-     Extract key details like family, size, GPU preference, quantization, and constraints from the query.
-     Write a single, clear, and descriptive prompt that captures all main requirements — no need for long extra text or repetition.
-     Focus on clarity and intent, not verbosity.
-     `,
+  description: `Resolve a model name from a user request into a HuggingFace model ID, estimated VRAM, and deployment type (ollama/vllm/custom). Call this before createJob when the user hasn't specified an exact HF model ID.`,
 
   inputSchema: z.object({
-    prompt: z
-      .string()
-      .describe(
-        "User or system query describing the model requirement. | dont ask it from user get it from text and history context",
-      ),
+    query: z.string().describe("The user's model request, e.g. 'mistral 7b', 'GPT-OSS 20B', 'llama 3.1 70b instruct'"),
   }),
 
-  execute: async ({ prompt }) => {
-    console.log(prompt);
-    const plannerModel =
-      getPlannerModel() || "qwen3:0.6b";
-    const resolvedPrompt = getResolvedPrompt(prompt, model_families);
-    const query = await chatJSON(
-      resolvedPrompt,
-      ModelQuerySchema,
-      plannerModel,
-    );
-    const models = await getModelData();
+  execute: async ({ query }) => {
+    console.log(query, "model deployment with vLLM on NVIDIA GPU");
+    const plannerModel = getPlannerModel();
+    if (!plannerModel) throw new Error("No model selected");
 
-    console.log(query);
-    const results = getRelatedModels(models, query as QueryFilter);
-    const summary = `
-          Model request: ${query.input}
+    const { generateText } = await import("ai");
+    const { createOpenAI } = await import("@ai-sdk/openai");
+    const openai = createOpenAI({
+      apiKey: process.env.LLM_PROVIDER === "deepseek"
+        ? process.env.DEEPSEEK_API_KEY || ""
+        : process.env.INFERIA_LLM_API_KEY || "nosana-local",
+      baseURL: process.env.LLM_PROVIDER === "deepseek"
+        ? process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com/v1"
+        : process.env.NEXT_PUBLIC_INFERIA_LLM_URL || "",
+    });
 
-          Families: ${query.families?.join(", ") || "-"}
-          Params: ${query.params?.op || ""} ${query.params?.value || "any"}
-          Quant: ${query.quant || "-"}
-          GPU: ${query.gpuPreference || "-"}
-          Memory: ${query.memoryUtilization || "-"}
-          Parallelism: ${query.tensorParallelism ?? "auto"}
-          Sort: ${query.sort || "relevance"}
+    // Step 1: search HuggingFace API with the raw query
+    const hfUrl = new URL("https://huggingface.co/api/models");
+    hfUrl.searchParams.set("search", query);
+    hfUrl.searchParams.set("limit", "5");
+    hfUrl.searchParams.set("sort", "trending");
+    const hfRes = await fetch(hfUrl.href).catch(() => null);
+    const hfModels: any[] = hfRes?.ok ? await hfRes.json().catch(() => []) : [];
+    const candidates = hfModels.map((m: any) => m.modelId || m.id).filter(Boolean);
 
-          Write a clear, readable summary of the top ${results.length} models.
-          Use a short intro explaining which types of models fit best and why.
-          Then show the models in a clean bullet or numbered list, one per line, including size, GPU needs, and notes.
-          Add brief recommendations or trade-offs (e.g., cost vs. speed, lighter vs. powerful).
-          Be natural and confident — like an engineer giving advice, not a robot or narrator.
-          Avoid repeating the query text; focus on insight.
+    // Step 2: LLM picks the best match from real HF results
+    const { text } = await generateText({
+      model: openai.chat(plannerModel),
+      prompt: `You are a model resolver. The user wants to deploy: "${query}"
 
-          Models:
-          ${results
-        .map(
-          (m, i) =>
-            `${i + 1}. ${m.family} → ${m.name} (${m.recommendedGPU?.parameters || "?"} GPU, score: ${m.score.toFixed(2)})`,
-        )
-        .join("\n")}
-          `.trim();
+HuggingFace search returned these real model IDs:
+${candidates.length ? candidates.map((c, i) => `${i + 1}. ${c}`).join("\n") : "(no results)"}
 
-    return {
-      content: [{ type: "tool", text: summary }],
-    };
+Pick the best matching model and output ONLY a JSON object:
+- "id": exact HuggingFace model ID from the list above (or your best known HF ID if list is empty/irrelevant)
+- "vram": estimated VRAM in GB (integer). 7B fp16=14, 7B int4=5, 13B=26, 20B=40, 70B int4=40
+- "type": "ollama" (default) or "vllm" (if user asked for vLLM/OpenAI API)
+- "ollamaTag": Ollama library tag (e.g. "mistral:7b") if type=ollama, else null. Ollama tags are from ollama.com/library, NOT HuggingFace IDs.
+
+Output only JSON.`,
+    });
+
+    const match = text.match(/\{[\s\S]*\}/);
+    if (!match) return { content: [{ type: "text", text: `Could not resolve model for: ${query}` }] };
+
+    const resolved = JSON.parse(match[0]);
+    console.log("resolved model:", resolved);
+    return { content: [{ type: "text", text: JSON.stringify(resolved) }] };
   },
 });
 
-function schemaShape(schema: z.ZodObject<any>): Record<string, string> {
-  return Object.fromEntries(
-    Object.entries(schema.shape).map(([k, v]) => [k, (v as any)._def.typeName]),
-  );
-}
