@@ -315,7 +315,8 @@ export const getModels = tool({
     const hfUrl = new URL("https://huggingface.co/api/models");
     hfUrl.searchParams.set("search", query);
     hfUrl.searchParams.set("limit", "5");
-    hfUrl.searchParams.set("sort", "trending");
+    hfUrl.searchParams.set("sort", "downloads");
+    hfUrl.searchParams.set("direction", "-1");
     const hfRes = await fetch(hfUrl.href).catch(() => null);
     const hfModels: any[] = hfRes?.ok ? await hfRes.json().catch(() => []) : [];
     const candidates = hfModels.map((m: any) => m.modelId || m.id).filter(Boolean);
