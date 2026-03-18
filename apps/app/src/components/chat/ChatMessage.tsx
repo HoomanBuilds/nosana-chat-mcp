@@ -10,6 +10,7 @@ import { UserMessage } from "./UserMessage";
 import { ReasoningSection } from "./ReasoningSection";
 import { SearchResultsSection } from "./SearchResultsSection";
 import { MessageToolbar } from "./AiMessageToolBar";
+import { AgentTrace } from "./AgentTrace";
 import { useShallow } from "zustand/shallow";
 
 const ChatMessage = memo(
@@ -36,6 +37,11 @@ const ChatMessage = memo(
         <div className="min-w-[95%] w-[100%] flex flex-col gap-2">
           {/* Reasoning preview */}
           {msg.reasoning && <ReasoningSection reasoning={msg.reasoning} />}
+
+          {/* Agent Trace */}
+          {msg.trace && msg.trace.length > 0 && (
+            <AgentTrace trace={msg.trace} />
+          )}
 
           {/* search Result */}
           {msg.search && msg.search.length > 0 && (

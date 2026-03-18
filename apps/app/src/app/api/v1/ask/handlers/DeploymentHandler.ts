@@ -134,6 +134,17 @@ function resolveToolName(
   return { valid: false, name: "", raw, sanitized: false };
 }
 
+interface TraceEvent {
+  type: "thinking" | "tool_start" | "tool_result" | "tool_error" | "text";
+  toolName?: string;
+  toolArgs?: Record<string, unknown>;
+  toolResult?: unknown;
+  error?: string;
+  content?: string;
+  timestamp: number;
+  duration?: number;
+}
+
 export const handleDeployment = async (
   payload: Payload,
   send: (event: string, data: string) => void,
@@ -146,6 +157,12 @@ export const handleDeployment = async (
     );
     return;
   }
+
+  const traceEvents: TraceEvent[] = [];
+  const sendTrace = (event: TraceEvent) => {
+    traceEvents.push(event);
+    send("trace", JSON.stringify(event));
+  };
 
   return runWithPlannerModel(plannerModel, async () => {
     const userWallet = payload.walletPublicKey;
@@ -363,6 +380,16 @@ ${payload.customPrompt || ""}
               }
 
               usedTools.add(tool.name);
+              const toolArgs = (chunk as any).args;
+              send(
+                "trace",
+                JSON.stringify({
+                  type: "tool_start",
+                  toolName: tool.name,
+                  toolArgs,
+                  timestamp: Date.now(),
+                }),
+              );
               send("event", `executing: ${tool.name}`);
               console.log(`🧰 Tool started: ${tool.name}`);
             }
@@ -377,6 +404,25 @@ ${payload.customPrompt || ""}
                   chunk.toolName,
                 );
                 break;
+              }
+
+              const lastTraceEvent = traceEvents
+                .filter(
+                  (e) => e.type === "tool_start" && e.toolName === tool.name,
+                )
+                .pop();
+
+              if (lastTraceEvent) {
+                send(
+                  "trace",
+                  JSON.stringify({
+                    type: "tool_result",
+                    toolName: tool.name,
+                    toolResult: chunk.output,
+                    timestamp: Date.now(),
+                    duration: Date.now() - lastTraceEvent.timestamp,
+                  }),
+                );
               }
 
               if (

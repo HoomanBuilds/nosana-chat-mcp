@@ -42,11 +42,13 @@ export function useChatLogic() {
   const [llmChunks, setLLMChunks] = useState<string>("");
   const [event, setEvent] = useState<string>("");
   const [mcp, setmcp] = useState(false);
+  const [streamingTrace, setStreamingTrace] = useState<any[]>([]);
 
   // Buffer refs for throttling
   const llmBufferRef = useRef<string[]>([]);
   const reasoningBufferRef = useRef<string[]>([]);
   const throttleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const traceRef = useRef<any[]>([]);
 
   // --- Stores ---
   const {
@@ -248,6 +250,8 @@ export function useChatLogic() {
       setReasoningChunks("");
       setLLMChunks("");
       setPendingTool(null);
+      traceRef.current = [];
+      setStreamingTrace([]);
 
       //abort controller
       controllerRef.current = new AbortController();
@@ -420,6 +424,20 @@ export function useChatLogic() {
                 case "event":
                   setEvent(data.toString());
                   break;
+
+                case "trace": {
+                  try {
+                    const traceEvent =
+                      typeof data === "string" ? JSON.parse(data) : data;
+                    if (traceEvent && traceEvent.type) {
+                      traceRef.current.push(traceEvent);
+                      setStreamingTrace([...traceRef.current]);
+                    }
+                  } catch (e) {
+                    console.error("Failed to parse trace event:", e);
+                  }
+                  break;
+                }
 
                 case "llmResult": {
                   const text = data.toString();
@@ -809,6 +827,7 @@ export function useChatLogic() {
 
         //wrapping UP
         const finalContent = (finalLLM + fallbackLLM).trim();
+        const finalTrace = [...traceRef.current];
         if (finalContent !== "" || finalThinking.trim() !== "") {
           addMessage({
             role: "model",
@@ -822,6 +841,7 @@ export function useChatLogic() {
             responseTime: responseTime || undefined,
             followUps: followUpQuestions || [],
             type: "message",
+            trace: finalTrace.length > 0 ? finalTrace : undefined,
           });
         } else if (selectedChatId && !hasError) {
           if (!localConfig.showErrorMessages) {
@@ -876,6 +896,8 @@ export function useChatLogic() {
         setLLMChunks("");
         setState("idle");
         setEvent("");
+        traceRef.current = [];
+        setStreamingTrace([]);
         controllerRef.current = null;
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -927,6 +949,7 @@ export function useChatLogic() {
     setLLMChunks,
     mcp,
     setmcp,
+    streamingTrace,
   };
 }
 

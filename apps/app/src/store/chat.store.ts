@@ -27,6 +27,17 @@ export interface PermissionRequest {
   onAllow: () => void;
   onDeny: () => void;
 }
+export interface TraceEvent {
+  type: "thinking" | "tool_start" | "tool_result" | "tool_error" | "text";
+  toolName?: string;
+  toolArgs?: Record<string, unknown>;
+  toolResult?: unknown;
+  error?: string;
+  content?: string;
+  timestamp: number;
+  duration?: number;
+}
+
 export interface Conversation {
   role: "user" | "model";
   query?: string;
@@ -40,6 +51,7 @@ export interface Conversation {
   responseTime?: number;
   followUps?: { question: string }[];
   type?: "message" | "error" | "aborted";
+  trace?: TraceEvent[];
 }
 
 export interface ChatHistory {

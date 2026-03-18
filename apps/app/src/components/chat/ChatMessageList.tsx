@@ -5,6 +5,7 @@ import ChatMessage from "./ChatMessage";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ReasoningSection } from "./ReasoningSection";
+import { AgentTrace } from "./AgentTrace";
 import rehypeHighlight from "rehype-highlight";
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
 import { Conversation, useChatStore } from "@/store/chat.store";
@@ -21,6 +22,7 @@ interface ChatMessageListProps {
   setQuery: (q: string) => void;
   textareaRef: React.RefObject<HTMLTextAreaElement | null>;
   onSubmit?: (question: string) => void;
+  streamingTrace?: any[];
 }
 
 const ChatMessageList = memo(
@@ -34,6 +36,7 @@ const ChatMessageList = memo(
     setQuery,
     textareaRef,
     onSubmit,
+    streamingTrace = [],
   }: ChatMessageListProps) => {
     const autoScroll = useRef(true);
     const virtuosoRef = useRef<VirtuosoHandle>(null);
@@ -84,8 +87,6 @@ const ChatMessageList = memo(
     const reasoningContent = reasoningChunks;
     const llmContent = llmChunks;
 
-
-
     useEffect(() => {
       if (reasoningRef.current) {
         reasoningRef.current.scrollTop = reasoningRef.current.scrollHeight;
@@ -106,6 +107,7 @@ const ChatMessageList = memo(
             event,
             markdownComponents,
             pendingPermission,
+            streamingTrace,
           }}
           components={{
             Footer: ChatFooter,
@@ -137,6 +139,7 @@ const ChatFooter = memo(({ context }: { context: any }) => {
     event,
     markdownComponents,
     pendingPermission,
+    streamingTrace = [],
   } = context;
 
   if (state !== "loading" && !reasoningChunks && !llmChunks) {
@@ -154,6 +157,10 @@ const ChatFooter = memo(({ context }: { context: any }) => {
                 isStreaming={true}
                 hasNormalResponseStarted={llmChunks.length > 0}
               />
+            )}
+
+            {streamingTrace.length > 0 && (
+              <AgentTrace trace={streamingTrace} isStreaming={true} />
             )}
 
             <div

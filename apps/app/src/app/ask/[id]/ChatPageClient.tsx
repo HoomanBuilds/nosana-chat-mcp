@@ -29,28 +29,34 @@ function ChatPageInner(): JSX.Element {
     setThinking,
     event,
     controllerRef,
+    streamingTrace,
   } = useChatLogic();
 
   const {
     localConfig: { appearance },
   } = useSettingsStore();
   const textareaRef = useRef<HTMLTextAreaElement>(
-    null
+    null,
   ) as React.RefObject<HTMLTextAreaElement>;
   const formRef = useRef<HTMLFormElement>(
-    null
+    null,
   ) as React.RefObject<HTMLFormElement>;
 
-  const handleTemplateSelect = useCallback((jobDefinition: Record<string, any>) => {
-    const jsonString = JSON.stringify(jobDefinition, null, 2);
-    setQuery(jsonString);
-    // Auto-submit after a short delay to allow the input to be set
-    setTimeout(() => {
-      if (formRef.current) {
-        formRef.current.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-      }
-    }, 100);
-  }, [setQuery]);
+  const handleTemplateSelect = useCallback(
+    (jobDefinition: Record<string, any>) => {
+      const jsonString = JSON.stringify(jobDefinition, null, 2);
+      setQuery(jsonString);
+      // Auto-submit after a short delay to allow the input to be set
+      setTimeout(() => {
+        if (formRef.current) {
+          formRef.current.dispatchEvent(
+            new Event("submit", { cancelable: true, bubbles: true }),
+          );
+        }
+      }, 100);
+    },
+    [setQuery],
+  );
 
   const updateContainerHeight = () => {
     setTimeout(() => {
@@ -97,7 +103,7 @@ function ChatPageInner(): JSX.Element {
         id="chat-container"
         className={cn(
           "flex items-center flex-col w-full bg-background pb-30",
-          appearance
+          appearance,
         )}
         style={{
           height: "100dvh",
@@ -129,6 +135,7 @@ function ChatPageInner(): JSX.Element {
               handleAskChunk(undefined, question);
             }, 50);
           }}
+          streamingTrace={streamingTrace}
         />
 
         <ChatForm
