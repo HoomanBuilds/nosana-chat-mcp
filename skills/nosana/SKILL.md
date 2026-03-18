@@ -258,3 +258,96 @@ Returns:
 4. **Use appropriate market** based on model VRAM requirements
 5. **Handle errors gracefully** - explain what went wrong and suggest solutions
 6. **Default timeout is 1 hour** - extend if needed but explain costs
+
+## Job Definition Templates
+
+Use these as reference when constructing job definitions.
+
+### PyTorch Jupyter Lab
+
+```json
+{
+  "ops": [
+    {
+      "id": "Pytorch",
+      "args": {
+        "cmd": [
+          "jupyter", "lab",
+          "--ip=0.0.0.0", "--port=8888",
+          "--no-browser", "--allow-root",
+          "--ServerApp.token=''", "--ServerApp.password=''"
+        ],
+        "gpu": true,
+        "image": "docker.io/nosana/pytorch-jupyter:2.0.0",
+        "expose": 8888
+      },
+      "type": "container/run"
+    }
+  ],
+  "meta": { "trigger": "dashboard", "system_requirements": { "required_vram": 4 } },
+  "type": "container",
+  "version": "0.1"
+}
+```
+
+### Ollama Model (e.g. Gemma3-4b)
+
+```json
+{
+  "ops": [
+    {
+      "id": "Gemma3-4b",
+      "args": {
+        "gpu": true,
+        "image": "docker.io/ollama/ollama:0.15.4",
+        "expose": [
+          {
+            "port": 11434,
+            "health_checks": [
+              { "path": "/api/tags", "type": "http", "method": "GET", "continuous": false, "expected_status": 200 }
+            ]
+          }
+        ],
+        "resources": [{ "type": "Ollama", "model": "%%global.variables.MODEL%%" }]
+      },
+      "type": "container/run"
+    }
+  ],
+  "meta": { "trigger": "dashboard", "system_requirements": { "required_vram": 5 } },
+  "type": "container",
+  "global": { "variables": { "MODEL": "gemma3:4b-it-qat" } },
+  "version": "0.1"
+}
+```
+
+Replace `MODEL` and `required_vram` based on the target model. Use this template for any Ollama-compatible model.
+
+### vLLM OpenAI-compatible Server (e.g. Nanonets-OCR2:3B)
+
+```json
+{
+  "ops": [
+    {
+      "id": "vllm-model",
+      "args": {
+        "cmd": [
+          "--model", "%%global.variables.MODEL%%",
+          "--served-model-name", "%%global.variables.MODEL%%",
+          "--port", "8000",
+          "--max-model-len", "30000"
+        ],
+        "gpu": true,
+        "image": "docker.io/vllm/vllm-openai:v0.10.2",
+        "expose": 8000
+      },
+      "type": "container/run"
+    }
+  ],
+  "meta": { "trigger": "dashboard", "system_requirements": { "required_vram": 8 } },
+  "type": "container",
+  "global": { "variables": { "MODEL": "nanonets/Nanonets-OCR2-3B" } },
+  "version": "0.1"
+}
+```
+
+Replace `MODEL` with the HuggingFace model ID and adjust `required_vram` accordingly. Use this template for any vLLM/OpenAI-compatible model deployment.
