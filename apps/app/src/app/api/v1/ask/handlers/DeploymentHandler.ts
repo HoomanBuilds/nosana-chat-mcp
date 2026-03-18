@@ -381,15 +381,14 @@ ${payload.customPrompt || ""}
 
               usedTools.add(tool.name);
               const toolArgs = (chunk as any).args;
-              send(
-                "trace",
-                JSON.stringify({
-                  type: "tool_start",
-                  toolName: tool.name,
-                  toolArgs,
-                  timestamp: Date.now(),
-                }),
-              );
+              const toolStartEvent: TraceEvent = {
+                type: "tool_start",
+                toolName: tool.name,
+                toolArgs,
+                timestamp: Date.now(),
+              };
+              traceEvents.push(toolStartEvent);
+              send("trace", JSON.stringify(toolStartEvent));
               send("event", `executing: ${tool.name}`);
               console.log(`🧰 Tool started: ${tool.name}`);
             }

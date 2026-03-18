@@ -41,23 +41,15 @@ export const StreamContent = memo(function StreamContent({
   // Build segments: interleave text chunks with trace items
   const segments: { type: "text" | "trace"; content: any }[] = [];
   let currentText = "";
-  const completedTools = new Set<string>();
 
   for (const item of items) {
     if (item.type === "text") {
       currentText += item.data as string;
     } else {
-      // Flush any pending text
       if (currentText) {
         segments.push({ type: "text", content: currentText });
         currentText = "";
       }
-      // Track completed tools
-      const traceData = item.data as TraceEvent;
-      if (traceData.type === "tool_result" && traceData.toolName) {
-        completedTools.add(traceData.toolName);
-      }
-      // Add the trace
       segments.push({ type: "trace", content: item.data });
     }
   }
@@ -83,11 +75,18 @@ export const StreamContent = memo(function StreamContent({
           );
         }
         const traceData = segment.content as TraceEvent;
-        // Only tool_start should show loading if tool hasn't completed yet
+        // Check if there's a tool_result for this tool_start AFTER this segment index
+        const isCompleted = items.some(
+          (item, i) =>
+            item.type === "trace" &&
+            (item.data as TraceEvent).type === "tool_result" &&
+            (item.data as TraceEvent).toolName === traceData.toolName &&
+            item.timestamp > (segment.content as TraceEvent).timestamp
+        );
         const showLoading =
           isStreaming &&
           traceData.type === "tool_start" &&
-          !completedTools.has(traceData.toolName || "");
+          !isCompleted;
 
         return (
           <TraceItem key={idx} trace={traceData} isStreaming={showLoading} />
