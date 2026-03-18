@@ -25,10 +25,9 @@ export const createJob = tool({
       .describe("Complete Nosana job definition with 'type', 'ops', and 'meta'."),
     resolvedModel: z
       .object({
-        id: z.string().describe("HuggingFace model ID, e.g. mistralai/Mistral-7B-Instruct-v0.3"),
+        hf_id: z.string().describe("HuggingFace model ID for vLLM, e.g. mistralai/Mistral-7B-Instruct-v0.3"),
+        ollama_tag: z.string().nullable().describe("Ollama pull tag e.g. mistral:7b, or null if not in Ollama library"),
         vram: z.number().describe("Required VRAM in GB"),
-        type: z.enum(["ollama", "vllm", "custom"]),
-        ollamaTag: z.string().nullable().optional().describe("Ollama pull tag if type=ollama"),
       })
       .optional()
       .describe("Pre-resolved model info from getModels tool."),
@@ -180,13 +179,13 @@ export const createJob = tool({
         let jobdef: any;
 
         if (params.resolvedModel) {
-          const { id, vram, type, ollamaTag: tag } = params.resolvedModel;
-          if (type === "ollama") {
-            jobdef = buildOllamaJob(tag || id, vram);
-          } else if (type === "vllm") {
-            jobdef = buildVllmJob(id, vram);
+          const { hf_id, ollama_tag, vram } = params.resolvedModel;
+          const req = params.requirements?.toLowerCase() || "";
+          const wantsVllm = /vllm|openai.?compat|openai.?api/i.test(req);
+          if (!wantsVllm && ollama_tag) {
+            jobdef = buildOllamaJob(ollama_tag, vram);
           } else {
-            return fail("Custom job type requires a directJobDef.");
+            jobdef = buildVllmJob(hf_id, vram);
           }
         } else {
           // Fallback: LLM generates job JSON from requirements
@@ -289,14 +288,13 @@ export const createJob = tool({
 });
 
 export const getModels = tool({
-  description: `Resolve a model name from a user request into a HuggingFace model ID, estimated VRAM, and deployment type (ollama/vllm/custom). Call this before createJob when the user hasn't specified an exact HF model ID.`,
+  description: `Resolve a model name into its HuggingFace ID, Ollama tag, and estimated VRAM. Call this before createJob for any model deployment.`,
 
   inputSchema: z.object({
     query: z.string().describe("The user's model request, e.g. 'mistral 7b', 'GPT-OSS 20B', 'llama 3.1 70b instruct'"),
   }),
 
   execute: async ({ query }) => {
-    console.log(query, "model deployment with vLLM on NVIDIA GPU");
     const plannerModel = getPlannerModel();
     if (!plannerModel) throw new Error("No model selected");
 
@@ -311,7 +309,7 @@ export const getModels = tool({
         : process.env.NEXT_PUBLIC_INFERIA_LLM_URL || "",
     });
 
-    // Step 1: search HuggingFace API with the raw query
+    // Step 1: search HuggingFace API
     const hfUrl = new URL("https://huggingface.co/api/models");
     hfUrl.searchParams.set("search", query);
     hfUrl.searchParams.set("limit", "5");
@@ -321,7 +319,7 @@ export const getModels = tool({
     const hfModels: any[] = hfRes?.ok ? await hfRes.json().catch(() => []) : [];
     const candidates = hfModels.map((m: any) => m.modelId || m.id).filter(Boolean);
 
-    // Step 2: LLM picks the best match from real HF results
+    // Step 2: LLM resolves both IDs
     const { text } = await generateText({
       model: openai.chat(plannerModel),
       prompt: `You are a model resolver. The user wants to deploy: "${query}"
@@ -329,11 +327,10 @@ export const getModels = tool({
 HuggingFace search returned these real model IDs:
 ${candidates.length ? candidates.map((c, i) => `${i + 1}. ${c}`).join("\n") : "(no results)"}
 
-Pick the best matching model and output ONLY a JSON object:
-- "id": exact HuggingFace model ID from the list above (or your best known HF ID if list is empty/irrelevant)
+Output ONLY a JSON object with:
+- "hf_id": best matching HuggingFace model ID from the list (used for vLLM)
+- "ollama_tag": the Ollama pull tag from ollama.com/library (e.g. "mistral:7b", "llama3.1:8b"). Set null if the model is not in the Ollama library.
 - "vram": estimated VRAM in GB (integer). 7B fp16=14, 7B int4=5, 13B=26, 20B=40, 70B int4=40
-- "type": "ollama" (default) or "vllm" (if user asked for vLLM/OpenAI API)
-- "ollamaTag": Ollama library tag (e.g. "mistral:7b") if type=ollama, else null. Ollama tags are from ollama.com/library, NOT HuggingFace IDs.
 
 Output only JSON.`,
     });
