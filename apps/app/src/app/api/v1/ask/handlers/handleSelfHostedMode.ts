@@ -48,7 +48,7 @@ export const handleSelfHostedMode = async (
 
   send("llmPrompt", JSON.stringify(messages))
 
-  const parser = createStreamingParser(send, { chunkSize: 12, minDelay: 1, maxDelay: 40 });
+  const parser = createStreamingParser(send, { chunkSize: 50, minDelay: 0, maxDelay: 5 });
   const startTime = performance.now();
   try {
 
@@ -80,7 +80,7 @@ export function createStreamingParser(
   send: (event: string, data: string) => void,
   config: ThrottleConfig = {}
 ) {
-  const { chunkSize = 12, minDelay = 1, maxDelay = 50 } = config;
+  const { chunkSize = 50, minDelay = 0, maxDelay = 5 } = config;
 
   let buffer = '';
   let isThinking = false;

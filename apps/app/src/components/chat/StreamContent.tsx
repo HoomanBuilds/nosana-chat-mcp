@@ -1,6 +1,6 @@
 "use client";
 
-import React, { memo } from "react";
+import React, { memo, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
@@ -38,26 +38,46 @@ export const StreamContent = memo(function StreamContent({
 }: StreamContentProps) {
   if (items.length === 0) return null;
 
-  // Build segments: interleave text chunks with trace items
-  const segments: { type: "text" | "trace"; content: any }[] = [];
-  let currentText = "";
-
-  for (const item of items) {
-    if (item.type === "text") {
-      currentText += item.data as string;
-    } else {
-      if (currentText) {
-        segments.push({ type: "text", content: currentText });
-        currentText = "";
+  // Pre-compute map: toolName -> latest tool_result timestamp (O(n) once)
+  const completedTools = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const item of items) {
+      if (
+        item.type === "trace" &&
+        (item.data as TraceEvent).type === "tool_result"
+      ) {
+        const trace = item.data as TraceEvent;
+        const existing = map.get(trace.toolName!) || 0;
+        if (trace.timestamp > existing) {
+          map.set(trace.toolName!, trace.timestamp);
+        }
       }
-      segments.push({ type: "trace", content: item.data });
     }
-  }
+    return map;
+  }, [items]);
 
-  // Flush remaining text
-  if (currentText) {
-    segments.push({ type: "text", content: currentText });
-  }
+  // Build segments: interleave text chunks with trace items
+  const segments = useMemo(() => {
+    const result: { type: "text" | "trace"; content: any }[] = [];
+    let currentText = "";
+
+    for (const item of items) {
+      if (item.type === "text") {
+        currentText += item.data as string;
+      } else {
+        if (currentText) {
+          result.push({ type: "text", content: currentText });
+          currentText = "";
+        }
+        result.push({ type: "trace", content: item.data });
+      }
+    }
+
+    if (currentText) {
+      result.push({ type: "text", content: currentText });
+    }
+    return result;
+  }, [items]);
 
   return (
     <>
@@ -75,26 +95,15 @@ export const StreamContent = memo(function StreamContent({
           );
         }
         const traceData = segment.content as TraceEvent;
-        // Skip tool_start if its tool_result has already arrived
+        // Skip tool_start if its tool_result has already arrived (O(1) lookup)
         if (
           traceData.type === "tool_start" &&
-          items.some(
-            (item) =>
-              item.type === "trace" &&
-              (item.data as TraceEvent).type === "tool_result" &&
-              (item.data as TraceEvent).toolName === traceData.toolName &&
-              (item.data as TraceEvent).timestamp > traceData.timestamp
-          )
+          (completedTools.get(traceData.toolName!) || 0) > traceData.timestamp
         ) {
           return null;
         }
-        const isCompleted = items.some(
-          (item, i) =>
-            item.type === "trace" &&
-            (item.data as TraceEvent).type === "tool_result" &&
-            (item.data as TraceEvent).toolName === traceData.toolName &&
-            item.timestamp > (segment.content as TraceEvent).timestamp
-        );
+        const isCompleted =
+          (completedTools.get(traceData.toolName!) || 0) > traceData.timestamp;
         const showLoading =
           isStreaming &&
           traceData.type === "tool_start" &&

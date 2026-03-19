@@ -1,6 +1,6 @@
 /* eslint-disable */
 
-import React, { memo, useEffect, useMemo, useRef } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import ChatMessage from "./ChatMessage";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -44,11 +44,9 @@ const ChatMessageList = memo(
     const prevLen = useRef(conversations.length);
 
     useEffect(() => {
-      // If we just added a message and are now loading, force the latest prompt to the TOP
       if (conversations.length > prevLen.current && state === "loading") {
         const targetIndex = conversations.length - 1;
 
-        // Multiple attempts to ensure the scroll hits after dynamic layout shifts
         const scroll = () => {
           virtuosoRef.current?.scrollToIndex({
             index: targetIndex,
@@ -57,10 +55,11 @@ const ChatMessageList = memo(
           });
         };
 
-        // Try immediately and again after a short delay for Markdown/Images to settle
-        scroll();
-        setTimeout(scroll, 100);
-        setTimeout(scroll, 300);
+        // Use rAF for immediate scroll, one fallback for layout shifts
+        requestAnimationFrame(scroll);
+        const timer = setTimeout(scroll, 250);
+        prevLen.current = conversations.length;
+        return () => clearTimeout(timer);
       }
       prevLen.current = conversations.length;
     }, [conversations.length, state]);
@@ -94,6 +93,34 @@ const ChatMessageList = memo(
       }
     }, [reasoningChunks]);
 
+    const virtuosoContext = useMemo(
+      () => ({
+        state,
+        reasoningChunks,
+        llmChunks,
+        event,
+        markdownComponents,
+        pendingPermission,
+        streamItems,
+      }),
+      [state, reasoningChunks, llmChunks, event, markdownComponents, pendingPermission, streamItems],
+    );
+
+    const renderItem = useCallback(
+      (index: number, msg: any) => (
+        <ChatMessage
+          key={msg.id || index}
+          msg={msg}
+          index={index}
+          conversations={conversations}
+          setQuery={setQuery}
+          textareaRef={textareaRef}
+          onSubmit={onSubmit}
+        />
+      ),
+      [conversations, setQuery, textareaRef, onSubmit],
+    );
+
     return (
       <div className="flex-1 w-[95vw] pb-4 sm:w-[80vw] md:w-[70vw] lg:w-[60vw] xl:w-[60vw] max-w-[800px] h-full">
         <Virtuoso
@@ -101,29 +128,11 @@ const ChatMessageList = memo(
           style={{ height: "100%", width: "100%" }}
           data={conversations}
           initialTopMostItemIndex={conversations.length - 1}
-          context={{
-            state,
-            reasoningChunks,
-            llmChunks,
-            event,
-            markdownComponents,
-            pendingPermission,
-            streamItems,
-          }}
+          context={virtuosoContext}
           components={{
             Footer: ChatFooter,
           }}
-          itemContent={(index, msg) => (
-            <ChatMessage
-              key={msg.id || index}
-              msg={msg}
-              index={index}
-              conversations={conversations}
-              setQuery={setQuery}
-              textareaRef={textareaRef}
-              onSubmit={onSubmit}
-            />
-          )}
+          itemContent={renderItem}
         />
       </div>
     );

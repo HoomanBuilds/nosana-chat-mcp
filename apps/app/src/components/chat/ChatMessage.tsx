@@ -29,7 +29,7 @@ const ChatMessage = memo(
       } else {
         import("highlight.js/styles/github.css");
       }
-    });
+    }, [appearance]);
 
     const markdownComponents = useMemo(
       () => ({

@@ -45,10 +45,12 @@ export function createSSEStream(payload?: Payload) {
           : Promise.resolve();
 
       try {
-        await Promise.allSettled([
-          providerPromise,
-          threadCheckPromise,
-          followUpPromise
+        // Wait for main response and thread check
+        await Promise.allSettled([providerPromise, threadCheckPromise]);
+        // Give follow-ups a short window to complete, don't block stream close
+        await Promise.race([
+          followUpPromise,
+          new Promise((resolve) => setTimeout(resolve, 300)),
         ]);
       } catch (err) {
         send("error", JSON.stringify({ message: (err as Error).message }));

@@ -49,6 +49,8 @@ export function useChatLogic() {
   const reasoningBufferRef = useRef<string[]>([]);
   const throttleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const streamItemsRef = useRef<any[]>([]);
+  const streamItemsDirtyRef = useRef(false);
+  const eventRef = useRef("");
 
   // --- Stores ---
   const {
@@ -295,7 +297,7 @@ export function useChatLogic() {
             mode: tool ? tool : undefined,
             customConfig: customConfig,
             walletPublicKey: walletCondition ? getCredential() : undefined,
-            chats: conversations.slice(-50).map((c) => ({
+            chats: useChatStore.getState().currentChat.slice(-50).map((c) => ({
               role: c.role,
               content: c.content,
               metadata: {
@@ -379,6 +381,10 @@ export function useChatLogic() {
             );
             reasoningBufferRef.current = [];
           }
+          if (streamItemsDirtyRef.current) {
+            setStreamItems([...streamItemsRef.current]);
+            streamItemsDirtyRef.current = false;
+          }
           throttleTimeoutRef.current = null;
         };
 
@@ -421,9 +427,14 @@ export function useChatLogic() {
                   break;
                 }
 
-                case "event":
-                  setEvent(data.toString());
+                case "event": {
+                  const val = data.toString();
+                  if (val !== eventRef.current) {
+                    eventRef.current = val;
+                    setEvent(val);
+                  }
                   break;
+                }
 
                 case "trace": {
                   try {
@@ -436,7 +447,8 @@ export function useChatLogic() {
                         data: traceEvent,
                         timestamp: Date.now(),
                       });
-                      setStreamItems([...streamItemsRef.current]);
+                      streamItemsDirtyRef.current = true;
+                      queueUpdate();
                     }
                   } catch (e) {
                     console.error("Failed to parse trace event:", e);
@@ -454,7 +466,8 @@ export function useChatLogic() {
                     data: text,
                     timestamp: Date.now(),
                   });
-                  setStreamItems([...streamItemsRef.current]);
+                  streamItemsDirtyRef.current = true;
+                  queueUpdate();
                   break;
                 }
 
@@ -918,7 +931,9 @@ export function useChatLogic() {
         setLLMChunks("");
         setState("idle");
         setEvent("");
+        eventRef.current = "";
         streamItemsRef.current = [];
+        streamItemsDirtyRef.current = false;
         setStreamItems([]);
         controllerRef.current = null;
       }
@@ -935,7 +950,6 @@ export function useChatLogic() {
       isApiKeyConnected,
       nosanaApiKey,
       customConfig,
-      conversations,
       search,
       thinking,
       customServiceUrl,

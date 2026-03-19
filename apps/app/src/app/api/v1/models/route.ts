@@ -30,7 +30,7 @@ export async function GET() {
       headers: {
         Authorization: `Bearer ${apiKey}`,
       },
-      cache: "no-store",
+      next: { revalidate: 300 },
     });
 
     const data = await res.json().catch(() => null);

@@ -2,10 +2,14 @@ import * as fs from "fs";
 import * as path from "path";
 import { MarketInfo } from "../utils/types";
 
+let skillCache: string | null = null;
+
 function loadSkill(): string {
+  if (skillCache !== null) return skillCache;
   try {
     const skillPath = path.join(process.cwd(), "skills", "nosana", "SKILL.md");
-    return fs.existsSync(skillPath) ? fs.readFileSync(skillPath, "utf-8") : "";
+    skillCache = fs.existsSync(skillPath) ? fs.readFileSync(skillPath, "utf-8") : "";
+    return skillCache;
   } catch {
     return "";
   }

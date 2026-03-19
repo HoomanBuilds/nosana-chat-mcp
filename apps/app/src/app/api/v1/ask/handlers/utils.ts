@@ -411,7 +411,7 @@ export async function streamThrottle(
 ) {
   const parser = createStreamingParser(send);
 
-  const { chunkSize = 10, minDelay = 1, maxDelay = 50 } = config;
+  const { chunkSize = 50, minDelay = 0, maxDelay = 5 } = config;
 
   const parts: string[] = [];
   for (let i = 0; i < text.length; i += chunkSize) {

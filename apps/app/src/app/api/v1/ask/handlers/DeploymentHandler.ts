@@ -37,7 +37,6 @@ const openai = createOpenAI({
   headers: {
     ...COMMON_HEADERS,
   },
-  compatibility: "compatible",
 });
 
 let nosanaSkillCache: string | null = null;
@@ -263,6 +262,9 @@ ${payload.customPrompt || ""}`.trim(),
         stopWhen: stepCountIs(10),
         abortSignal: payload.signal,
         maxRetries: 1,
+        providerOptions: {
+          openai: { structuredOutputs: false },
+        },
       });
     } catch (error) {
       console.error("Failed to initialize LLM stream:", error);
@@ -293,9 +295,9 @@ ${payload.customPrompt || ""}`.trim(),
           case "text-delta":
             send("event", "streaming");
             await streamThrottle(chunk.text, send, payload.signal, {
-              chunkSize: 20,
-              minDelay: 2,
-              maxDelay: 40,
+              chunkSize: 50,
+              minDelay: 0,
+              maxDelay: 5,
             });
             finalText += chunk.text;
             break;

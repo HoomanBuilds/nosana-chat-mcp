@@ -134,9 +134,9 @@ export const handleInferenceMode = async (
   });
 
   const parser = createStreamingParser(send, {
-    chunkSize: 12,
-    minDelay: 1,
-    maxDelay: 40,
+    chunkSize: 50,
+    minDelay: 0,
+    maxDelay: 5,
   });
   const startTime = performance.now();
   let receivedTextChunk = false;
