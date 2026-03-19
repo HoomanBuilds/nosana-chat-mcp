@@ -60,10 +60,12 @@ function ChatPageInner(): JSX.Element {
 
   const updateContainerHeight = () => {
     setTimeout(() => {
-      const chatContainer = document.getElementById("chat-container");
-      if (chatContainer) {
+      const chatScroller = document.querySelector(
+        "#chat-container [data-virtuoso-scroller='true']",
+      );
+      if (chatScroller instanceof HTMLElement) {
         setTimeout(() => {
-          chatContainer.scrollTop = chatContainer.scrollHeight;
+          chatScroller.scrollTop = chatScroller.scrollHeight;
         }, 50);
       }
     }, 200);
@@ -107,15 +109,8 @@ function ChatPageInner(): JSX.Element {
         )}
         style={{
           height: "100dvh",
-          overflowY: "auto",
+          overflowY: "hidden",
           overflowX: "hidden",
-        }}
-        onScroll={(e) => {
-          const element = e.currentTarget;
-          const isNearBottom =
-            element.scrollHeight - element.scrollTop - element.clientHeight <
-            100;
-          (window as any).chatAutoScroll = isNearBottom;
         }}
       >
         <ChatNavBar onTemplateSelect={handleTemplateSelect} />

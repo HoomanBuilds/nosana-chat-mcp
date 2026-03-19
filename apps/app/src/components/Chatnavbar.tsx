@@ -21,7 +21,7 @@ function ChatNavBar({ className, onTemplateSelect }: ChatNavBarProps) {
         <>
             <div
                 className={cn(
-                    "sticky top-0 z-30 flex h-14 w-full items-center justify-between border-b border-dashed bg-background/85 px-3 py-2 text-start backdrop-blur",
+                    "sticky top-0 z-30 flex h-14 w-full items-center justify-between border-b border-dashed bg-background/85 px-3 py-2 text-start backdrop-blur lg:justify-end",
                     className
                 )}
             >
