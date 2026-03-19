@@ -872,6 +872,10 @@ export function useChatLogic() {
         }
       } catch (error) {
         if ((error as Error).name === "AbortError") {
+          const abortedTrace = [...streamItemsRef.current];
+          const abortedTraceOnly = abortedTrace
+            .filter((i) => i.type === "trace")
+            .map((i) => i.data);
           addMessage({
             role: "model",
             content: finalLLM
@@ -882,6 +886,8 @@ export function useChatLogic() {
             model: selectedModel,
             id: crypto.randomUUID(),
             type: "aborted",
+            trace: abortedTraceOnly.length > 0 ? abortedTraceOnly : undefined,
+            streamItems: abortedTrace.length > 0 ? abortedTrace : undefined,
           });
         } else {
           console.error("Fetch/Stream error:", error);
