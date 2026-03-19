@@ -21,25 +21,25 @@ function ChatNavBar({ className, onTemplateSelect }: ChatNavBarProps) {
         <>
             <div
                 className={cn(
-                    "sticky top-0 z-30 flex h-14 w-full items-center justify-between border-b border-dashed bg-background/85 px-3 py-2 text-start backdrop-blur lg:justify-end",
+                    "sticky top-0 z-40 flex h-14 w-full shrink-0 items-center justify-between border-b border-dashed bg-background/85 px-3 py-2 text-start backdrop-blur pointer-events-auto lg:justify-end",
                     className
                 )}
             >
                 <button
                     onClick={() => toggleMobile()}
                     type="button"
-                    className="rounded-md p-2 transition-colors hover:bg-muted-foreground/10 lg:hidden"
+                    className="relative z-10 rounded-md p-2 transition-colors hover:bg-muted-foreground/10 touch-manipulation lg:hidden"
                 >
                     <ArrowRightFromLine className={cn("cursor-pointer text-muted-foreground")} />
                 </button>
 
-                <div className='flex items-center gap-2 sm:gap-5'>
+                <div className='relative z-10 flex items-center gap-2 sm:gap-5'>
                     {tool == "deployer" && (
                         <button
                             onClick={() => toggleTemplate()}
                             type="button"
                             aria-label="Toggle deployment templates"
-                            className="rounded-md p-2 transition-colors hover:bg-muted-foreground/10"
+                            className="rounded-md p-2 transition-colors hover:bg-muted-foreground/10 touch-manipulation"
                         >
                             <LayoutGrid className='text-green-500' />
                         </button>

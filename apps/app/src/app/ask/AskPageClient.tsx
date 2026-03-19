@@ -150,7 +150,7 @@ function AskPage() {
       >
         {mcp && (
           <div className="sticky top-0 z-40 w-full">
-            <ChatNavBar />
+            <ChatNavBar onTemplateSelect={handleTemplateSelect} />
           </div>
         )}
 
