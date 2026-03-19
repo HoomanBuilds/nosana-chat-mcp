@@ -103,7 +103,15 @@ const ChatMessageList = memo(
         pendingPermission,
         streamItems,
       }),
-      [state, reasoningChunks, llmChunks, event, markdownComponents, pendingPermission, streamItems],
+      [
+        state,
+        reasoningChunks,
+        llmChunks,
+        event,
+        markdownComponents,
+        pendingPermission,
+        streamItems,
+      ],
     );
 
     const renderItem = useCallback(
@@ -180,9 +188,21 @@ const ChatFooter = memo(({ context }: { context: any }) => {
               <>
                 <div className="flex items-center gap-4 text-muted-foreground/50 mb-2">
                   <PulseCircle size={0.8} colorClass="bg-muted-foreground/50" />
-                  <span className="flex-1 flex items-center">{event || "streaming..."}</span>
+                  <span className="flex-1 flex items-center">
+                    {event || "streaming..."}
+                  </span>
                 </div>
-                <div style={{ paddingLeft: "5px", paddingRight: "5px", paddingTop: "0px", paddingBlock: "0px", margin: "0px", backgroundColor: "transparent" }} className="rounded-lg mt-3 markdown-container markdown-body text-sm max-w-none">
+                <div
+                  style={{
+                    paddingLeft: "5px",
+                    paddingRight: "5px",
+                    paddingTop: "0px",
+                    paddingBlock: "0px",
+                    margin: "0px",
+                    backgroundColor: "transparent",
+                  }}
+                  className="rounded-lg mt-3 markdown-container markdown-body text-sm max-w-none"
+                >
                   <StreamContent
                     items={streamItems}
                     markdownComponents={markdownComponents}
@@ -204,7 +224,9 @@ const ChatFooter = memo(({ context }: { context: any }) => {
               >
                 <div className="flex items-center gap-4 text-muted-foreground/50 mb-2">
                   <PulseCircle size={0.8} colorClass="bg-muted-foreground/50" />
-                  <span className="flex-1 flex items-center">{event || "streaming..."}</span>
+                  <span className="flex-1 flex items-center">
+                    {event || "streaming..."}
+                  </span>
                 </div>
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
@@ -228,7 +250,6 @@ const ChatFooter = memo(({ context }: { context: any }) => {
         </div>
       )}
       <div className="h-4" />
-      {state === "loading" && <div className="h-[80vh]" />}
     </>
   );
 });
