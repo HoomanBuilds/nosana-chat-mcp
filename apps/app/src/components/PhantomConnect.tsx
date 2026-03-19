@@ -49,10 +49,17 @@ export default function PhantomConnect({
   const [apiKeyError, setApiKeyError] = useState("");
   const [apiKeySaved, setApiKeySaved] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isMobileBrowser, setIsMobileBrowser] = useState(false);
 
   useEffect(() => {
     checkPhantom();
   }, [checkPhantom]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    setIsMobileBrowser(/Android|iPhone|iPad|iPod/i.test(window.navigator.userAgent));
+  }, []);
 
   const handleApiKeySave = () => {
     const trimmed = apiKeyDraft.trim();
@@ -181,6 +188,7 @@ export default function PhantomConnect({
           onWalletDisconnect={disconnectWallet}
           onApiKeySave={handleApiKeySave}
           onApiKeyClear={clearNosanaApiKey}
+          isMobileBrowser={isMobileBrowser}
         />
       </div>
     );
@@ -221,6 +229,7 @@ export default function PhantomConnect({
         onWalletDisconnect={disconnectWallet}
         onApiKeySave={handleApiKeySave}
         onApiKeyClear={clearNosanaApiKey}
+        isMobileBrowser={isMobileBrowser}
       />
     </>
   );
@@ -246,6 +255,7 @@ interface ConnectDialogProps {
   onWalletDisconnect: () => void;
   onApiKeySave: () => void;
   onApiKeyClear: () => void;
+  isMobileBrowser: boolean;
 }
 
 function ConnectDialog({
@@ -266,6 +276,7 @@ function ConnectDialog({
   onWalletDisconnect,
   onApiKeySave,
   onApiKeyClear,
+  isMobileBrowser,
 }: ConnectDialogProps) {
   const connectedMethod =
     authMode === "wallet" && isConnected
@@ -399,12 +410,12 @@ function ConnectDialog({
                   </div>
                 ) : (
                   <Button
-                    onClick={() => window.open("https://phantom.app/", "_blank")}
+                    onClick={onWalletConnect}
                     variant="outline"
                     className="h-11 w-full rounded-2xl text-sm whitespace-normal"
                   >
                     <ExternalLink className="h-4 w-4" />
-                    Install Phantom Wallet
+                    {isMobileBrowser ? "Open in Phantom" : "Install Phantom Wallet"}
                   </Button>
                 )}
               </div>
