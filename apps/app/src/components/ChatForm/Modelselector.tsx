@@ -74,7 +74,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
     <Select value={selectedValue} onValueChange={onValueChange}>
       <SelectTrigger
         className={cn(
-          "text-xs border border-muted-foreground/20 font-normal text-foreground h-6 rounded-sm bg-muted/50",
+          "h-8 w-full min-w-0 border border-muted-foreground/20 bg-muted/50 text-xs font-normal text-foreground sm:w-fit",
           className,
           mcp && "rounded-none",
         )}

@@ -35,6 +35,38 @@ interface WalletState {
   getCredential: () => string | null;
 }
 
+const getPhantomProvider = () => {
+  if (typeof window === "undefined") return null;
+
+  const phantomWindow = window as Window & {
+    phantom?: { solana?: Window["solana"] };
+  };
+  const injectedProvider =
+    phantomWindow.phantom?.solana || window.solana || null;
+
+  if (injectedProvider?.isPhantom) {
+    return injectedProvider;
+  }
+
+  return null;
+};
+
+const isMobileBrowser = () => {
+  if (typeof window === "undefined") return false;
+
+  return /Android|iPhone|iPad|iPod/i.test(window.navigator.userAgent);
+};
+
+const openPhantomBrowseDeeplink = () => {
+  if (typeof window === "undefined") return;
+
+  const currentUrl = window.location.href;
+  const ref = window.location.origin;
+  const deeplinkUrl = `https://phantom.app/ul/browse/${encodeURIComponent(currentUrl)}?ref=${encodeURIComponent(ref)}`;
+
+  window.location.href = deeplinkUrl;
+};
+
 export const useWalletStore = create<WalletState>()(
   persist(
     (set, get) => ({
@@ -49,7 +81,7 @@ export const useWalletStore = create<WalletState>()(
 
       checkPhantom: () => {
         if (typeof window === "undefined") return;
-        const provider = window.solana;
+        const provider = getPhantomProvider();
         if (provider?.isPhantom) {
           set({ isPhantom: true, provider });
 
@@ -105,8 +137,13 @@ export const useWalletStore = create<WalletState>()(
         if (typeof window === "undefined") {
           throw new Error("Cannot connect wallet during server-side rendering");
         }
-        const provider = window.solana;
+        const provider = getPhantomProvider();
         if (!provider?.isPhantom) {
+          if (isMobileBrowser()) {
+            openPhantomBrowseDeeplink();
+            throw new Error("Open this page in Phantom to continue");
+          }
+
           window.open("https://phantom.app/", "_blank");
           throw new Error("Phantom Wallet not installed");
         }
@@ -155,7 +192,7 @@ export const useWalletStore = create<WalletState>()(
         if (typeof window === "undefined") return;
         // Only verify if user didn't explicitly disconnect
         if (get()._walletDisconnectedByUser) return;
-        const provider = window.solana;
+        const provider = getPhantomProvider();
         if (provider?.publicKey) {
           set({
             wallet: provider.publicKey.toString(),

@@ -84,25 +84,31 @@ export const ChatForm: React.FC<ChatFormProps> = ({
       ref={formRef}
       onSubmit={onSubmit}
       className={cn(
-        "overflow-hidden bg-muted w-[95vw] sm:w-[80vw] md:w-[70vw] lg:w-[60vw] xl:w-[60vw] max-w-[800px] rounded-2xl border-2 border-muted-foreground/5 flex flex-col gap-2 mb-3 fixed bottom-0",
+        "fixed z-30 mb-0 flex w-[calc(100vw-1rem)] max-w-[800px] -translate-x-1/2 flex-col gap-1 overflow-hidden rounded-2xl border border-muted-foreground/10 bg-muted/95 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-muted/85 sm:w-[80vw] md:w-[70vw] lg:w-[60vw] xl:w-[60vw]",
         className,
       )}
+      style={{
+        left: "calc(50% + (var(--sidebar-width, 0px) / 2))",
+        bottom: "max(0.5rem, env(safe-area-inset-bottom))",
+      }}
     >
       <ChatInput
         value={query}
         onChange={setQuery}
         onKeyDown={handleKeyDown}
         textareaRef={textareaRef}
+        className="rounded-t-2xl"
       />
 
-      <div className="flex justify-between items-center pb-2 px-2">
-        <div className="flex gap-4 items-center text-muted-foreground">
+      <div className="flex items-center gap-2 px-2 pb-2">
+        <div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden text-muted-foreground">
           <ModelSelector
             value={model || selectedModel}
             onValueChange={handleModelChange}
+            className="min-w-0 flex-1 sm:min-w-[12rem] sm:flex-none"
           />
 
-          {tool && <PhantomConnect />}
+          {tool && <PhantomConnect compactMobile />}
 
           {currentConfig.search && !tool && (
             <FeatureToggle
@@ -133,6 +139,7 @@ export const ChatForm: React.FC<ChatFormProps> = ({
               setQuery("");
             }
           }}
+          className="size-8 shrink-0 rounded-full p-0 sm:h-8 sm:w-auto sm:rounded-md sm:px-3"
         />
       </div>
     </form>

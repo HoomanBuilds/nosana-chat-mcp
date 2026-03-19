@@ -54,7 +54,7 @@ export const AskForm: React.FC<AskFormProps> = ({
     <form
       onSubmit={onSubmit}
       className={cn(
-        "border border-muted-foreground/10 overflow-hidden bg-muted/80 w-[95vw] sm:w-[80vw] md:w-[70vw] lg:w-[60vw] xl:w-[50vw] max-w-[800px] rounded-2xl shadow-md flex flex-col gap-2",
+        "flex w-[calc(100vw-1rem)] max-w-[800px] flex-col gap-1 overflow-hidden rounded-2xl border border-muted-foreground/10 bg-muted/80 shadow-md sm:w-[80vw] md:w-[70vw] lg:w-[60vw] xl:w-[50vw]",
         className,
         mcp && "rounded-none shadow-[4px_4px_0_#2f2e2a]",
       )}
@@ -65,38 +65,39 @@ export const AskForm: React.FC<AskFormProps> = ({
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         textareaRef={textareaRef}
-        className={cn("py-4 rounded-t-lg")}
+        className={cn("rounded-t-lg py-3")}
         mcp={mcp}
       />
 
-      <div className="flex justify-between items-center pb-2 px-2">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 px-2 pb-2">
+        <div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
           <ModelSelector
             value={model || selectedModel}
             onValueChange={handleModelChange}
-            className="border-muted-foreground/10 bg-muted/5"
+            className="min-w-0 flex-1 border-muted-foreground/10 bg-muted/5 sm:min-w-[12rem] sm:flex-none"
             mcp={mcp}
           />
 
           {mcp && (
-            <PhantomConnect className="bg-purple-600 px-4 py-2 h-8 text-white rounded-none border cursor-pointer hover:bg-purple-500" />
+            <PhantomConnect
+              compactMobile
+              className="h-8 shrink-0 rounded-xl border border-purple-400/40 bg-purple-600 px-3 text-sm text-white hover:bg-purple-500 sm:h-8 sm:w-auto sm:rounded-none"
+            />
           )}
         </div>
 
-        <div className="flex  items-center gap-2">
-          <SubmitButton
-            isLoading={false}
-            isDisabled={!input.trim()}
-            onSubmit={() => {
-              if (input.trim()) {
-                onSubmit(new Event("submit") as any);
-                setInput("");
-              }
-            }}
-            mcp={mcp}
-            className="border-muted-foreground/10 border"
-          />
-        </div>
+        <SubmitButton
+          isLoading={false}
+          isDisabled={!input.trim()}
+          onSubmit={() => {
+            if (input.trim()) {
+              onSubmit(new Event("submit") as any);
+              setInput("");
+            }
+          }}
+          mcp={mcp}
+          className="size-8 shrink-0 border border-muted-foreground/10 p-0 sm:h-8 sm:w-auto sm:px-3"
+        />
       </div>
     </form>
   );

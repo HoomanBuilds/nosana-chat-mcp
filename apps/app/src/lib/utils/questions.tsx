@@ -66,8 +66,8 @@ const deployerQuestions = [
   },
   { 
     id: 3, 
-    topic: "List MCP Tools", 
-    text: "Show me all available mcp tools for Nosana deployments",
+    topic: "List Nosana Skills", 
+    text: "Show me all available Nosana skills",
     Icon: <List size={30} />
   }
 ];

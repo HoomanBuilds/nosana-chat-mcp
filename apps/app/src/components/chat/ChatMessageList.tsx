@@ -1,6 +1,12 @@
 /* eslint-disable */
 
-import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
+import React, {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
 import ChatMessage from "./ChatMessage";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -8,7 +14,6 @@ import { ReasoningSection } from "./ReasoningSection";
 import { AgentTrace } from "./AgentTrace";
 import { StreamContent } from "./StreamContent";
 import rehypeHighlight from "rehype-highlight";
-import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
 import { Conversation, useChatStore } from "@/store/chat.store";
 import { useShallow } from "zustand/shallow";
 import PermissionRequest from "../UserPermission";
@@ -39,60 +44,11 @@ const ChatMessageList = memo(
     onSubmit,
     streamItems = [],
   }: ChatMessageListProps) => {
-    const autoScroll = useRef(true);
-    const virtuosoRef = useRef<VirtuosoHandle>(null);
     const prevLen = useRef(conversations.length);
-    const prevState = useRef(state);
-    const scrollerRef = useRef<HTMLElement | null>(null);
-
-    useEffect(() => {
-      const wasLoading = prevState.current === "loading";
-      const isNowIdle = state === "idle" || state === null;
-
-      if (wasLoading && isNowIdle && !autoScroll.current) {
-        prevState.current = state;
-        return;
-      }
-
-      if (conversations.length > prevLen.current && state === "loading") {
-        const targetIndex = conversations.length - 1;
-
-        const scroll = () => {
-          virtuosoRef.current?.scrollToIndex({
-            index: targetIndex,
-            align: "start",
-            behavior: "smooth",
-          });
-        };
-
-        requestAnimationFrame(scroll);
-        const timer = setTimeout(scroll, 250);
-        prevLen.current = conversations.length;
-        prevState.current = state;
-        return () => clearTimeout(timer);
-      }
-      prevLen.current = conversations.length;
-      prevState.current = state;
-    }, [conversations.length, state]);
-
-    const handleScrollerScroll = () => {
-      if (scrollerRef.current) {
-        const el = scrollerRef.current as HTMLElement;
-        const { scrollTop, scrollHeight, clientHeight } = el;
-        const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
-        autoScroll.current = isNearBottom;
-      }
-    };
-
-    const scrollerRefCallback = (ref: HTMLElement | Window | null) => {
-      if (scrollerRef.current && !(scrollerRef.current instanceof Window)) {
-        scrollerRef.current.removeEventListener("scroll", handleScrollerScroll);
-      }
-      if (ref instanceof HTMLElement) {
-        scrollerRef.current = ref;
-        ref.addEventListener("scroll", handleScrollerScroll, { passive: true });
-      }
-    };
+    const prevLastMessageId = useRef<string | undefined>(
+      conversations[conversations.length - 1]?.id,
+    );
+    const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
     const { pendingPermission } = useChatStore(
       useShallow((state) => ({ pendingPermission: state.pendingPermission })),
@@ -122,6 +78,57 @@ const ChatMessageList = memo(
         reasoningRef.current.scrollTop = reasoningRef.current.scrollHeight;
       }
     }, [reasoningChunks]);
+
+    useEffect(() => {
+      const lastMessage = conversations[conversations.length - 1];
+      const lastMessageId = lastMessage?.id;
+      const hasNewLastMessage = lastMessageId !== prevLastMessageId.current;
+
+      if (
+        conversations.length <= prevLen.current ||
+        !hasNewLastMessage ||
+        lastMessage?.role !== "user"
+      ) {
+        return;
+      }
+
+      const scrollToLatestUserMessage = () => {
+        const container = scrollContainerRef.current;
+        if (!container || !lastMessageId) return;
+
+        const messageElement = container.querySelector(
+          `[data-message-id="${lastMessageId}"]`,
+        );
+
+        if (!(messageElement instanceof HTMLElement)) return;
+
+        const nextScrollTop = Math.max(messageElement.offsetTop - 8, 0);
+        container.scrollTo({
+          top: nextScrollTop,
+          behavior: "smooth",
+        });
+      };
+
+      requestAnimationFrame(scrollToLatestUserMessage);
+      const retry1 = setTimeout(scrollToLatestUserMessage, 120);
+      const retry2 = setTimeout(scrollToLatestUserMessage, 320);
+
+      return () => {
+        clearTimeout(retry1);
+        clearTimeout(retry2);
+      };
+    }, [conversations]);
+
+    useEffect(() => {
+      prevLen.current = conversations.length;
+      prevLastMessageId.current = conversations[conversations.length - 1]?.id;
+    }, [conversations]);
+
+    useEffect(() => {
+      if (scrollRef) {
+        scrollRef.current = scrollContainerRef.current;
+      }
+    }, [scrollRef]);
 
     const virtuosoContext = useMemo(
       () => ({
@@ -160,19 +167,14 @@ const ChatMessageList = memo(
     );
 
     return (
-      <div className="flex-1 w-[95vw] pb-4 sm:w-[80vw] md:w-[70vw] lg:w-[60vw] xl:w-[60vw] max-w-[800px] h-full">
-        <Virtuoso
-          ref={virtuosoRef}
-          style={{ height: "100%", width: "100%" }}
-          data={conversations}
-          initialTopMostItemIndex={conversations.length - 1}
-          context={virtuosoContext}
-          components={{
-            Footer: ChatFooter,
-          }}
-          itemContent={renderItem}
-          scrollerRef={scrollerRefCallback}
-        />
+      <div className="min-h-0 h-full w-full max-w-[800px] flex-1 px-1 pb-24 sm:w-[80vw] sm:px-0 sm:pb-28 md:w-[70vw] lg:w-[60vw] xl:w-[60vw]">
+        <div
+          ref={scrollContainerRef}
+          className="h-full w-full overflow-y-auto"
+        >
+          {conversations.map((msg, index) => renderItem(index, msg))}
+          <ChatFooter context={virtuosoContext} />
+        </div>
       </div>
     );
   },

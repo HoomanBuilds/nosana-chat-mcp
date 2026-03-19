@@ -66,6 +66,17 @@ export default function SideBar({ onTemplateSelect }: SideBarProps) {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  useEffect(() => {
+    const root = document.documentElement;
+    const sidebarWidth =
+      window.innerWidth >= 1024 ? (barOpen ? "260px" : "60px") : "0px";
+    root.style.setProperty("--sidebar-width", sidebarWidth);
+
+    return () => {
+      root.style.setProperty("--sidebar-width", "0px");
+    };
+  }, [barOpen, mobileOpen, height]);
+
   const handleOldChat = (id: string) => {
     useChatStore.getState().setSelectedChatId(id);
     const chat = chatHistory.find((c) => c.thread_id === id);
@@ -132,13 +143,22 @@ export default function SideBar({ onTemplateSelect }: SideBarProps) {
 
   return (
     <>
+      {mobileOpen && (
+        <button
+          type="button"
+          aria-label="Close sidebar"
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          onClick={() => toggleMobile()}
+        />
+      )}
+
       <div
         id="sidebar-container"
         className={cn(
-          "flex flex-col justify-between h-full bg-muted text-muted-foreground border-r border-muted-foreground/10",
+          "flex h-full flex-col justify-between border-r border-muted-foreground/10 bg-muted text-muted-foreground",
           "transition-[width,opacity] duration-300 ease-in-out lg:relative",
-          mobileOpen ? "fixed top-0 left-0 z-50 shadow-lg" : "hidden lg:flex",
-          barOpen ? "w-[260px] opacity-100" : "w-[60px] opacity-90",
+          mobileOpen ? "fixed inset-y-0 left-0 z-50 shadow-2xl" : "hidden lg:flex",
+          barOpen ? "w-[min(86vw,320px)] opacity-100 lg:w-[260px]" : "w-[60px] opacity-90",
         )}
         style={{ height: height ? `${height}px` : undefined }}
       >

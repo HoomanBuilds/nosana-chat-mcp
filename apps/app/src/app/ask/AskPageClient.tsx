@@ -131,7 +131,9 @@ function AskPage() {
       {!mcp && (
         <button
           onClick={() => toggleMobile()}
-          className="fixed top-2 left-2 z-50"
+          type="button"
+          className="fixed left-3 z-40 rounded-full border border-border/60 bg-background/90 p-2 shadow-md backdrop-blur lg:hidden"
+          style={{ top: "max(0.75rem, env(safe-area-inset-top))" }}
         >
           <ArrowRightFromLine
             className={cn("cursor-pointer lg:hidden text-muted-foreground")}
@@ -148,17 +150,17 @@ function AskPage() {
       >
         {mcp && (
           <div className="sticky top-0 z-40 w-full">
-            <ChatNavBar />
+            <ChatNavBar onTemplateSelect={handleTemplateSelect} />
           </div>
         )}
 
         <div
           className={cn(
-            "flex-1 flex flex-col justify-center items-center px-6",
+            "flex flex-1 flex-col items-center justify-center px-4 pb-32 pt-16 sm:px-6 md:pb-20",
             mcp ? "pt-0" : "",
           )}
         >
-          <div className="sm:translate-y-6 w-full -translate-y-12 flex flex-col items-center">
+          <div className="flex w-full flex-col items-center md:-translate-y-6">
             <div
               className={cn(
                 "text-center text-2xl sm:text-3xl font-sans mb-6 font-extralight",
@@ -184,9 +186,9 @@ function AskPage() {
               </div>
             </div>
 
-            <AskForm {...formProps} className="mt-8 hidden md:block" />
+            <AskForm {...formProps} className="mt-8 hidden md:flex" />
 
-            <div className="w-[90vw] sm:w-[80vw] md:w-[70vw] lg:w-[60vw] xl:w-[50vw] max-w-[800px] grid-cols-2 lg:grid-cols-3 gap-4 mt-5 sm:grid">
+            <div className="mt-5 grid w-full max-w-[800px] grid-cols-1 gap-4 sm:w-[80vw] sm:grid-cols-2 md:w-[70vw] lg:w-[60vw] lg:grid-cols-3 xl:w-[50vw]">
               {displayedQuestions.map((q, index) => (
                 <div
                   key={q.id}
@@ -204,7 +206,7 @@ function AskPage() {
                     }
                   }}
                   className={cn(
-                    "p-3 h-24 items-center sm:items-start gap-4 sm:gap-0 shadow-md mb-2 flex flow-row sm:flex-col sm:h-full select-none border border-transparent rounded-lg cursor-pointer transition-all duration-150 bg-muted/30 text-muted-foreground ",
+                    "mb-2 flex h-auto min-h-24 select-none flex-row items-center gap-4 rounded-lg border border-transparent bg-muted/30 p-3 text-muted-foreground shadow-md transition-all duration-150 sm:h-full sm:flex-col sm:items-start sm:gap-0",
                     index >= 2 ? "sm:hover:scale-105" : "hover:scale-105",
                     "hover:bg-muted-foreground/10",
                     mcp && "border-2 rounded-none shadow-[4px_4px_0_#2f2e2a]",
@@ -229,8 +231,9 @@ function AskPage() {
 
         <div
           className={cn(
-            "md:hidden fixed bottom-0 left-0 right-0 backdrop-blur-sm border-border py-2 transition-colors duration-500",
+            "fixed inset-x-0 bottom-0 z-30 border-t border-border/60 bg-background/85 px-2 pt-2 backdrop-blur-sm transition-colors duration-500 md:hidden",
           )}
+          style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}
         >
           <div className="flex justify-center">
             <AskForm {...formProps} />
