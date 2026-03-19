@@ -26,7 +26,7 @@ export const useModelGroups = ({ onlyModel }: UseModelGroupsOptions = {}) => {
   const { data, isLoading: isSwrLoading } = useSWR(
     onlyModel ? null : "/api/v1/models",
     fetcher,
-    { revalidateOnFocus: false }
+    { revalidateOnFocus: false, dedupingInterval: 60000 }
   );
 
   const localModels: ModelItem[] = useMemo(() => {

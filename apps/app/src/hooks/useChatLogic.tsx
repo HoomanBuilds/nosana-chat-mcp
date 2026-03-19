@@ -42,11 +42,15 @@ export function useChatLogic() {
   const [llmChunks, setLLMChunks] = useState<string>("");
   const [event, setEvent] = useState<string>("");
   const [mcp, setmcp] = useState(false);
+  const [streamItems, setStreamItems] = useState<any[]>([]);
 
   // Buffer refs for throttling
   const llmBufferRef = useRef<string[]>([]);
   const reasoningBufferRef = useRef<string[]>([]);
   const throttleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const streamItemsRef = useRef<any[]>([]);
+  const streamItemsDirtyRef = useRef(false);
+  const eventRef = useRef("");
 
   // --- Stores ---
   const {
@@ -248,6 +252,8 @@ export function useChatLogic() {
       setReasoningChunks("");
       setLLMChunks("");
       setPendingTool(null);
+      streamItemsRef.current = [];
+      setStreamItems([]);
 
       //abort controller
       controllerRef.current = new AbortController();
@@ -276,13 +282,13 @@ export function useChatLogic() {
         }
         const deployedModelPayload = customServiceUrl
           ? {
-            baseURL: customServiceUrl,
-            model: customServiceModel || modelToSend,
-          }
+              baseURL: customServiceUrl,
+              model: customServiceModel || modelToSend,
+            }
           : undefined;
 
         //making backend ai request
-        const res = await fetch(`/api/v2/ask`, {
+        const res = await fetch(`/api/v1/ask`, {
           method: "POST",
           headers,
           body: JSON.stringify({
@@ -291,7 +297,7 @@ export function useChatLogic() {
             mode: tool ? tool : undefined,
             customConfig: customConfig,
             walletPublicKey: walletCondition ? getCredential() : undefined,
-            chats: conversations.slice(-50).map((c) => ({
+            chats: useChatStore.getState().currentChat.slice(-50).map((c) => ({
               role: c.role,
               content: c.content,
               metadata: {
@@ -370,8 +376,14 @@ export function useChatLogic() {
             llmBufferRef.current = [];
           }
           if (reasoningBufferRef.current.length > 0) {
-            setReasoningChunks((prev) => prev + reasoningBufferRef.current.join(""));
+            setReasoningChunks(
+              (prev) => prev + reasoningBufferRef.current.join(""),
+            );
             reasoningBufferRef.current = [];
+          }
+          if (streamItemsDirtyRef.current) {
+            setStreamItems([...streamItemsRef.current]);
+            streamItemsDirtyRef.current = false;
           }
           throttleTimeoutRef.current = null;
         };
@@ -415,14 +427,46 @@ export function useChatLogic() {
                   break;
                 }
 
-                case "event":
-                  setEvent(data.toString());
+                case "event": {
+                  const val = data.toString();
+                  if (val !== eventRef.current) {
+                    eventRef.current = val;
+                    setEvent(val);
+                  }
                   break;
+                }
+
+                case "trace": {
+                  try {
+                    const traceEvent =
+                      typeof data === "string" ? JSON.parse(data) : data;
+                    if (traceEvent && traceEvent.type) {
+                      streamItemsRef.current.push({
+                        id: crypto.randomUUID(),
+                        type: "trace",
+                        data: traceEvent,
+                        timestamp: Date.now(),
+                      });
+                      streamItemsDirtyRef.current = true;
+                      queueUpdate();
+                    }
+                  } catch (e) {
+                    console.error("Failed to parse trace event:", e);
+                  }
+                  break;
+                }
 
                 case "llmResult": {
                   const text = data.toString();
                   llmBufferRef.current.push(text);
                   finalLLM += text;
+                  streamItemsRef.current.push({
+                    id: crypto.randomUUID(),
+                    type: "text",
+                    data: text,
+                    timestamp: Date.now(),
+                  });
+                  streamItemsDirtyRef.current = true;
                   queueUpdate();
                   break;
                 }
@@ -437,49 +481,51 @@ export function useChatLogic() {
 
                 case "searchResult":
                   try {
-                    searchResult = typeof data === "string" ? JSON.parse(data) : data;
+                    searchResult =
+                      typeof data === "string" ? JSON.parse(data) : data;
                   } catch (e) {
                     console.error("Failed to parse searchResult:", e);
                   }
                   break;
 
                 //stream based error handling
-                case "error": {
-                  if (hasError) break;
-                  const errorMessage = data.message || data;
-                  const isUserFriendly =
-                    typeof errorMessage === "string" &&
-                    (errorMessage.includes("tool calling is not supported") ||
-                      errorMessage.includes("openai/gpt-oss-20b"));
+                case "error":
+                  {
+                    if (hasError) break;
+                    const errorMessage = data.message || data;
+                    const isUserFriendly =
+                      typeof errorMessage === "string" &&
+                      (errorMessage.includes("tool calling is not supported") ||
+                        errorMessage.includes("openai/gpt-oss-20b"));
 
-                  if (localConfig.showErrorMessages || isUserFriendly) {
-                    addMessage({
-                      role: "model",
-                      model: modelToSend,
-                      reasoning: isUserFriendly
-                        ? undefined
-                        : `An error occurred: ${errorMessage}`,
-                      content: isUserFriendly
-                        ? errorMessage
-                        : `An error occurred: in Response from ${errorMessage.substring(0, 50)}... Expand to check full error message.`,
-                      id: crypto.randomUUID(),
-                      type: "error",
-                    });
-                  } else {
-                    addMessage({
-                      role: "model",
-                      model: modelToSend,
-                      content: "Something went wrong.",
-                      id: crypto.randomUUID(),
-                      type: "error",
-                    });
+                    if (localConfig.showErrorMessages || isUserFriendly) {
+                      addMessage({
+                        role: "model",
+                        model: modelToSend,
+                        reasoning: isUserFriendly
+                          ? undefined
+                          : `An error occurred: ${errorMessage}`,
+                        content: isUserFriendly
+                          ? errorMessage
+                          : `An error occurred: in Response from ${errorMessage.substring(0, 50)}... Expand to check full error message.`,
+                        id: crypto.randomUUID(),
+                        type: "error",
+                      });
+                    } else {
+                      addMessage({
+                        role: "model",
+                        model: modelToSend,
+                        content: "Something went wrong.",
+                        id: crypto.randomUUID(),
+                        type: "error",
+                      });
+                    }
+                    hasError = true;
+                    console.error("API Error:", data.message || data);
+                    setState("idle");
+                    // Try to break out of the stream if we hit a critical error
+                    if (controllerRef.current) controllerRef.current.abort();
                   }
-                  hasError = true;
-                  console.error("API Error:", data.message || data);
-                  setState("idle");
-                  // Try to break out of the stream if we hit a critical error
-                  if (controllerRef.current) controllerRef.current.abort();
-                }
                   break;
 
                 //tools execution approval
@@ -518,9 +564,8 @@ export function useChatLogic() {
                               console.log(`▶ Executing ${funcName}`);
                               const approvedJobDef =
                                 pendingTool?.prompt || parsed.prompt;
-                              const { validateJobDefinition } = await import(
-                                "@nosana/sdk"
-                              );
+                              const { validateJobDefinition } =
+                                await import("@nosana/sdk");
                               const r = validateJobDefinition(approvedJobDef);
                               if (!r.success) {
                                 const validationErrors = JSON.stringify(
@@ -530,9 +575,8 @@ export function useChatLogic() {
                                   `Invalid job definition: ${validationErrors}`,
                                 );
                               }
-                              const { createJob } = await import(
-                                "@/lib/nosana/createJob"
-                              );
+                              const { createJob } =
+                                await import("@/lib/nosana/createJob");
                               const result = await createJob(
                                 approvedJobDef,
                                 parsed.args.marketPubKey,
@@ -545,7 +589,7 @@ export function useChatLogic() {
 
                               const curlSnippet =
                                 parsed?.args?.provider === "huggingface" &&
-                                  parsed?.args?.testGeneration
+                                parsed?.args?.testGeneration
                                   ? `
                                 # You can test your deployment using:
                                 curl -s -X POST <service_url>/generate \\
@@ -663,9 +707,8 @@ export function useChatLogic() {
                           onConfirm: async () => {
                             try {
                               console.log(`▶ Executing ${funcName}`);
-                              const { stopJob } = await import(
-                                "@/lib/nosana/stopJob"
-                              );
+                              const { stopJob } =
+                                await import("@/lib/nosana/stopJob");
                               const result = await stopJob(parsed.args.jobId);
                               await handleAskChunk(
                                 undefined,
@@ -710,9 +753,8 @@ export function useChatLogic() {
                           onConfirm: async () => {
                             try {
                               console.log(`▶ Executing ${funcName}`);
-                              const { extendJob } = await import(
-                                "@/lib/nosana/extendjob"
-                              );
+                              const { extendJob } =
+                                await import("@/lib/nosana/extendjob");
                               const result = await extendJob(
                                 parsed.args.jobId,
                                 parsed.args.extensionSeconds / 60,
@@ -777,8 +819,11 @@ export function useChatLogic() {
                 default:
                   if (eventType?.toLowerCase() === "followup") {
                     try {
-                      const parsed = typeof data === "string" ? JSON.parse(data) : data;
-                      followUpQuestions = Array.isArray(parsed) ? parsed : (parsed?.questions || []);
+                      const parsed =
+                        typeof data === "string" ? JSON.parse(data) : data;
+                      followUpQuestions = Array.isArray(parsed)
+                        ? parsed
+                        : parsed?.questions || [];
                       setFollowUp(followUpQuestions);
                     } catch (err) {
                       console.error(
@@ -806,6 +851,11 @@ export function useChatLogic() {
 
         //wrapping UP
         const finalContent = (finalLLM + fallbackLLM).trim();
+        const finalTrace = [...streamItemsRef.current];
+        const traceOnly = finalTrace
+          .filter((i) => i.type === "trace")
+          .map((i) => i.data);
+
         if (finalContent !== "" || finalThinking.trim() !== "") {
           addMessage({
             role: "model",
@@ -819,6 +869,8 @@ export function useChatLogic() {
             responseTime: responseTime || undefined,
             followUps: followUpQuestions || [],
             type: "message",
+            trace: traceOnly.length > 0 ? traceOnly : undefined,
+            streamItems: finalTrace.length > 0 ? finalTrace : undefined,
           });
         } else if (selectedChatId && !hasError) {
           if (!localConfig.showErrorMessages) {
@@ -833,6 +885,10 @@ export function useChatLogic() {
         }
       } catch (error) {
         if ((error as Error).name === "AbortError") {
+          const abortedTrace = [...streamItemsRef.current];
+          const abortedTraceOnly = abortedTrace
+            .filter((i) => i.type === "trace")
+            .map((i) => i.data);
           addMessage({
             role: "model",
             content: finalLLM
@@ -843,6 +899,8 @@ export function useChatLogic() {
             model: selectedModel,
             id: crypto.randomUUID(),
             type: "aborted",
+            trace: abortedTraceOnly.length > 0 ? abortedTraceOnly : undefined,
+            streamItems: abortedTrace.length > 0 ? abortedTrace : undefined,
           });
         } else {
           console.error("Fetch/Stream error:", error);
@@ -873,6 +931,10 @@ export function useChatLogic() {
         setLLMChunks("");
         setState("idle");
         setEvent("");
+        eventRef.current = "";
+        streamItemsRef.current = [];
+        streamItemsDirtyRef.current = false;
+        setStreamItems([]);
         controllerRef.current = null;
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -888,7 +950,6 @@ export function useChatLogic() {
       isApiKeyConnected,
       nosanaApiKey,
       customConfig,
-      conversations,
       search,
       thinking,
       customServiceUrl,
@@ -924,6 +985,7 @@ export function useChatLogic() {
     setLLMChunks,
     mcp,
     setmcp,
+    streamItems,
   };
 }
 

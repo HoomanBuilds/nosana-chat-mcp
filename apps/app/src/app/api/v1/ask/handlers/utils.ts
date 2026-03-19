@@ -41,17 +41,26 @@ import OpenAI from "openai";
 
 export async function getThreadTitle(query: string, model: string) {
   try {
+    const provider = process.env.LLM_PROVIDER || "inferia";
+    let fallbackBaseUrl = process.env.NEXT_PUBLIC_INFERIA_LLM_URL || "";
+    let fallbackApiKey = process.env.INFERIA_LLM_API_KEY || "nosana-local";
+
+    if (provider === "deepseek") {
+      fallbackBaseUrl =
+        process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com/v1";
+      fallbackApiKey = process.env.DEEPSEEK_API_KEY || "";
+    }
+
     const client = new OpenAI({
-      apiKey: process.env.INFERIA_LLM_API_KEY,
-      baseURL: normalizeInferenceBaseURL(
-        process.env.NEXT_PUBLIC_INFERIA_LLM_URL || "",
-      ),
+      apiKey: fallbackApiKey,
+      baseURL: normalizeInferenceBaseURL(fallbackBaseUrl),
       defaultHeaders: {
         ...COMMON_HEADERS,
       },
     });
     // Use the user's selected model for title generation
-    const titleModel = model || "inferiallm";
+    const titleModel =
+      model || (provider === "deepseek" ? "deepseek-chat" : "inferiallm");
 
     const res = await client.chat.completions.create({
       model: titleModel,
@@ -67,12 +76,13 @@ export async function getThreadTitle(query: string, model: string) {
 
     const rawContent = res.choices[0]?.message?.content || "";
     // Remove reasoning blocks like <think>...</think> or unclosed `<think>...`
-    const cleanContent = rawContent.replace(/<think>[\s\S]*?(<\/think>|$)/g, "").trim();
+    const cleanContent = rawContent
+      .replace(/<think>[\s\S]*?(<\/think>|$)/g, "")
+      .trim();
 
     const title =
-      cleanContent
-        .replace(/^["“”‘']+/, "")
-        .replace(/["“”‘']+$/, "") || query.substring(0, 30);
+      cleanContent.replace(/^["“”‘']+/, "").replace(/["“”‘']+$/, "") ||
+      query.substring(0, 30);
 
     return title;
   } catch (err) {
@@ -404,7 +414,7 @@ export async function streamThrottle(
 ) {
   const parser = createStreamingParser(send);
 
-  const { chunkSize = 10, minDelay = 1, maxDelay = 50 } = config;
+  const { chunkSize = 50, minDelay = 0, maxDelay = 5 } = config;
 
   const parts: string[] = [];
   for (let i = 0; i < text.length; i += chunkSize) {
@@ -422,6 +432,8 @@ export async function streamThrottle(
       minDelay + ((1 - Math.cos(Math.PI * t)) / 2) * (maxDelay - minDelay);
     await new Promise((r) => setTimeout(r, delay));
   }
+
+  parser.flush();
 }
 
 export function createStreamingParser(
@@ -495,13 +507,23 @@ export function createStreamingParser(
     }
   }
 
-  return { parse };
+  function flush() {
+    if (buffer) {
+      if (state === "llm") {
+        send("llmResult", buffer);
+      } else {
+        send("thinking", buffer);
+      }
+      buffer = "";
+    }
+  }
+
+  return { parse, flush };
 }
 
 export function registerApiKeys(payload: Payload, headers: Headers) {
   const keyMap: Record<string, string> = {
     "x-openai-key": "openai",
-
   };
 
   const apiKeys: Record<string, string> = {};

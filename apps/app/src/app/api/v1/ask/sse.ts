@@ -45,10 +45,12 @@ export function createSSEStream(payload?: Payload) {
           : Promise.resolve();
 
       try {
-        await Promise.allSettled([
-          providerPromise,
-          threadCheckPromise,
-          followUpPromise
+        // Wait for main response and thread check
+        await Promise.allSettled([providerPromise, threadCheckPromise]);
+        // Give follow-ups a short window to complete, don't block stream close
+        await Promise.race([
+          followUpPromise,
+          new Promise((resolve) => setTimeout(resolve, 300)),
         ]);
       } catch (err) {
         send("error", JSON.stringify({ message: (err as Error).message }));
@@ -77,7 +79,10 @@ function getFollowUpFromPayload(
     .join("\n");
 
   if (combinedQuery.length > MAX_LENGTH) {
-    combinedQuery = combinedQuery.slice(-MAX_LENGTH);
+    // Avoid splitting a word in half when trimming
+    const sliced = combinedQuery.slice(-MAX_LENGTH);
+    const firstSpaceIndex = sliced.indexOf(" ");
+    combinedQuery = firstSpaceIndex !== -1 ? sliced.slice(firstSpaceIndex + 1) : sliced;
   }
 
   return combinedQuery

@@ -4,7 +4,7 @@ import { GpuMarketSlug, JobsResponse, ModelSpec } from "./types";
 import { PublicKey } from "@solana/web3.js";
 import { NosanaDeployer } from "../Deployer";
 import { createOpenAI } from "@ai-sdk/openai";
-import { generateObject } from "ai";
+import { generateObject, generateText } from "ai";
 import { ZodType } from "zod";
 import { TResult } from "./schema";
 import { getPlannerModel } from "./plannerContext";
@@ -12,20 +12,26 @@ import { IMAGE_REGISTRY } from "./ImageRegistry";
 import { SolanaService } from "../../services/SolanaService";
 import { normalizeInferenceBaseURL, COMMON_HEADERS } from "@/lib/utils/llm";
 
+const provider = process.env.LLM_PROVIDER || "inferia";
+const baseURL = provider === "deepseek"
+  ? process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com/v1"
+  : process.env.NEXT_PUBLIC_INFERIA_LLM_URL || "";
+const apiKey = provider === "deepseek"
+  ? process.env.DEEPSEEK_API_KEY || ""
+  : process.env.INFERIA_LLM_API_KEY || "nosana-local";
+
 const openai = createOpenAI({
-  apiKey: process.env.INFERIA_LLM_API_KEY || "nosana-local",
-  baseURL: normalizeInferenceBaseURL(
-    process.env.NEXT_PUBLIC_INFERIA_LLM_URL || "",
-  ),
+  apiKey,
+  baseURL: normalizeInferenceBaseURL(baseURL),
   headers: {
     ...COMMON_HEADERS,
   },
 });
 
 function resolvePlannerModel(model?: string): string {
-  return (
-    model || getPlannerModel() || "qwen3:0.6b"
-  );
+  const resolved = model || getPlannerModel();
+  if (!resolved) throw new Error("No model selected");
+  return resolved;
 }
 
 export function assertImagePresent(spec: ModelSpec): void {
@@ -218,12 +224,27 @@ export async function chatJSON<T>(
   schema: ZodType<T>,
   model?: string,
 ): Promise<T> {
-  const { object } = await generateObject({
-    model: openai.chat(resolvePlannerModel(model)),
-    prompt,
-    schema,
-  });
-  return object;
+  try {
+    const { object } = await generateObject({
+      model: openai.chat(resolvePlannerModel(model)),
+      prompt,
+      schema,
+    });
+    return object;
+  } catch (e: any) {
+    // Fallback for models that don't support response_format/json_schema (e.g. DeepSeek)
+    if (/response_format|unavailable|json_schema/i.test(e?.message || "")) {
+      const { text } = await generateText({
+        model: openai.chat(resolvePlannerModel(model)),
+        prompt: `${prompt}\n\nRespond with ONLY valid JSON, no markdown, no explanation.`,
+      });
+      const jsonMatch = text.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
+      if (!jsonMatch) throw new Error("No JSON found in model response");
+      const parsed = JSON.parse(jsonMatch[0]);
+      return schema.parse(parsed);
+    }
+    throw e;
+  }
 }
 
 export function normalizeOllamaTag(name: string, vramGb?: number): string {

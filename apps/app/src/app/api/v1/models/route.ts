@@ -6,14 +6,19 @@ function joinModelUrl(baseUrl: string) {
 }
 
 export async function GET() {
-  const baseUrl = process.env.NEXT_PUBLIC_INFERIA_LLM_URL;
-  const apiKey = process.env.INFERIA_LLM_API_KEY;
+  const provider = process.env.LLM_PROVIDER || "inferia";
+  let baseUrl = process.env.NEXT_PUBLIC_INFERIA_LLM_URL;
+  let apiKey = process.env.INFERIA_LLM_API_KEY;
+
+  if (provider === "deepseek") {
+    baseUrl = process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com/v1";
+    apiKey = process.env.DEEPSEEK_API_KEY;
+  }
 
   if (!baseUrl || !apiKey) {
     return NextResponse.json(
       {
-        error:
-          "Missing NEXT_PUBLIC_INFERIA_LLM_URL or INFERIA_LLM_API_KEY environment variables",
+        error: `Missing configuration for provider: ${provider}`,
       },
       { status: 500 },
     );
@@ -25,7 +30,7 @@ export async function GET() {
       headers: {
         Authorization: `Bearer ${apiKey}`,
       },
-      cache: "no-store",
+      next: { revalidate: 300 },
     });
 
     const data = await res.json().catch(() => null);

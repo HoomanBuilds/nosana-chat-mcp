@@ -25,20 +25,19 @@ export const getFollowUpQuestions = async (
                      : give short follow ups 6-12 words
             `;
 
+  const isDeepSeek = process.env.LLM_PROVIDER === "deepseek";
   const client = new OpenAI({
-    apiKey: process.env.INFERIA_LLM_API_KEY,
-    baseURL: process.env.NEXT_PUBLIC_INFERIA_LLM_URL,
-    defaultHeaders: {
-      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-      "Referer": "https://nosana.chat/",
-    },
+    apiKey: isDeepSeek ? process.env.DEEPSEEK_API_KEY : process.env.INFERIA_LLM_API_KEY,
+    baseURL: isDeepSeek
+      ? process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com/v1"
+      : process.env.NEXT_PUBLIC_INFERIA_LLM_URL,
   });
 
   try {
     const response = await client.chat.completions.create({
       model: model,
       messages: [{ role: "user", content: prompt }],
-      response_format: { type: "json_object" },
+      ...(isDeepSeek ? {} : { response_format: { type: "json_object" } }),
     });
 
     const rawContent = response.choices[0]?.message?.content || "[]";

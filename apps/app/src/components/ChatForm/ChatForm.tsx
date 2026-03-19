@@ -55,7 +55,7 @@ export const ChatForm: React.FC<ChatFormProps> = ({
 }) => {
   const currentConfig =
     Modes.ChatModeConfig[
-    selectedModel?.split("/")[1] as keyof typeof Modes.ChatModeConfig
+      selectedModel?.split("/")[1] as keyof typeof Modes.ChatModeConfig
     ] || {};
 
   const { tool } = useChatStore(useShallow((state) => ({ tool: state.tool })));
@@ -96,7 +96,7 @@ export const ChatForm: React.FC<ChatFormProps> = ({
       />
 
       <div className="flex justify-between items-center pb-2 px-2">
-        <div className="flex gap-4 items-center text-black/50">
+        <div className="flex gap-4 items-center text-muted-foreground">
           <ModelSelector
             value={model || selectedModel}
             onValueChange={handleModelChange}
