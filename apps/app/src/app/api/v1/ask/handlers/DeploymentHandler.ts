@@ -213,74 +213,23 @@ export const handleDeployment = async (
       return history;
     };
 
-    // ── System prompt — clean, mode-specific ──
-    const authPrompt = isApiKeyMode
-      ? `**Auth Mode:** API Key (Credits-based). The user is connected via their Nosana API key.
-You do NOT have access to any wallet. Do not ask for a wallet address.
-
-**Available Tools:**
-- getCreditBalance → check credit balance
-- listJobs → list all jobs
-- getJob → get details of a specific job
-- stopJob → stop a running job
-- createJob → create a new job
-- getModels → search for models
-- getMarket → get GPU market info
-- getJob → get job info by ID
-- listGpuMarkets → list all GPU markets
-- estimateJobCost → estimate job cost
-- suggest_model_market → get recommendations
-
-All tools are pre-authenticated. Just call them directly — no credentials needed in parameters.`
+    // ── Auth context (dynamic, wallet-specific) ──
+    const authContext = isApiKeyMode
+      ? `**Auth Mode:** API Key (Credits-based). No wallet. Call all tools directly — pre-authenticated.`
       : userWallet
-        ? `**Auth Mode:** Wallet (On-chain)
-**Wallet:** ${userWallet}
-Use this as userPublicKey / UsersPublicKey / job_owners_pubKey / userPubKey in all tool calls.
-
-**Available Tools:**
-- createJob → create a new job (userPublicKey="${userWallet}")
-- getWalletBalance → check SOL + NOS balances (UsersPublicKey="${userWallet}")
-- getAllJobs → list all jobs (userPubKey="${userWallet}")
-- getJob → get job details by ID
-- stopJob → stop a running job (job_owners_pubKey="${userWallet}")
-- extendJobRuntime → extend a running job (job_owners_pubKey="${userWallet}")
-- getMarket → get GPU market info
-- listGpuMarkets → list all GPU markets
-- estimateJobCost → estimate job cost
-- suggest_model_market → get recommendations
-- getModels → search for models`
-        : "**No wallet connected.** Ask the user to connect their wallet or provide a Nosana API key first.";
+        ? `**Auth Mode:** Wallet (On-chain). Wallet: ${userWallet}
+Use "${userWallet}" as userPublicKey / UsersPublicKey / job_owners_pubKey / userPubKey in all tool calls.`
+        : `**No wallet connected.** Ask the user to connect their wallet or provide a Nosana API key first.`;
 
     const messages = [
       {
         role: "system",
-        content: `
-You are **NosanaDeploy**, a deployment agent for Nosana's decentralized GPU network.
+        content: `You are **NosanaDeploy**, a deployment agent for Nosana's decentralized GPU network.
 
-${authPrompt}
+${authContext}
 
-${(() => {
-  const skillContent = loadNosanaSkill();
-  return skillContent ? `\n## Nosana Skill Guide\n${skillContent}\n` : "";
-})()}
-
-Handling User JSON:
-1. If JSON has 'type', 'ops', 'meta' → createJob(directJobDef={...json...})
-2. For ANY model deployment request → ALWAYS call getModels first, then pass its output as resolvedModel to createJob. NEVER call createJob with only requirements for model deployments.
-3. For custom non-LLM containers (e.g. nginx, n8n) → createJob(requirements="...")
-
-Behavior:
-- Be concise, technical, and adaptive.
-- NEVER call createJob more than once per user request.
-- NEVER skip getModels for model deployments — it is required to get the correct model ID and VRAM.
-- Never dump raw tool output — interpret and summarize.
-- Respond cleanly; no filler, no repetition.
-
-If errors occur, try recovery twice before stopping. Always inform user of what's done and what's next.
-
--In in response from tool add your human tone rather then just pasting tool output as it is
-${payload.customPrompt || ""}
-`.trim(),
+${loadNosanaSkill()}
+${payload.customPrompt || ""}`.trim(),
       },
       ...normalizeChats(payload.chats || []),
       { role: "user", content: payload.query || "" },

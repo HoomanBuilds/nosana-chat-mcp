@@ -399,3 +399,98 @@ Replace `MODEL` and `required_vram` based on the target model. Use this template
 ```
 
 Replace `MODEL` with the HuggingFace model ID and adjust `required_vram` accordingly. Use this template for any vLLM/OpenAI-compatible model deployment.
+
+---
+
+## Job Definition Generator Rules
+
+When `createJob` is called with `model` + `requirements`, an internal resolver converts them into a Nosana job definition JSON. The following rules govern that conversion.
+
+### Provider Selection
+
+- User mentions Docker image / container name → `providerName = "container"`
+- User gives a HuggingFace model ID or just says "run model X" → `providerName = "huggingface"`
+- User mentions vLLM, TGI, or Ollama image explicitly → `providerName = "container"`
+- HuggingFace inference image (e.g. `ghcr.io/huggingface/text-generation-inference`) → `providerName = "huggingface"`
+- Custom app (FastAPI, Jupyter, etc.) → `providerName = "container"`
+
+### Image Selection (CRITICAL)
+
+- Ollama (recommended for self-hosted text-gen): `docker.io/ollama/ollama:0.15.4`
+- vLLM (OpenAI-compatible API): `docker.io/vllm/vllm-openai:v0.10.2`
+- Jupyter: `docker.io/nosana/pytorch-jupyter:2.0.0`
+- TGI: `ghcr.io/huggingface/text-generation-inference:1.4`
+- **NEVER** use `docker.io/hoomanhq/oneclickllm:ollama01` — deprecated
+- **NEVER** generate placeholder images like `user/model:latest`
+
+For `huggingface` provider: omit `image`, `entrypoint`, `commands` — platform selects automatically.
+
+### GPU & VRAM
+
+- `gpu=true` only if image/model uses GPU (vLLM, TGI, Ollama, SDXL)
+- `required_vram = 0` when `gpu=false`
+- Approx VRAM = (model_size_B × 2) + 2 GB
+- Non-ML containers (n8n, Jupyter, APIs) → CPU-only
+
+### Environment Variables
+
+- `env` must be an array: `[{"key":"KEY","value":"VALUE"}]`
+- Always include user-specified keys
+- Required for LLMs: `PARAMETER_SIZE`, `MAX_MODEL_LEN` (default `"8192"`), `MODEL_ID` (container only)
+- Optional (only if explicitly requested): `ENABLE_STREAMING`, `QUANTIZATION`, `GPU_MEMORY_UTILIZATION`, `DTYPE`, `TENSOR_PARALLEL_SIZE`
+- Never use placeholder values: `"NAN"`, `"unknown"`, `"false"`, `"0"`, `"0.9"`
+
+### Ollama Template Rules
+
+- image: `docker.io/ollama/ollama:0.15.4`
+- expose: port `11434` with health check on `/api/tags`
+- resources: `[{ type: "Ollama", model: "<ollama-tag>" }]`
+- Ollama tag format: `<name>:<size>` e.g. `llama3.2:3b`, `gemma3:4b-it-qat`, `mistral:7b`
+
+### vLLM Template Rules
+
+- image: `docker.io/vllm/vllm-openai:v0.10.2`
+- cmd: `["--model", "<hf-id>", "--served-model-name", "<hf-id>", "--port", "8000", "--max-model-len", "30000"]`
+- expose: `8000`
+
+### Output Schema (what the resolver must produce)
+
+```json
+{
+  "providerName": "huggingface | container",
+  "category": "text-generation | text-to-image | development-environment | generic-transformer",
+  "modelName": "org/model-name",
+  "params": "7B",
+  "gpu": true,
+  "vRAM_required": 16,
+  "image": "(container only)",
+  "entrypoint": "(container only)",
+  "commands": ["(container only)"],
+  "exposedPorts": 8080,
+  "env": [{ "key": "KEY", "value": "VALUE" }],
+  "resources": [{ "type": "url", "url": "...", "target": "/path" }],
+  "apiKey": "(optional)",
+  "huggingFaceToken": "(optional)",
+  "notes": "...",
+  "otherExtra": { "id": "...", "Description": "..." }
+}
+```
+
+### Model Market Recommendation Rules
+
+When `suggest_model_market` is called, evaluate:
+- Model size vs available VRAM per market
+- Price efficiency (cheaper for small models)
+- Task fit (chat, coding, image generation, etc.)
+- Prefer open-source, non-gated HuggingFace models
+- Always return full HuggingFace model ID: `org/model-name`
+- Include `recommendation_score` (1–10) for each suggestion
+
+### General Constraints
+
+- Output must be production-ready — no mock configs, no placeholders
+- If provider is `container`: must set `image`, `entrypoint`, `commands`, `exposedPorts`, `env`
+- If provider is `huggingface`: omit all container fields
+- Never invent fake URLs or commands
+- Preserve all existing fields on updates — only modify what the user explicitly changed
+- Default timeout: 1 hour (3600s) unless user specifies otherwise
