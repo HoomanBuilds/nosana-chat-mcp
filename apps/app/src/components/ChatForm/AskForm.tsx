@@ -30,9 +30,8 @@ export const AskForm: React.FC<AskFormProps> = ({
   textareaRef,
   className,
   placeholder = "Type your message to start chat...",
-  mcp = false
+  mcp = false,
 }) => {
-
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     const isMobile = /Mobi|Android/i.test(navigator.userAgent);
 
@@ -55,9 +54,9 @@ export const AskForm: React.FC<AskFormProps> = ({
     <form
       onSubmit={onSubmit}
       className={cn(
-        "border-muted-foreground/5  overflow-hidden border-2 bg-muted/60 w-[95vw] sm:w-[80vw] md:w-[70vw] lg:w-[60vw] xl:w-[50vw] max-w-[800px] rounded-2xl shadow-md flex flex-col gap-2",
+        "border border-muted-foreground/10 overflow-hidden bg-muted/80 w-[95vw] sm:w-[80vw] md:w-[70vw] lg:w-[60vw] xl:w-[50vw] max-w-[800px] rounded-2xl shadow-md flex flex-col gap-2",
         className,
-        mcp && "rounded-none shadow-[4px_4px_0_#2f2e2a]"
+        mcp && "rounded-none shadow-[4px_4px_0_#2f2e2a]",
       )}
     >
       <ChatInput
@@ -84,14 +83,13 @@ export const AskForm: React.FC<AskFormProps> = ({
           )}
         </div>
 
-
         <div className="flex  items-center gap-2">
           <SubmitButton
             isLoading={false}
             isDisabled={!input.trim()}
             onSubmit={() => {
               if (input.trim()) {
-                onSubmit(new Event('submit') as any);
+                onSubmit(new Event("submit") as any);
                 setInput("");
               }
             }}
@@ -99,7 +97,6 @@ export const AskForm: React.FC<AskFormProps> = ({
             className="border-muted-foreground/10 border"
           />
         </div>
-
       </div>
     </form>
   );

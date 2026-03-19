@@ -42,8 +42,18 @@ const ChatMessageList = memo(
     const autoScroll = useRef(true);
     const virtuosoRef = useRef<VirtuosoHandle>(null);
     const prevLen = useRef(conversations.length);
+    const prevState = useRef(state);
+    const scrollerRef = useRef<HTMLElement | null>(null);
 
     useEffect(() => {
+      const wasLoading = prevState.current === "loading";
+      const isNowIdle = state === "idle" || state === null;
+
+      if (wasLoading && isNowIdle && !autoScroll.current) {
+        prevState.current = state;
+        return;
+      }
+
       if (conversations.length > prevLen.current && state === "loading") {
         const targetIndex = conversations.length - 1;
 
@@ -55,14 +65,34 @@ const ChatMessageList = memo(
           });
         };
 
-        // Use rAF for immediate scroll, one fallback for layout shifts
         requestAnimationFrame(scroll);
         const timer = setTimeout(scroll, 250);
         prevLen.current = conversations.length;
+        prevState.current = state;
         return () => clearTimeout(timer);
       }
       prevLen.current = conversations.length;
+      prevState.current = state;
     }, [conversations.length, state]);
+
+    const handleScrollerScroll = () => {
+      if (scrollerRef.current) {
+        const el = scrollerRef.current as HTMLElement;
+        const { scrollTop, scrollHeight, clientHeight } = el;
+        const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+        autoScroll.current = isNearBottom;
+      }
+    };
+
+    const scrollerRefCallback = (ref: HTMLElement | Window | null) => {
+      if (scrollerRef.current && !(scrollerRef.current instanceof Window)) {
+        scrollerRef.current.removeEventListener("scroll", handleScrollerScroll);
+      }
+      if (ref instanceof HTMLElement) {
+        scrollerRef.current = ref;
+        ref.addEventListener("scroll", handleScrollerScroll, { passive: true });
+      }
+    };
 
     const { pendingPermission } = useChatStore(
       useShallow((state) => ({ pendingPermission: state.pendingPermission })),
@@ -141,6 +171,7 @@ const ChatMessageList = memo(
             Footer: ChatFooter,
           }}
           itemContent={renderItem}
+          scrollerRef={scrollerRefCallback}
         />
       </div>
     );
@@ -220,7 +251,7 @@ const ChatFooter = memo(({ context }: { context: any }) => {
                   margin: "0px",
                   backgroundColor: "transparent",
                 }}
-                className="markdown-container rounded-lg mt-3 w-full text-black/60 text-sm prose prose-sm max-w-none"
+                className="markdown-container rounded-lg mt-3 w-full text-foreground text-sm prose prose-sm max-w-none"
               >
                 <div className="flex items-center gap-4 text-muted-foreground/50 mb-2">
                   <PulseCircle size={0.8} colorClass="bg-muted-foreground/50" />

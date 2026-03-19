@@ -9,8 +9,7 @@ import { ensureDeployer } from "./Deployer";
 import { JOB_MESSAGE } from "./utils/contants";
 import { extractDefination } from "./utils/draft.prompt";
 import { getPlannerModel } from "./utils/plannerContext";
-
-
+import { schemaShape, ContainerExecutionTemplate } from "./utils/schema";
 
 export const createJob = tool({
   description: `Create a Nosana job and show a deploy button.
@@ -22,11 +21,22 @@ export const createJob = tool({
     directJobDef: z
       .record(z.string(), z.any())
       .optional()
-      .describe("Complete Nosana job definition with 'type', 'ops', and 'meta'."),
+      .describe(
+        "Complete Nosana job definition with 'type', 'ops', and 'meta'.",
+      ),
     resolvedModel: z
       .object({
-        hf_id: z.string().describe("HuggingFace model ID for vLLM, e.g. mistralai/Mistral-7B-Instruct-v0.3"),
-        ollama_tag: z.string().nullable().describe("Ollama pull tag e.g. mistral:7b, or null if not in Ollama library"),
+        hf_id: z
+          .string()
+          .describe(
+            "HuggingFace model ID for vLLM, e.g. mistralai/Mistral-7B-Instruct-v0.3",
+          ),
+        ollama_tag: z
+          .string()
+          .nullable()
+          .describe(
+            "Ollama pull tag e.g. mistral:7b, or null if not in Ollama library",
+          ),
         vram: z.number().describe("Required VRAM in GB"),
       })
       .optional()
@@ -34,7 +44,9 @@ export const createJob = tool({
     requirements: z
       .string()
       .optional()
-      .describe("Only for custom non-LLM containers (e.g. nginx, n8n, Jupyter). Do NOT use this for model deployments — use resolvedModel from getModels instead."),
+      .describe(
+        "Only for custom non-LLM containers (e.g. nginx, n8n, Jupyter). Do NOT use this for model deployments — use resolvedModel from getModels instead.",
+      ),
     userPublicKey: z
       .string()
       .optional()
@@ -191,15 +203,22 @@ export const createJob = tool({
           // Fallback: LLM generates job JSON from requirements
           const req = params.requirements || "";
           const extract_jobdef_prompt = extractDefination(req, {}, MARKETS);
-          const { text } = await (await import("ai")).generateText({
-            model: (await import("@ai-sdk/openai")).createOpenAI({
-              apiKey: process.env.LLM_PROVIDER === "deepseek"
-                ? process.env.DEEPSEEK_API_KEY || ""
-                : process.env.INFERIA_LLM_API_KEY || "nosana-local",
-              baseURL: process.env.LLM_PROVIDER === "deepseek"
-                ? process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com/v1"
-                : process.env.NEXT_PUBLIC_INFERIA_LLM_URL || "",
-            }).chat(plannerModel),
+          const { text } = await (
+            await import("ai")
+          ).generateText({
+            model: (await import("@ai-sdk/openai"))
+              .createOpenAI({
+                apiKey:
+                  process.env.LLM_PROVIDER === "deepseek"
+                    ? process.env.DEEPSEEK_API_KEY || ""
+                    : process.env.INFERIA_LLM_API_KEY || "nosana-local",
+                baseURL:
+                  process.env.LLM_PROVIDER === "deepseek"
+                    ? process.env.DEEPSEEK_BASE_URL ||
+                      "https://api.deepseek.com/v1"
+                    : process.env.NEXT_PUBLIC_INFERIA_LLM_URL || "",
+              })
+              .chat(plannerModel),
             prompt: extract_jobdef_prompt,
           });
           const jsonMatch = text.match(/\{[\s\S]*\}/);
@@ -213,9 +232,13 @@ export const createJob = tool({
           if (!selected) return fail(`Unknown market: ${params.market}`);
           market_public_key = selected.address;
         } else {
-          const requiredVram = jobdef.meta?.system_requirements?.required_vram || 6;
-          const fallback = Object.entries(MARKETS).find(([, m]) => m.vram_gb >= requiredVram);
-          market_public_key = fallback?.[1]?.address ?? MARKETS["nvidia-4070"].address;
+          const requiredVram =
+            jobdef.meta?.system_requirements?.required_vram || 6;
+          const fallback = Object.entries(MARKETS).find(
+            ([, m]) => m.vram_gb >= requiredVram,
+          );
+          market_public_key =
+            fallback?.[1]?.address ?? MARKETS["nvidia-4070"].address;
         }
 
         // Inject only the required meta fields into the job definition
@@ -250,7 +273,7 @@ export const createJob = tool({
           return fail(
             JOB_MESSAGE.validation_failed(
               formattedErrors || "Unknown validation errors",
-              "",
+              schemaShape(ContainerExecutionTemplate),
             ),
           );
         }
@@ -291,7 +314,11 @@ export const getModels = tool({
   description: `Resolve a model name into its HuggingFace ID, Ollama tag, and estimated VRAM. Call this before createJob for any model deployment.`,
 
   inputSchema: z.object({
-    query: z.string().describe("The user's model request, e.g. 'mistral 7b', 'GPT-OSS 20B', 'llama 3.1 70b instruct'"),
+    query: z
+      .string()
+      .describe(
+        "The user's model request, e.g. 'mistral 7b', 'GPT-OSS 20B', 'llama 3.1 70b instruct'",
+      ),
   }),
 
   execute: async ({ query }) => {
@@ -301,12 +328,14 @@ export const getModels = tool({
     const { generateText } = await import("ai");
     const { createOpenAI } = await import("@ai-sdk/openai");
     const openai = createOpenAI({
-      apiKey: process.env.LLM_PROVIDER === "deepseek"
-        ? process.env.DEEPSEEK_API_KEY || ""
-        : process.env.INFERIA_LLM_API_KEY || "nosana-local",
-      baseURL: process.env.LLM_PROVIDER === "deepseek"
-        ? process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com/v1"
-        : process.env.NEXT_PUBLIC_INFERIA_LLM_URL || "",
+      apiKey:
+        process.env.LLM_PROVIDER === "deepseek"
+          ? process.env.DEEPSEEK_API_KEY || ""
+          : process.env.INFERIA_LLM_API_KEY || "nosana-local",
+      baseURL:
+        process.env.LLM_PROVIDER === "deepseek"
+          ? process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com/v1"
+          : process.env.NEXT_PUBLIC_INFERIA_LLM_URL || "",
     });
 
     // Step 1: search HuggingFace API
@@ -317,7 +346,9 @@ export const getModels = tool({
     hfUrl.searchParams.set("direction", "-1");
     const hfRes = await fetch(hfUrl.href).catch(() => null);
     const hfModels: any[] = hfRes?.ok ? await hfRes.json().catch(() => []) : [];
-    const candidates = hfModels.map((m: any) => m.modelId || m.id).filter(Boolean);
+    const candidates = hfModels
+      .map((m: any) => m.modelId || m.id)
+      .filter(Boolean);
 
     // Step 2: LLM resolves both IDs
     const { text } = await generateText({
@@ -336,11 +367,15 @@ Output only JSON.`,
     });
 
     const match = text.match(/\{[\s\S]*\}/);
-    if (!match) return { content: [{ type: "text", text: `Could not resolve model for: ${query}` }] };
+    if (!match)
+      return {
+        content: [
+          { type: "text", text: `Could not resolve model for: ${query}` },
+        ],
+      };
 
     const resolved = JSON.parse(match[0]);
     console.log("resolved model:", resolved);
     return { content: [{ type: "text", text: JSON.stringify(resolved) }] };
   },
 });
-

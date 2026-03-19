@@ -9,6 +9,36 @@ const EnvKVSchema = z
   )
   .default([]);
 
+export function schemaShape(schema: z.ZodTypeAny): Record<string, string> {
+  const shape: Record<string, string> = {};
+
+  if (schema instanceof z.ZodObject) {
+    const entries = schema._def.shape();
+    for (const [key, value] of Object.entries(entries)) {
+      if (value instanceof z.ZodType) {
+        const description = value.description || getTypeName(value);
+        shape[key] = description;
+      }
+    }
+  }
+
+  return shape;
+}
+
+function getTypeName(schema: z.ZodTypeAny): string {
+  if (schema instanceof z.ZodString) return "string";
+  if (schema instanceof z.ZodNumber) return "number";
+  if (schema instanceof z.ZodBoolean) return "boolean";
+  if (schema instanceof z.ZodArray) return "array";
+  if (schema instanceof z.ZodObject) return "object";
+  if (schema instanceof z.ZodLiteral) return String(schema._def.value);
+  if (schema instanceof z.ZodOptional)
+    return getTypeName(schema._def.innerType) + " (optional)";
+  if (schema instanceof z.ZodDefault)
+    return getTypeName(schema._def.innerType) + " (default provided)";
+  return "any";
+}
+
 export const pipeline = z.enum([
   "text-generation",
   "feature-extraction",
@@ -263,7 +293,10 @@ export const ModelQuerySchema = z.object({
 
   params: z
     .object({
-      op: z.enum(["<", "<=", ">", ">=", "=", "==", "~"]).transform(v => (v === "==" || v === "~") ? "=" : v).default("="),
+      op: z
+        .enum(["<", "<=", ">", ">=", "=", "==", "~"])
+        .transform((v) => (v === "==" || v === "~" ? "=" : v))
+        .default("="),
       value: z.number().nullable().default(null),
       strict: z.boolean().optional().default(false),
     })
@@ -284,7 +317,7 @@ export const ModelQuerySchema = z.object({
   context: z
     .union([z.string(), z.number()])
     .nullable()
-    .transform(v => v != null ? String(v) : null)
+    .transform((v) => (v != null ? String(v) : null))
     .describe("Model context length if mentioned, e.g. '128K'.")
     .default(null),
 

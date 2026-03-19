@@ -74,7 +74,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
     <Select value={selectedValue} onValueChange={onValueChange}>
       <SelectTrigger
         className={cn(
-          "text-xs border-muted-foreground/20 font-normal text-muted-foreground/80 h-6 rounded-sm bg-black/5",
+          "text-xs border border-muted-foreground/20 font-normal text-foreground h-6 rounded-sm bg-muted/50",
           className,
           mcp && "rounded-none",
         )}
@@ -91,7 +91,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
         )}
       </SelectTrigger>
 
-      <SelectContent className=" w-[250px] border-muted-foreground/10 bg-muted text-muted-foreground/90">
+      <SelectContent className=" w-[250px] border-muted-foreground/10 bg-background text-foreground">
         {modelGroups.map((group) => (
           <SelectGroup key={group.label}>
             <SelectLabel>{group.label}</SelectLabel>
@@ -100,7 +100,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
                 key={m.value}
                 value={m.value}
                 disabled={m.disabled}
-                className=" data-[state=checked]:bg-black/5 focus:text-muted-foreground focus:bg-muted-foreground/5 flex items-center gap-1"
+                className="data-[state=checked]:bg-muted focus:text-foreground focus:bg-muted/50 flex items-center gap-1"
               >
                 {m.icon}
                 {m.label}
