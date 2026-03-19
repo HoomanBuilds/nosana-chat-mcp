@@ -26,6 +26,7 @@ const openai = createOpenAI({
   headers: {
     ...COMMON_HEADERS,
   },
+  compatibility: "compatible",
 });
 
 function resolvePlannerModel(model?: string): string {

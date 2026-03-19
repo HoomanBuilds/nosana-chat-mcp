@@ -37,6 +37,7 @@ const openai = createOpenAI({
   headers: {
     ...COMMON_HEADERS,
   },
+  compatibility: "compatible",
 });
 
 let nosanaSkillCache: string | null = null;
@@ -384,6 +385,23 @@ ${payload.customPrompt || ""}`.trim(),
         }
       }
     } catch (e) {
+      const err = e as any;
+      const msg = err?.message || String(e);
+      const cause = err?.cause?.message || err?.cause || "";
+      const isToolCallFailure =
+        msg === "terminated" ||
+        /other side closed/i.test(String(cause)) ||
+        /400|Bad Request/i.test(msg) ||
+        /tool_use_failed|invalid_type.*choices.*undefined/i.test(msg);
+
+      if (isToolCallFailure && !finalText.trim()) {
+        console.warn(`⚠️ Model "${plannerModel}" does not support tool calling — informing user.`);
+        const errorMsg = `The model **${plannerModel}** does not support tool calling. Please try again with a different model that supports function/tool calling (e.g. Qwen2.5-7B-Instruct or larger).`;
+        send("llmResult", errorMsg);
+        return;
+      }
+
+      console.error("🔴 LLM stream error:", { msg, cause });
       send("error", llmErr(e));
       return;
     }

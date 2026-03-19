@@ -199,6 +199,7 @@ export const createJob = tool({
               baseURL: process.env.LLM_PROVIDER === "deepseek"
                 ? process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com/v1"
                 : process.env.NEXT_PUBLIC_INFERIA_LLM_URL || "",
+              compatibility: "compatible",
             }).chat(plannerModel),
             prompt: extract_jobdef_prompt,
           });
@@ -307,6 +308,7 @@ export const getModels = tool({
       baseURL: process.env.LLM_PROVIDER === "deepseek"
         ? process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com/v1"
         : process.env.NEXT_PUBLIC_INFERIA_LLM_URL || "",
+      compatibility: "compatible",
     });
 
     // Step 1: search HuggingFace API
