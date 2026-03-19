@@ -51,7 +51,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       onFocus={handleFocus}
       onKeyDown={onKeyDown}
       className={cn(
-        "w-full min-h-16 resize-none bg-muted-foreground/10 text-muted-foreground p-2 rounded-t-lg focus:outline-none focus:ring-black/10",
+        "min-h-12 w-full resize-none rounded-t-lg bg-muted-foreground/10 p-3 text-sm text-muted-foreground focus:outline-none focus:ring-black/10 sm:min-h-16 sm:p-2",
         className,
         mcp && "rounded-none"
       )}

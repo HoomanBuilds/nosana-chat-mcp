@@ -102,7 +102,7 @@ function ChatPageInner(): JSX.Element {
       <div
         id="chat-container"
         className={cn(
-          "flex items-center flex-col w-full bg-background pb-30",
+          "flex w-full flex-col items-center bg-background pt-2",
           appearance,
         )}
         style={{

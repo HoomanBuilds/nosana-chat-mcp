@@ -21,20 +21,25 @@ function ChatNavBar({ className, onTemplateSelect }: ChatNavBarProps) {
         <>
             <div
                 className={cn(
-                    "border-dashed flex h-14 justify-between items-center border-b bg-transparent cursor-pointer text-start px-3 z-40 w-full py-2",
+                    "sticky top-0 z-30 flex h-14 w-full items-center justify-between border-b border-dashed bg-background/85 px-3 py-2 text-start backdrop-blur",
                     className
                 )}
             >
-                <button onClick={() => toggleMobile()}>
-                    <ArrowRightFromLine className={cn("cursor-pointer lg:hidden text-muted-foreground")} />
+                <button
+                    onClick={() => toggleMobile()}
+                    type="button"
+                    className="rounded-md p-2 transition-colors hover:bg-muted-foreground/10 lg:hidden"
+                >
+                    <ArrowRightFromLine className={cn("cursor-pointer text-muted-foreground")} />
                 </button>
 
-                <div className='flex items-center gap-5'>
+                <div className='flex items-center gap-2 sm:gap-5'>
                     {tool == "deployer" && (
                         <button
                             onClick={() => toggleTemplate()}
+                            type="button"
                             aria-label="Toggle deployment templates"
-                            className="p-1 hover:bg-muted-foreground/10 rounded transition-colors"
+                            className="rounded-md p-2 transition-colors hover:bg-muted-foreground/10"
                         >
                             <LayoutGrid className='text-green-500' />
                         </button>
@@ -43,7 +48,7 @@ function ChatNavBar({ className, onTemplateSelect }: ChatNavBarProps) {
                     {currentChat.length > 0 && <Button
                         title="Export chat"
                         onClick={() => selectedChatId && currentChat?.length > 0 && exportThread(selectedChatId)}
-                        className="scale-90 bg-green-500 items-center text-sm cursor-pointer hover:bg-green-400"><span className="xl:block hidden">export </span> <Download />
+                        className="h-9 bg-green-500 text-sm cursor-pointer items-center hover:bg-green-400 sm:scale-90"><span className="hidden xl:block">export </span> <Download />
                     </Button>}
                 </div>
             </div>

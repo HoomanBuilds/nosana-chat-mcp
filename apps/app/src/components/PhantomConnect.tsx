@@ -3,6 +3,7 @@ import { useWalletStore } from "@/store/wallet.store";
 import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
+import { cn } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -22,7 +23,13 @@ import {
   ExternalLink,
 } from "lucide-react";
 
-export default function PhantomConnect({ className }: { className?: string }) {
+export default function PhantomConnect({
+  className,
+  compactMobile = false,
+}: {
+  className?: string;
+  compactMobile?: boolean;
+}) {
   const {
     isPhantom,
     wallet,
@@ -87,38 +94,67 @@ export default function PhantomConnect({ className }: { className?: string }) {
   // ── Connected indicator (compact) ──
   if (isConnected || isApiKeyConnected) {
     return (
-      <div className="flex items-center gap-1.5">
+      <div className="flex max-w-full flex-wrap items-center gap-1.5">
         {/* Main connection icon */}
         {authMode === "wallet" && wallet ? (
           <button
-            onClick={copyWallet}
-            className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-muted-foreground/10 transition-colors text-xs"
-            title={copied ? "Copied!" : `Click to copy: ${wallet}`}
+            onClick={compactMobile ? () => setDialogOpen(true) : copyWallet}
+            type="button"
+            className={cn(
+              "flex min-w-0 max-w-full items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors hover:bg-muted-foreground/10",
+              compactMobile && "h-8 shrink-0 px-2",
+            )}
+            title={
+              compactMobile
+                ? "Manage wallet connection"
+                : copied
+                  ? "Copied!"
+                  : `Click to copy: ${wallet}`
+            }
           >
             <Wallet className="h-3.5 w-3.5 text-green-500" />
-            <span className="text-muted-foreground hidden sm:inline">
+            <span
+              className={cn(
+                "max-w-[7.5rem] truncate text-muted-foreground sm:max-w-none",
+                compactMobile && "hidden sm:inline",
+              )}
+            >
               {copied ? "Copied!" : `${wallet.slice(0, 4)}...${wallet.slice(-4)}`}
             </span>
           </button>
         ) : authMode === "api_key" && isApiKeyConnected ? (
           <button
-            className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-muted-foreground/10 transition-colors text-xs"
+            type="button"
+            className={cn(
+              "flex min-w-0 max-w-full items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors hover:bg-muted-foreground/10",
+              compactMobile && "h-8 shrink-0 px-2",
+            )}
             onClick={() => setDialogOpen(true)}
             title="Connected via API Key"
           >
             <Key className="h-3.5 w-3.5 text-blue-400" />
-            <span className="text-muted-foreground hidden sm:inline">API Key</span>
+            <span
+              className={cn(
+                "truncate text-muted-foreground",
+                compactMobile && "hidden sm:inline",
+              )}
+            >
+              API Key
+            </span>
           </button>
         ) : null}
 
         {/* Manage button */}
-        <button
-          onClick={() => setDialogOpen(true)}
-          className="p-1 rounded hover:bg-muted-foreground/10 text-muted-foreground/60 transition-colors"
-          title="Manage connection"
-        >
-          <PlugZap className="h-3 w-3" />
-        </button>
+        {!compactMobile && (
+          <button
+            onClick={() => setDialogOpen(true)}
+            type="button"
+            className="rounded p-2 text-muted-foreground/60 transition-colors hover:bg-muted-foreground/10"
+            title="Manage connection"
+          >
+            <PlugZap className="h-3 w-3" />
+          </button>
+        )}
 
         {/* Connection management dialog */}
         <ConnectDialog
@@ -149,12 +185,16 @@ export default function PhantomConnect({ className }: { className?: string }) {
     <>
       <Button
         onClick={() => setDialogOpen(true)}
-        className={className || ""}
+        className={cn(
+          "h-9 max-w-full gap-1.5 px-3 text-xs sm:h-8 sm:text-sm",
+          compactMobile && "h-8 shrink-0 px-2.5 sm:px-3",
+          className,
+        )}
         size="sm"
         variant="outline"
       >
         <PlugZap className="h-3.5 w-3.5 mr-1.5" />
-        Connect
+        <span className={cn(compactMobile && "hidden sm:inline")}>Connect</span>
       </Button>
 
       <ConnectDialog
@@ -223,7 +263,7 @@ function ConnectDialog({
 }: ConnectDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="max-h-[min(85dvh,720px)] w-[calc(100%-1rem)] overflow-y-auto p-4 sm:max-w-md sm:p-6">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <PlugZap className="h-5 w-5" />
@@ -234,10 +274,10 @@ function ConnectDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col gap-4 mt-2">
+        <div className="mt-2 flex flex-col gap-4">
           {/* ── Option 1: Phantom Wallet ── */}
-          <div className="rounded-lg border p-4 space-y-3">
-            <div className="flex items-center justify-between">
+          <div className="space-y-3 rounded-lg border p-3 sm:p-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-2">
                 <Ghost className="h-5 w-5 text-purple-400" />
                 <span className="font-medium text-sm">Phantom Wallet</span>
@@ -252,7 +292,7 @@ function ConnectDialog({
 
             {isConnected && wallet ? (
               <div className="space-y-2">
-                <div className="flex items-center gap-2 px-3 py-2 bg-muted rounded-md">
+                <div className="flex items-center gap-2 rounded-md bg-muted px-3 py-2">
                   <Wallet className="h-3.5 w-3.5 text-muted-foreground" />
                   <span className="text-xs text-muted-foreground font-mono truncate flex-1">
                     {wallet}
@@ -261,6 +301,7 @@ function ConnectDialog({
                     onClick={() => {
                       navigator.clipboard.writeText(wallet);
                     }}
+                    type="button"
                     className="text-muted-foreground hover:text-foreground transition-colors"
                     title="Copy address"
                   >
@@ -311,8 +352,8 @@ function ConnectDialog({
           </div>
 
           {/* ── Option 2: Nosana API Key ── */}
-          <div className="rounded-lg border p-4 space-y-3">
-            <div className="flex items-center justify-between">
+          <div className="space-y-3 rounded-lg border p-3 sm:p-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-2">
                 <Key className="h-5 w-5 text-blue-400" />
                 <span className="font-medium text-sm">Nosana API Key</span>
@@ -353,8 +394,13 @@ function ConnectDialog({
                     setApiKeyDraft(e.target.value);
                     setApiKeyError("");
                   }}
-                  onKeyDown={(e) => e.key === "Enter" && onApiKeySave()}
-                  className="font-mono text-sm"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      onApiKeySave();
+                    }
+                  }}
+                  className="h-11 font-mono text-sm sm:h-9"
                 />
                 {apiKeyError && (
                   <p className="text-xs text-red-400">{apiKeyError}</p>

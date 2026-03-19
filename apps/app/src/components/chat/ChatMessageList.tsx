@@ -160,11 +160,13 @@ const ChatMessageList = memo(
     );
 
     return (
-      <div className="flex-1 w-[95vw] pb-4 sm:w-[80vw] md:w-[70vw] lg:w-[60vw] xl:w-[60vw] max-w-[800px] h-full">
+      <div className="h-full w-full max-w-[800px] flex-1 px-1 pb-24 sm:w-[80vw] sm:px-0 sm:pb-28 md:w-[70vw] lg:w-[60vw] xl:w-[60vw]">
         <Virtuoso
           ref={virtuosoRef}
           style={{ height: "100%", width: "100%" }}
           data={conversations}
+          alignToBottom
+          followOutput
           initialTopMostItemIndex={conversations.length - 1}
           context={virtuosoContext}
           components={{

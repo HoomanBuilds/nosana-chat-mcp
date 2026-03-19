@@ -36,7 +36,7 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
       onClick={handleClick}
       disabled={!isLoading && isDisabled}
       className={cn(
-        "bg-muted-foreground/10 cursor-pointer p-1 flex items-center justify-center rounded text-muted-foreground/80 transition",
+        "flex cursor-pointer items-center justify-center rounded bg-muted-foreground/10 p-2 text-muted-foreground/80 transition",
         !isDisabled && !isLoading ? "opacity-100 hover:bg-muted-foreground/20" : "opacity-50",
         className,
         mcp && "rounded-none bg-green-600 hover:bg-green-500"
