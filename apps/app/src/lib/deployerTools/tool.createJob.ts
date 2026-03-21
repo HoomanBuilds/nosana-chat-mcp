@@ -15,7 +15,8 @@ export const createJob = tool({
   description: `Create a Nosana job and show a deploy button.
 - For model deployments: REQUIRES resolvedModel from getModels tool. Call getModels first, then pass its result here.
 - For direct JSON: use directJobDef.
-- For custom containers only (nginx, n8n, etc.): use requirements.`,
+- For custom containers only (nginx, n8n, etc.): use requirements.
+- If user mentions "vllm", "openai-compatible", or "openai api", set runtime to "vllm". Otherwise defaults to "ollama".`,
 
   inputSchema: z.object({
     directJobDef: z
@@ -41,6 +42,12 @@ export const createJob = tool({
       })
       .optional()
       .describe("Pre-resolved model info from getModels tool."),
+    runtime: z
+      .enum(["ollama", "vllm"])
+      .optional()
+      .describe(
+        "Runtime engine for model deployments. Set to 'vllm' when user asks for vLLM, OpenAI-compatible API, or HuggingFace model. Defaults to 'ollama'.",
+      ),
     requirements: z
       .string()
       .optional()
@@ -192,8 +199,9 @@ export const createJob = tool({
 
         if (params.resolvedModel) {
           const { hf_id, ollama_tag, vram } = params.resolvedModel;
-          const req = params.requirements?.toLowerCase() || "";
-          const wantsVllm = /vllm|openai.?compat|openai.?api/i.test(req);
+          const wantsVllm =
+            params.runtime === "vllm" ||
+            /vllm|openai.?compat|openai.?api/i.test(params.requirements || "");
           if (!wantsVllm && ollama_tag) {
             jobdef = buildOllamaJob(ollama_tag, vram);
           } else {
