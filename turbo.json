@@ -3,7 +3,10 @@
   "globalEnv": [
     "SELF_HOSTED_API_KEY",
     "SELF_HOSTED_URL",
-    "INFERIA_LLM_API_KEY"
+    "INFERIA_LLM_API_KEY",
+    "LLM_PROVIDER",
+    "DEEPSEEK_BASE_URL",
+    "DEEPSEEK_API_KEY"
   ],
   "tasks": {
     "build": {
